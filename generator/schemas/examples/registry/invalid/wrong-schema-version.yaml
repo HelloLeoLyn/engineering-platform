@@ -1,0 +1,7 @@
+# 非法样例 10：wrong schemaVersion
+# 期望：FAIL（schemaVersion const=1 违反）
+schemaVersion: 2
+registry:
+  type: modules
+  version: 1
+entries: []

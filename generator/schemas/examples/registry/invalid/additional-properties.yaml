@@ -1,0 +1,9 @@
+# 非法样例 11：additionalProperties 违反（entry 带未定义字段 runtime）
+# 期望：FAIL（entry additionalProperties: false 违反）
+schemaVersion: 1
+registry:
+  type: modules
+  version: 1
+entries:
+  - id: sample-customer
+    runtime: some-runtime-value

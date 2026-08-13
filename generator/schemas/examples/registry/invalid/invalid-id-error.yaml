@@ -1,0 +1,8 @@
+# 非法样例 7：error id 非法（非 UPPER_SNAKE_CASE）
+# 期望：FAIL（id pattern 违反）
+schemaVersion: 1
+registry:
+  type: errors
+  version: 1
+entries:
+  - id: ValidationFailed

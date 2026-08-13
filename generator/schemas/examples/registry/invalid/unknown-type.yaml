@@ -1,0 +1,7 @@
+# 非法样例 9：unknown registry type（不在 8 类枚举）
+# 期望：FAIL（registry.type 枚举违反）
+schemaVersion: 1
+registry:
+  type: routes
+  version: 1
+entries: []

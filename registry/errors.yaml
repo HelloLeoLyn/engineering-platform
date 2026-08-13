@@ -2,4 +2,10 @@ schemaVersion: 1
 registry:
   type: errors
   version: 1
-entries: []
+entries:
+  - id: VALIDATION_FAILED
+    description: Request validation failed (WebErrorCode, platform-web)
+  - id: BAD_REQUEST
+    description: Bad request (WebErrorCode, platform-web)
+  - id: INTERNAL_ERROR
+    description: Internal server error (WebErrorCode, platform-web)

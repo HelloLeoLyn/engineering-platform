@@ -2,4 +2,6 @@ schemaVersion: 1
 registry:
   type: modules
   version: 1
-entries: []
+entries:
+  - id: sample-customer
+    description: Sample customer CRUD module (backend/modules/sample-customer)

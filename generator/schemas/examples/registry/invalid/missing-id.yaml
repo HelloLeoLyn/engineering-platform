@@ -1,0 +1,8 @@
+# 非法样例 8：entry 缺 id（required 违反）
+# 期望：FAIL（missing required field: id）
+schemaVersion: 1
+registry:
+  type: modules
+  version: 1
+entries:
+  - description: no id here

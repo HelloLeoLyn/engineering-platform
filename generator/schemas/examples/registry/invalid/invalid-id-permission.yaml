@@ -1,0 +1,8 @@
+# 非法样例 6：permission id 非法（非 domain:resource:action 三段）
+# 期望：FAIL（id pattern 违反）
+schemaVersion: 1
+registry:
+  type: permissions
+  version: 1
+entries:
+  - id: customer:view

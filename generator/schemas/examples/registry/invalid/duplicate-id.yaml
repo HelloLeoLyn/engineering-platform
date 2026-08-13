@@ -1,0 +1,11 @@
+# 非法样例 1：同一 Registry 内 duplicate id
+# 期望：FAIL（duplicate id: sample-customer）
+schemaVersion: 1
+registry:
+  type: modules
+  version: 1
+entries:
+  - id: sample-customer
+    description: first
+  - id: sample-customer
+    description: second

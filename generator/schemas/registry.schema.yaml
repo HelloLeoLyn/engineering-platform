@@ -1,0 +1,146 @@
+# registry.schema.yaml — Unified Registry Contract Schema V1
+# 依据: Engineering Platform 设计决策记录 V0.7
+#   - §2 Error Registry（统一）
+#   - §17 Capability/Provider/Module Registry 索引（platform.yaml 职责）
+#   - §10 命名规范（Event dotted / Permission domain:resource:action / Error UPPER_SNAKE）
+# 职责: 统一管理 8 类 Registry（capabilities/providers/modules/events/tasks/
+#       permissions/errors/guides）的结构契约。
+# 原则: 最小契约——Entry 仅要求 id（+ 可选 description）；
+#       不为未来需求预置 dependencies/features/configurationSchema/
+#       runtime/provider-binding/role-binding/payload-schema 等字段。
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://engineering-platform.dev/schemas/registry.schema.v1.yaml
+title: Engineering Platform Registry Contract
+description: Unified registry contract for 8 registry categories (V1)
+
+type: object
+additionalProperties: false
+required:
+  - schemaVersion
+  - registry
+  - entries
+
+properties:
+  schemaVersion:
+    description: Registry schema version. Bump requires a documented migration.
+    const: 1
+
+  registry:
+    type: object
+    additionalProperties: false
+    required: [type, version]
+    properties:
+      type:
+        type: string
+        enum: [capabilities, providers, modules, events, tasks, permissions, errors, guides]
+      version:
+        const: 1
+
+  entries:
+    type: array
+    items:
+      $ref: '#/$defs/entry'
+
+# 按 registry.type 差异化校验 Entry ID pattern（V0.7 §10 命名规范）
+allOf:
+  - if:
+      properties:
+        registry:
+          properties:
+            type: { const: modules }
+    then:
+      properties:
+        entries:
+          items:
+            properties:
+              id: { pattern: '^[a-z0-9]+(-[a-z0-9]+)*$' }
+  - if:
+      properties:
+        registry:
+          properties:
+            type: { const: providers }
+    then:
+      properties:
+        entries:
+          items:
+            properties:
+              id: { pattern: '^[a-z0-9]+(-[a-z0-9]+)*$' }
+  - if:
+      properties:
+        registry:
+          properties:
+            type: { const: capabilities }
+    then:
+      properties:
+        entries:
+          items:
+            properties:
+              id: { pattern: '^[a-z0-9]+(\.[a-z0-9]+)*$' }
+  - if:
+      properties:
+        registry:
+          properties:
+            type: { const: events }
+    then:
+      properties:
+        entries:
+          items:
+            properties:
+              id: { pattern: '^[a-z0-9]+\.[a-z0-9]+\.[a-z0-9]+$' }
+  - if:
+      properties:
+        registry:
+          properties:
+            type: { const: permissions }
+    then:
+      properties:
+        entries:
+          items:
+            properties:
+              id: { pattern: '^[a-z0-9]+:[a-z0-9]+:[a-z0-9]+$' }
+  - if:
+      properties:
+        registry:
+          properties:
+            type: { const: errors }
+    then:
+      properties:
+        entries:
+          items:
+            properties:
+              id: { pattern: '^[A-Z][A-Z0-9_]*$' }
+  - if:
+      properties:
+        registry:
+          properties:
+            type: { const: tasks }
+    then:
+      properties:
+        entries:
+          items:
+            properties:
+              id: { pattern: '^[a-z0-9]+(-[a-z0-9]+)*$' }
+  - if:
+      properties:
+        registry:
+          properties:
+            type: { const: guides }
+    then:
+      properties:
+        entries:
+          items:
+            properties:
+              id: { pattern: '^[a-z0-9]+(-[a-z0-9]+)*$' }
+
+$defs:
+  entry:
+    type: object
+    additionalProperties: false
+    required: [id]
+    properties:
+      id:
+        type: string
+        minLength: 1
+      description:
+        type: string
+        maxLength: 2000

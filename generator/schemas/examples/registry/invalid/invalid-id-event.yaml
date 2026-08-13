@@ -1,0 +1,8 @@
+# 非法样例 5：event id 非法（仅两段，需三段 dotted event code）
+# 期望：FAIL（id pattern 违反）
+schemaVersion: 1
+registry:
+  type: events
+  version: 1
+entries:
+  - id: customer.created

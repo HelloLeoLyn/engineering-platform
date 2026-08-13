@@ -1,0 +1,9 @@
+# 合法样例：modules 带合法 kebab-case 条目
+# 期望：PASS
+schemaVersion: 1
+registry:
+  type: modules
+  version: 1
+entries:
+  - id: sample-customer
+    description: Sample customer module

@@ -1,0 +1,7 @@
+# 合法样例：空 Registry（合法空 entries）
+# 期望：PASS（V0.7 允许空 Registry，entries: [] 合法）
+schemaVersion: 1
+registry:
+  type: capabilities
+  version: 1
+entries: []

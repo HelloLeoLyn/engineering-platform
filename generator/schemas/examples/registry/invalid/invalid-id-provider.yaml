@@ -1,0 +1,8 @@
+# 非法样例 4：provider id 非法（含下划线，非 kebab-case）
+# 期望：FAIL（id pattern 违反）
+schemaVersion: 1
+registry:
+  type: providers
+  version: 1
+entries:
+  - id: mybatis_plus

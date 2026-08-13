@@ -1,0 +1,8 @@
+# 非法样例 2：module id 非法（含大写，非 kebab-case）
+# 期望：FAIL（id pattern 违反）
+schemaVersion: 1
+registry:
+  type: modules
+  version: 1
+entries:
+  - id: Sample-Customer

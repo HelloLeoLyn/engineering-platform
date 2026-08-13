@@ -1,0 +1,8 @@
+# 非法样例 3：capability id 非法（含大写，非 dotted lowercase）
+# 期望：FAIL（id pattern 违反）
+schemaVersion: 1
+registry:
+  type: capabilities
+  version: 1
+entries:
+  - id: Persistence
