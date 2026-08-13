@@ -1,0 +1,15 @@
+# 非法示例 1：platform - 缺必需字段 + 版本号非法
+# 期望：被拒（缺 schemaVersion；platform.version 格式错误）
+platform:
+  id: bad-platform
+  name: Bad Platform
+  version: "not-a-version"
+  maturity: experimental
+technology:
+  bom:
+    id: bad-bom
+    version: 0.1.0
+quality:
+  profiles:
+    Q1:
+      required: [build]

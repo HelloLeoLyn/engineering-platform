@@ -1,0 +1,11 @@
+# 非法示例 3：module - 无 compatibility + 非法 ownership 枚举
+# 期望：被拒（缺 compatibility；extensionPoints.ownership 不是四级之一）
+schemaVersion: 1
+module:
+  id: bad-module
+  name: Bad Module
+  version: 0.1.0
+  type: business
+extensionPoints:
+  - name: listener
+    ownership: SORT_OF_OWNED

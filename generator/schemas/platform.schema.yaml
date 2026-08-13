@@ -1,5 +1,274 @@
-schemaVersion: 1
-schema:
-  id: platform
-  status: bootstrap-placeholder
-  note: Formal schema implementation is scheduled for the resolver/generator phase.
+# platform.schema.yaml — Platform Root Manifest Schema V1
+# 依据: Engineering Platform 设计决策记录 V0.7 第 17 节
+# 描述: 平台 Root Manifest，承载 Platform Identity / Technology BOM /
+#       Profile Defaults / Capability·Provider·Module Registry 索引 /
+#       Quality / Generator / Compatibility / Governance / Knowledge 入口。
+# 约束: 仅声明式 Contract/Metadata；禁止 Secret / 客户 Runtime Values /
+#       业务数据 / 任意可执行代码 (JavaScript/Groovy/Shell)。
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://engineering-platform.dev/schemas/platform.schema.v1.yaml
+title: Engineering Platform Root Manifest
+description: Platform root manifest contract (V1)
+
+type: object
+additionalProperties: false
+required:
+  - schemaVersion
+  - platform
+  - technology
+  - quality
+
+properties:
+  schemaVersion:
+    description: Manifest schema version. Bump requires a documented migration.
+    const: 1
+
+  platform:
+    type: object
+    additionalProperties: false
+    required: [id, name, version]
+    properties:
+      id:
+        type: string
+        pattern: ^[a-z0-9]+(-[a-z0-9]+)*$
+      name:
+        type: string
+        minLength: 1
+        maxLength: 200
+      version:
+        type: string
+        pattern: ^\d+\.\d+\.\d+$
+      status:
+        type: string
+        enum: [active, deprecated, sunset]
+      maturity:
+        type: string
+        enum: [experimental, stable, mature]
+      description:
+        type: string
+        maxLength: 2000
+
+  technology:
+    type: object
+    additionalProperties: false
+    required: [bom]
+    properties:
+      bom:
+        type: object
+        additionalProperties: false
+        required: [id, version]
+        properties:
+          id:
+            type: string
+            pattern: ^[a-z0-9]+(-[a-z0-9]+)*$
+          version:
+            type: string
+            pattern: ^\d+\.\d+\.\d+$
+      constraints:
+        type: object
+        additionalProperties:
+          type: string
+
+  profiles:
+    type: object
+    additionalProperties: false
+    properties:
+      presets:
+        type: object
+        additionalProperties:
+          type: object
+          additionalProperties: false
+          properties:
+            application:
+              type: string
+            infrastructure:
+              type: string
+            security:
+              type: string
+            quality:
+              type: string
+              pattern: ^Q[1-3]$
+          required: [application, infrastructure, security, quality]
+      default:
+        type: string
+
+  capabilities:
+    type: object
+    description: Capability registry index. Keyed by capability id -> registry entry.
+    additionalProperties:
+      type: object
+      additionalProperties: true
+
+  providers:
+    type: object
+    description: Provider registry index. Keyed by provider id -> registry entry.
+    additionalProperties:
+      type: object
+      additionalProperties: true
+
+  modules:
+    type: object
+    description: Module registry index. Keyed by module id -> registry entry.
+    additionalProperties:
+      type: object
+      additionalProperties: true
+
+  quality:
+    type: object
+    additionalProperties: false
+    required: [profiles]
+    properties:
+      profiles:
+        type: object
+        additionalProperties: false
+        minProperties: 1
+        propertyNames:
+          pattern: ^Q[1-3]$
+        patternProperties:
+          ^Q[1-3]$:
+            type: object
+            additionalProperties: false
+            required: [required]
+            properties:
+              extends:
+                type: string
+                pattern: ^Q[1-3]$
+              required:
+                type: array
+                minItems: 1
+                uniqueItems: true
+                items:
+                  type: string
+                  enum:
+                    - build
+                    - unit
+                    - architecture
+                    - smoke
+                    - integration
+                    - api
+                    - migration
+                    - browser-e2e
+                    - concurrency
+                    - idempotency
+                    - failure-recovery
+                    - security
+                    - upgrade-compatibility
+                    - performance
+                    - contract
+      default:
+        type: string
+        pattern: ^Q[1-3]$
+
+  generator:
+    type: object
+    additionalProperties: false
+    required: [version]
+    properties:
+      version:
+        type: string
+        pattern: ^\d+\.\d+\.\d+$
+      schemas:
+        type: object
+        additionalProperties:
+          type: string
+
+  registries:
+    type: object
+    additionalProperties: false
+    properties:
+      capability: { $ref: '#/$defs/registryRef' }
+      provider: { $ref: '#/$defs/registryRef' }
+      module: { $ref: '#/$defs/registryRef' }
+      event: { $ref: '#/$defs/registryRef' }
+      task: { $ref: '#/$defs/registryRef' }
+      permission: { $ref: '#/$defs/registryRef' }
+      error: { $ref: '#/$defs/registryRef' }
+      guide: { $ref: '#/$defs/registryRef' }
+
+  compatibility:
+    type: object
+    additionalProperties: false
+    properties:
+      projectSchema:
+        $ref: '#/$defs/schemaSupport'
+      moduleSchema:
+        $ref: '#/$defs/schemaSupport'
+      providerSchema:
+        $ref: '#/$defs/schemaSupport'
+
+  governance:
+    type: object
+    additionalProperties: false
+    properties:
+      ownership:
+        $ref: '#/$defs/boolFlag'
+      architectureValidation:
+        $ref: '#/$defs/boolFlag'
+      securityGate:
+        $ref: '#/$defs/boolFlag'
+      guides:
+        type: object
+        additionalProperties:
+          type: boolean
+      scopeExpansion:
+        type: object
+        additionalProperties: true
+
+  guides:
+    type: object
+    additionalProperties:
+      type: object
+      additionalProperties: false
+      properties:
+        path:
+          type: string
+
+  metadata:
+    type: object
+    additionalProperties: true
+    properties:
+      ownerTeam:
+        type: string
+      tags:
+        type: array
+        items:
+          type: string
+
+  # 明确禁止的敏感/运行时内容 (V0.7 第 17 节)
+  secrets: false
+  runtimeValues: false
+  businessData: false
+
+$defs:
+  registryRef:
+    type: object
+    additionalProperties: false
+    required: [path]
+    properties:
+      path:
+        type: string
+      description:
+        type: string
+
+  schemaSupport:
+    type: object
+    additionalProperties: false
+    required: [supported]
+    properties:
+      supported:
+        type: array
+        minItems: 1
+        uniqueItems: true
+        items:
+          type: integer
+      default:
+        type: integer
+
+  boolFlag:
+    type: object
+    additionalProperties: false
+    properties:
+      required:
+        type: boolean
+      message:
+        type: string

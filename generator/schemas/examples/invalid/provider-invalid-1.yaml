@@ -1,0 +1,9 @@
+# 非法示例 4：provider - 缺 schemaVersion + implements 为空数组 + 版本号非法
+# 期望：被拒（缺 schemaVersion；implements minItems=1 违反；provider.version 格式错误）
+provider:
+  id: bad-provider
+  name: Bad Provider
+  version: "latest"
+implements: []
+compatibility:
+  platformVersion: 0.1.x

@@ -1,0 +1,75 @@
+# 示例：Project Composition Contract（合法示例）
+# 对应 schema: generator/schemas/project.schema.yaml
+schemaVersion: 1
+
+project:
+  id: demo-project
+  name: Demo Project
+  version: 1.0.0
+  description: 演示项目组合契约
+
+platform:
+  id: engineering-platform
+  version: 0.1.x
+  compatibility:
+    projectSchema: 1
+    moduleSchema: 1
+    providerSchema: 1
+
+profiles:
+  application: standard
+  infrastructure: standard
+  security: standard
+  quality: Q2
+
+technology:
+  java: "25"
+  node: "24"
+  springBoot: "4.1.x"
+  vue: "3.x"
+  vite: "8.x"
+
+modules:
+  - id: sample-customer
+    version: 0.1.0
+    required: true
+    enabled: true
+
+capabilities:
+  - id: persistence
+    required: true
+    provider: mybatis-plus
+  - id: print
+    required: false
+
+providers:
+  - id: mybatis-plus
+    version: 3.5.17
+    mode: standard
+
+quality:
+  minimum: Q2
+  requiredGates: [build, unit, architecture, integration, api, migration]
+
+environments:
+  - name: dev
+    infrastructure: docker-compose
+  - name: test
+    infrastructure: docker-compose
+  - name: prod
+    infrastructure: kubernetes
+    region: cn-east
+
+delivery:
+  policy: gated
+  pipeline: github-actions
+
+metadata:
+  ownerTeam: demo-team
+  repository: https://github.com/example/demo-project
+  tags: [demo]
+
+customerConstraints:
+  - name: data-residency
+    value: cn
+    reason: 客户要求数据不出境

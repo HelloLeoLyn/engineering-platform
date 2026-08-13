@@ -1,5 +1,228 @@
-schemaVersion: 1
-schema:
-  id: project
-  status: bootstrap-placeholder
-  note: Formal schema implementation is scheduled for the resolver/generator phase.
+# project.schema.yaml — Project Composition Contract Schema V1
+# 依据: Engineering Platform 设计决策记录 V0.7 第 17 节
+# 描述: 项目组合契约，承载项目身份 / 平台约束 / 多维 Profile /
+#       Technology Choice / Modules / Capabilities / Providers /
+#       Quality / Environment Declaration / Delivery Policy /
+#       Metadata / Customer Constraints。
+# 约束: 仅声明式 Contract/Metadata；禁止 Secret / 客户 Runtime Values /
+#       业务数据 / 任意可执行代码。
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://engineering-platform.dev/schemas/project.schema.v1.yaml
+title: Engineering Platform Project Composition Contract
+description: Project composition contract (V1)
+
+type: object
+additionalProperties: false
+required:
+  - schemaVersion
+  - project
+  - platform
+  - modules
+
+properties:
+  schemaVersion:
+    description: Manifest schema version. Bump requires a documented migration.
+    const: 1
+
+  project:
+    type: object
+    additionalProperties: false
+    required: [id, name, version]
+    properties:
+      id:
+        type: string
+        pattern: ^[a-z0-9]+(-[a-z0-9]+)*$
+      name:
+        type: string
+        minLength: 1
+        maxLength: 200
+      version:
+        type: string
+        pattern: ^\d+\.\d+\.\d+$
+      description:
+        type: string
+        maxLength: 2000
+
+  platform:
+    type: object
+    additionalProperties: false
+    required: [id]
+    properties:
+      id:
+        type: string
+        pattern: ^[a-z0-9]+(-[a-z0-9]+)*$
+      version:
+        description: Required platform version constraint (e.g. 0.1.x).
+        type: string
+        maxLength: 50
+      compatibility:
+        type: object
+        additionalProperties: false
+        properties:
+          projectSchema:
+            type: integer
+          moduleSchema:
+            type: integer
+          providerSchema:
+            type: integer
+
+  profiles:
+    type: object
+    additionalProperties: false
+    properties:
+      application:
+        type: string
+      infrastructure:
+        type: string
+      security:
+        type: string
+      quality:
+        type: string
+        pattern: ^Q[1-3]$
+    required: [application, infrastructure, security, quality]
+
+  technology:
+    type: object
+    description: Explicit technology choices overriding platform defaults.
+    additionalProperties:
+      type: [string, number, boolean]
+    properties:
+      java:
+        type: string
+      node:
+        type: string
+      springBoot:
+        type: string
+      vue:
+        type: string
+      vite:
+        type: string
+
+  modules:
+    type: array
+    minItems: 0
+    uniqueItems: true
+    items:
+      type: object
+      additionalProperties: false
+      required: [id]
+      properties:
+        id:
+          type: string
+          pattern: ^[a-z0-9]+(-[a-z0-9]+)*$
+        version:
+          type: string
+          pattern: ^\d+\.\d+\.\d+$
+        required:
+          type: boolean
+        enabled:
+          type: boolean
+
+  capabilities:
+    type: array
+    uniqueItems: true
+    items:
+      type: object
+      additionalProperties: false
+      required: [id]
+      properties:
+        id:
+          type: string
+          pattern: ^[a-z0-9]+(\.[a-z0-9]+)*$
+        required:
+          type: boolean
+        provider:
+          type: string
+          pattern: ^[a-z0-9]+(-[a-z0-9]+)*$
+
+  providers:
+    type: array
+    uniqueItems: true
+    items:
+      type: object
+      additionalProperties: false
+      required: [id]
+      properties:
+        id:
+          type: string
+          pattern: ^[a-z0-9]+(-[a-z0-9]+)*$
+        version:
+          type: string
+          pattern: ^\d+\.\d+\.\d+$
+        feature:
+          type: string
+        mode:
+          type: string
+
+  quality:
+    type: object
+    additionalProperties: false
+    properties:
+      minimum:
+        type: string
+        pattern: ^Q[1-3]$
+      requiredGates:
+        type: array
+        uniqueItems: true
+        items:
+          type: string
+
+  environments:
+    type: array
+    uniqueItems: true
+    items:
+      type: object
+      additionalProperties: false
+      required: [name]
+      properties:
+        name:
+          type: string
+          enum: [dev, test, staging, prod]
+        infrastructure:
+          type: string
+        region:
+          type: string
+
+  delivery:
+    type: object
+    additionalProperties: false
+    properties:
+      policy:
+        type: string
+        enum: [continuous, gated, manual]
+      pipeline:
+        type: string
+      artifactRepository:
+        type: string
+
+  metadata:
+    type: object
+    additionalProperties: true
+    properties:
+      ownerTeam:
+        type: string
+      repository:
+        type: string
+      tags:
+        type: array
+        items:
+          type: string
+
+  customerConstraints:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      required: [name]
+      properties:
+        name:
+          type: string
+        value:
+          type: [string, number, boolean]
+        reason:
+          type: string
+
+  # 明确禁止的敏感/运行时内容 (V0.7 第 17 节)
+  secrets: false
+  runtimeValues: false
+  businessData: false

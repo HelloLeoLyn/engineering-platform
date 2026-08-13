@@ -1,0 +1,83 @@
+# 示例：Provider Contract（合法示例）
+# 对应 schema: generator/schemas/provider.schema.yaml
+schemaVersion: 1
+
+provider:
+  id: mybatis-plus
+  name: MyBatis-Plus Provider
+  version: 3.5.17
+  description: MyBatis-Plus 持久化 Provider
+
+implements:
+  - persistence
+
+compatibility:
+  platformVersion: 0.1.x
+  providerSchema: 1
+  requires: [platform-core, platform-data]
+
+dependencies:
+  requiredCapabilities: []
+  optionalCapabilities: []
+  libraries: [mybatis-plus-spring-boot4-starter]
+
+configurationSchema:
+  url:
+    type: secret-ref
+    required: true
+    description: JDBC URL（引用 Secret，不落盘）
+  username:
+    type: secret-ref
+    required: true
+  poolSize:
+    type: number
+    default: 10
+    required: false
+
+features:
+  - pagination
+  - optimistic-lock
+  - logic-delete
+
+modes:
+  - name: standard
+    default: true
+    description: 标准模式
+
+security:
+  authentication: false
+  authorization: false
+  encryption: true
+  audit: false
+
+health:
+  criticality: high
+  checkEndpoint: /actuator/health
+
+observability:
+  metrics: true
+  tracing: false
+  logging: true
+
+testing:
+  unit: true
+  integration: true
+  contract: false
+  qualityMinimum: Q2
+
+migrationRisk:
+  level: medium
+  replacement: jdbc-provider
+  notes: 切换需重写 Mapper 层
+
+guides:
+  - topic: persistence
+    path: docs/guides/persistence.md
+
+governance:
+  ownerTeam: platform-team
+  reviewRequired: true
+  status: supported
+
+metadata:
+  tags: [persistence, mybatis]

@@ -1,0 +1,14 @@
+# 非法示例 2：project - 含 Secret（V0.7 禁止）+ quality 非法档位
+# 期望：被拒（secrets 字段禁止；quality.minimum 不是 Q1-Q3）
+schemaVersion: 1
+project:
+  id: bad-project
+  name: Bad Project
+  version: 1.0.0
+platform:
+  id: engineering-platform
+modules: []
+secrets:
+  db_password: hunter2
+quality:
+  minimum: Q9

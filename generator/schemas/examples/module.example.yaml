@@ -1,0 +1,73 @@
+# 示例：Module Contract（合法示例）
+# 对应 schema: generator/schemas/module.schema.yaml
+schemaVersion: 1
+
+module:
+  id: sample-customer
+  name: Sample Customer Module
+  version: 0.1.0
+  type: business
+  description: 客户 CRUD 演示模块
+
+compatibility:
+  platformVersion: 0.1.x
+  moduleSchema: 1
+  requires: [platform-core]
+
+dependencies:
+  requiredModules: []
+  optionalModules: []
+  requiredCapabilities:
+    - persistence
+  optionalCapabilities:
+    - print
+
+provides:
+  capabilities: []
+  resources: [sample_customer]
+  apis: [/api/sample/customers]
+  events: []
+
+resources:
+  - type: table
+    name: sample_customer
+    migration: V001__create_sample_customer.sql
+
+stateMachine:
+  states: [DRAFT, ACTIVE, DISABLED]
+  initial: DRAFT
+  transitions:
+    - from: DRAFT
+      to: ACTIVE
+      guard: validation-passed
+      on: activate
+
+configuration:
+  policies:
+    - key: customer-page-size
+      type: integer
+      default: 20
+      required: false
+      description: 客户列表默认分页大小
+
+quality:
+  minimum: Q1
+  gates: [build, unit, architecture]
+
+migration:
+  - version: V001
+    description: 创建 sample_customer 表
+    breaking: false
+
+extensionPoints:
+  - name: customer-created-listener
+    ownership: USER_OWNED
+    contract: EventListener<CustomerCreatedEvent>
+
+guides:
+  - topic: module-development
+    path: docs/guides/module-development.md
+
+metadata:
+  ownerTeam: demo-team
+  tags: [sample, crud]

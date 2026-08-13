@@ -1,5 +1,259 @@
-schemaVersion: 1
-schema:
-  id: module
-  status: bootstrap-placeholder
-  note: Formal schema implementation is scheduled for the resolver/generator phase.
+# module.schema.yaml — Module Contract Schema V1
+# 依据: Engineering Platform 设计决策记录 V0.7 第 17 节
+# 描述: 模块契约，承载 Identity / Compatibility / Required·Optional
+#       Module & Capability Dependencies / Provides / Resources /
+#       State Machine Metadata / Configuration·Policy Definitions /
+#       Quality Minimum / Migration / Extension Points / Guides / Metadata。
+# 约束: 仅声明式 Contract/Metadata；禁止 Secret / 客户 Runtime Values /
+#       业务数据 / 任意可执行代码。
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://engineering-platform.dev/schemas/module.schema.v1.yaml
+title: Engineering Platform Module Contract
+description: Module contract (V1)
+
+type: object
+additionalProperties: false
+required:
+  - schemaVersion
+  - module
+  - compatibility
+
+properties:
+  schemaVersion:
+    description: Manifest schema version. Bump requires a documented migration.
+    const: 1
+
+  module:
+    type: object
+    additionalProperties: false
+    required: [id, name, version]
+    properties:
+      id:
+        type: string
+        pattern: ^[a-z0-9]+(-[a-z0-9]+)*$
+      name:
+        type: string
+        minLength: 1
+        maxLength: 200
+      version:
+        type: string
+        pattern: ^\d+\.\d+\.\d+$
+      type:
+        type: string
+        enum: [business, platform, capability, provider-binding]
+      description:
+        type: string
+        maxLength: 2000
+
+  compatibility:
+    type: object
+    additionalProperties: false
+    required: [platformVersion]
+    properties:
+      platformVersion:
+        type: string
+        maxLength: 50
+      moduleSchema:
+        type: integer
+      requires:
+        type: array
+        uniqueItems: true
+        items:
+          type: string
+
+  dependencies:
+    type: object
+    additionalProperties: false
+    properties:
+      requiredModules:
+        type: array
+        uniqueItems: true
+        items:
+          type: string
+          pattern: ^[a-z0-9]+(-[a-z0-9]+)*$
+      optionalModules:
+        type: array
+        uniqueItems: true
+        items:
+          type: string
+          pattern: ^[a-z0-9]+(-[a-z0-9]+)*$
+      requiredCapabilities:
+        type: array
+        uniqueItems: true
+        items:
+          type: string
+          pattern: ^[a-z0-9]+(\.[a-z0-9]+)*$
+      optionalCapabilities:
+        type: array
+        uniqueItems: true
+        items:
+          type: string
+          pattern: ^[a-z0-9]+(\.[a-z0-9]+)*$
+
+  provides:
+    type: object
+    additionalProperties: false
+    properties:
+      capabilities:
+        type: array
+        uniqueItems: true
+        items:
+          type: string
+          pattern: ^[a-z0-9]+(\.[a-z0-9]+)*$
+      resources:
+        type: array
+        uniqueItems: true
+        items:
+          type: string
+      apis:
+        type: array
+        uniqueItems: true
+        items:
+          type: string
+      events:
+        type: array
+        uniqueItems: true
+        items:
+          type: string
+          pattern: ^[a-z0-9]+\.[a-z0-9]+\.[a-z0-9]+$
+
+  resources:
+    type: array
+    uniqueItems: true
+    items:
+      type: object
+      additionalProperties: false
+      required: [type]
+      properties:
+        type:
+          type: string
+          enum: [table, queue, bucket, cache, index, file]
+        name:
+          type: string
+        migration:
+          type: string
+
+  stateMachine:
+    type: object
+    additionalProperties: false
+    properties:
+      states:
+        type: array
+        uniqueItems: true
+        items:
+          type: string
+      initial:
+        type: string
+      transitions:
+        type: array
+        uniqueItems: true
+        items:
+          type: object
+          additionalProperties: false
+          required: [from, to]
+          properties:
+            from:
+              type: string
+            to:
+              type: string
+            guard:
+              type: string
+            on:
+              type: string
+
+  configuration:
+    type: object
+    additionalProperties: false
+    properties:
+      policies:
+        type: array
+        uniqueItems: true
+        items:
+          type: object
+          additionalProperties: false
+          required: [key]
+          properties:
+            key:
+              type: string
+              pattern: ^[a-z0-9]+(-[a-z0-9]+)*$
+            type:
+              type: string
+            default:
+              type: [string, number, boolean, array, object]
+            required:
+              type: boolean
+            description:
+              type: string
+
+  quality:
+    type: object
+    additionalProperties: false
+    properties:
+      minimum:
+        type: string
+        pattern: ^Q[1-3]$
+      gates:
+        type: array
+        uniqueItems: true
+        items:
+          type: string
+
+  migration:
+    type: array
+    uniqueItems: true
+    items:
+      type: object
+      additionalProperties: false
+      required: [version, description]
+      properties:
+        version:
+          type: string
+        description:
+          type: string
+        breaking:
+          type: boolean
+
+  extensionPoints:
+    type: array
+    uniqueItems: true
+    items:
+      type: object
+      additionalProperties: false
+      required: [name]
+      properties:
+        name:
+          type: string
+        ownership:
+          type: string
+          enum: [GENERATED, MANAGED, USER_OWNED, IMMUTABLE]
+        contract:
+          type: string
+
+  guides:
+    type: array
+    uniqueItems: true
+    items:
+      type: object
+      additionalProperties: false
+      required: [topic]
+      properties:
+        topic:
+          type: string
+        path:
+          type: string
+
+  metadata:
+    type: object
+    additionalProperties: true
+    properties:
+      ownerTeam:
+        type: string
+      tags:
+        type: array
+        items:
+          type: string
+
+  # 明确禁止的敏感/运行时内容 (V0.7 第 17 节)
+  secrets: false
+  runtimeValues: false
+  businessData: false
