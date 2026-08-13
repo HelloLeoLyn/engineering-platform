@@ -1,0 +1,80 @@
+schemaVersion: 1
+
+platform:
+  id: engineering-platform
+  name: Engineering Platform
+  version: 0.1.0
+  status: active
+  maturity: experimental
+
+technology:
+  bom:
+    id: platform-bom
+    version: 0.1.0
+
+profiles:
+  presets:
+    lite:
+      application: lite
+      infrastructure: lite
+      security: standard
+      quality: Q1
+    standard:
+      application: standard
+      infrastructure: standard
+      security: standard
+      quality: Q2
+
+capabilities: {}
+providers: {}
+modules: {}
+
+quality:
+  profiles:
+    Q1:
+      required: [build, unit, architecture, smoke]
+    Q2:
+      extends: Q1
+      required: [integration, api, migration, browser-e2e]
+    Q3:
+      extends: Q2
+      required: [concurrency, idempotency, failure-recovery, security, upgrade-compatibility]
+
+generator:
+  version: 0.1.0
+  schemas:
+    platform: generator/schemas/platform.schema.yaml
+    project: generator/schemas/project.schema.yaml
+    module: generator/schemas/module.schema.yaml
+    provider: generator/schemas/provider.schema.yaml
+    effectiveProject: generator/schemas/effective-project.schema.yaml
+
+registries:
+  capability: { path: registry/capabilities.yaml }
+  provider: { path: registry/providers.yaml }
+  module: { path: registry/modules.yaml }
+  event: { path: registry/events.yaml }
+  task: { path: registry/tasks.yaml }
+  permission: { path: registry/permissions.yaml }
+  error: { path: registry/errors.yaml }
+  guide: { path: registry/guides.yaml }
+
+compatibility:
+  projectSchema: { supported: [1] }
+  moduleSchema: { supported: [1] }
+  providerSchema: { supported: [1] }
+
+governance:
+  ownership: { required: true }
+  architectureValidation: { required: true }
+  securityGate: { required: true }
+  guides: { requiredForStableAssets: true }
+
+guides:
+  architecture: { path: docs/architecture }
+  standards: { path: docs/standards }
+  ai: { path: docs/ai }
+
+metadata:
+  ownerTeam: platform-team
+  tags: [engineering-platform, modular, ai-assisted-development]

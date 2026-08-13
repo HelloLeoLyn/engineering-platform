@@ -1,0 +1,5 @@
+schemaVersion: 1
+schema:
+  id: change-manifest
+  status: bootstrap-placeholder
+  note: Formal schema implementation is scheduled for the resolver/generator phase.
