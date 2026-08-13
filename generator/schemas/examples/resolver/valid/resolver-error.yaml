@@ -1,0 +1,13 @@
+# 合法样例：Resolver Error
+# 期望：PASS
+schemaVersion: 1
+
+code: UNKNOWN_REFERENCE
+message: module 'ghost-module' is not present in the modules registry
+severity: ERROR
+source: project-manifest
+sourcePath: project.yaml:/modules/0/id
+referenceType: module
+referenceId: ghost-module
+details:
+  step: reference-resolution

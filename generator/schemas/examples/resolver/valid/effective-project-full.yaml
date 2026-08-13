@@ -1,0 +1,109 @@
+# 合法样例：EffectiveProjectModel 完整版
+# 期望：PASS
+schemaVersion: 1
+
+resolution:
+  resolutionId: res-0002
+  resolverVersion: 0.1.0
+  inputHash: def456abc789
+
+identity:
+  id: demo-project
+  name: Demo Project
+  version: 1.0.0
+  description: Full EPM example
+
+platform:
+  id: engineering-platform
+  version: 0.1.0
+
+profiles:
+  application: standard
+  infrastructure: standard
+  security: standard
+  quality: Q2
+
+technology:
+  java: "25"
+  node: "24"
+  springBoot: "4.1.x"
+  vue: "3.x"
+  vite: "8.x"
+
+modules:
+  - id: sample-customer
+    version: 0.1.0
+    activation: explicit
+    reason: Declared in project.modules
+    requiredBy: [demo-project]
+
+capabilities:
+  - id: persistence
+    activation: required
+    reason: Required by module sample-customer
+    requiredBy: [sample-customer]
+    provider: mybatis-plus
+
+providers:
+  - id: mybatis-plus
+    version: 3.5.17
+    activation: explicit
+    reason: Declared in project.providers
+    requiredBy: [persistence]
+    implements: [persistence]
+
+quality:
+  minimum: Q2
+  gates: [build, unit, architecture, integration, api, migration]
+
+environments:
+  - name: dev
+    infrastructure: docker-compose
+  - name: test
+    infrastructure: docker-compose
+  - name: prod
+    infrastructure: kubernetes
+    region: cn-east
+
+security:
+  findings: []
+
+infrastructure:
+  provider: docker-compose
+  scale: single-node
+
+delivery:
+  policy: gated
+  pipeline: github-actions
+
+registries:
+  capability: { path: registry/capabilities.yaml }
+  provider: { path: registry/providers.yaml }
+  module: { path: registry/modules.yaml }
+  event: { path: registry/events.yaml }
+  task: { path: registry/tasks.yaml }
+  permission: { path: registry/permissions.yaml }
+  error: { path: registry/errors.yaml }
+  guide: { path: registry/guides.yaml }
+
+provenance:
+  profiles.quality:
+    value: Q2
+    source: profile-default
+    sourcePath: platform.yaml:/profiles/presets/standard/quality
+    profile: standard
+  technology.java:
+    value: "25"
+    source: platform-default
+    sourcePath: platform.yaml:/technology
+  modules:
+    value: [sample-customer]
+    source: project
+    sourcePath: project.yaml:/modules
+  providers:
+    value: [mybatis-plus]
+    source: project
+    sourcePath: project.yaml:/providers
+
+warnings:
+  - capability persistence has no registry entry yet (resolved via explicit project declaration)

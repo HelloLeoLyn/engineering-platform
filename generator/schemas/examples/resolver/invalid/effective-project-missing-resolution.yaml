@@ -1,0 +1,41 @@
+# 非法样例 1：EffectiveProjectModel 缺 resolution 段
+# 期望：FAIL（required: resolution 违反）
+schemaVersion: 1
+
+identity:
+  id: demo-project
+  name: Demo Project
+  version: 1.0.0
+
+platform:
+  id: engineering-platform
+  version: 0.1.0
+
+profiles:
+  application: lite
+  infrastructure: lite
+  security: standard
+  quality: Q1
+
+technology:
+  java: "25"
+
+modules: []
+capabilities: []
+providers: []
+
+quality:
+  minimum: Q1
+
+environments:
+  - name: dev
+
+security:
+
+registries:
+  capability: { path: registry/capabilities.yaml }
+  provider: { path: registry/providers.yaml }
+  module: { path: registry/modules.yaml }
+
+provenance: {}
+warnings: []

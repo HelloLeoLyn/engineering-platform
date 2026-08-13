@@ -1,0 +1,7 @@
+# 非法样例 5：Resolver Error 缺 message
+# 期望：FAIL（required: message 违反）
+schemaVersion: 1
+
+code: UNKNOWN_REFERENCE
+severity: ERROR
+source: project-manifest

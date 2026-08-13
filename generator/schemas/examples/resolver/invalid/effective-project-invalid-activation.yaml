@@ -1,0 +1,51 @@
+# 非法样例 2：EffectiveProjectModel activation 非法值（运行时状态 running）
+# 期望：FAIL（activation enum 违反；running 不是 Resolution Activation）
+schemaVersion: 1
+
+resolution:
+  resolutionId: res-0001
+  resolverVersion: 0.1.0
+  inputHash: abc123
+
+identity:
+  id: demo-project
+  name: Demo Project
+  version: 1.0.0
+
+platform:
+  id: engineering-platform
+  version: 0.1.0
+
+profiles:
+  application: lite
+  infrastructure: lite
+  security: standard
+  quality: Q1
+
+technology:
+  java: "25"
+
+modules:
+  - id: sample-customer
+    version: 0.1.0
+    activation: running
+    reason: Declared in project.modules
+
+capabilities: []
+providers: []
+
+quality:
+  minimum: Q1
+
+environments:
+  - name: dev
+
+security:
+
+registries:
+  capability: { path: registry/capabilities.yaml }
+  provider: { path: registry/providers.yaml }
+  module: { path: registry/modules.yaml }
+
+provenance: {}
+warnings: []

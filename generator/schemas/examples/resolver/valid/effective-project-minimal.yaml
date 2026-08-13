@@ -1,0 +1,56 @@
+# 合法样例：EffectiveProjectModel 最小版
+# 期望：PASS
+schemaVersion: 1
+
+resolution:
+  resolutionId: res-0001
+  resolverVersion: 0.1.0
+  inputHash: abc123def456
+
+identity:
+  id: demo-project
+  name: Demo Project
+  version: 1.0.0
+
+platform:
+  id: engineering-platform
+  version: 0.1.0
+
+profiles:
+  application: lite
+  infrastructure: lite
+  security: standard
+  quality: Q1
+
+technology:
+  java: "25"
+  node: "24"
+
+modules: []
+capabilities: []
+providers: []
+
+quality:
+  minimum: Q1
+  gates: [build, unit, architecture]
+
+environments:
+  - name: dev
+    infrastructure: docker-compose
+
+security:
+  findings: []
+
+registries:
+  capability: { path: registry/capabilities.yaml }
+  provider: { path: registry/providers.yaml }
+  module: { path: registry/modules.yaml }
+
+provenance:
+  profiles.quality:
+    value: Q1
+    source: profile-default
+    sourcePath: platform.yaml:/profiles/presets/lite/quality
+    profile: lite
+
+warnings: []

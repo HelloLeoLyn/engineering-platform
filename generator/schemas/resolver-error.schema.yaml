@@ -1,0 +1,95 @@
+# resolver-error.schema.yaml — Resolver Error Contract Schema V1
+# 依据: Engineering Platform 设计决策记录 V0.7 §18（Resolver Pipeline [DECIDED]）
+# 定位: Resolver 错误的最小 envelope。仅定义 Resolver Contract 范围内的错误码，
+#       不是 Engineering Platform 全局 Error Catalog（registry/errors.yaml 不在此列）。
+# 本 Schema 只定义契约（语言无关），不定义 Resolver 如何计算。
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://engineering-platform.dev/schemas/resolver-error.schema.v1.yaml
+title: Engineering Platform Resolver Error
+description: Minimal resolver error envelope (V1)
+
+type: object
+additionalProperties: false
+required:
+  - schemaVersion
+  - code
+  - message
+  - severity
+  - source
+
+properties:
+  schemaVersion:
+    description: Contract schema version. Bump requires a documented migration.
+    const: 1
+
+  code:
+    description: Resolver Contract 范围内的错误码（非全局 Error Catalog）。
+    type: string
+    enum:
+      - UNKNOWN_REFERENCE
+      - DUPLICATE_REFERENCE
+      - UNKNOWN_PROFILE
+      - CONSTRAINT_VIOLATION
+      - DEPENDENCY_CONFLICT
+      - DEPENDENCY_CYCLE
+      - CAPABILITY_MISSING
+      - PROVIDER_MISSING
+      - COMPATIBILITY_FAILURE
+      - SECURITY_VIOLATION
+      - UNKNOWN_QUALITY
+      - UNKNOWN_ENVIRONMENT
+
+  message:
+    type: string
+    minLength: 1
+    maxLength: 2000
+
+  severity:
+    type: string
+    enum: [INFO, WARNING, ERROR, CRITICAL]
+
+  source:
+    description: 错误来源（哪个输入/阶段）。
+    type: string
+    enum:
+      - platform-manifest
+      - project-manifest
+      - module-manifest
+      - provider-manifest
+      - registry
+      - profile
+      - environment
+      - dependency
+      - capability
+      - provider
+      - compatibility
+      - security
+      - quality
+
+  sourcePath:
+    description: 触发错误的精确位置（manifest 路径 + JSON pointer）。
+    type: string
+
+  referenceType:
+    description: 引用类型（当错误与引用解析相关时）。
+    type: string
+    enum:
+      - module
+      - capability
+      - provider
+      - event
+      - task
+      - permission
+      - error
+      - guide
+      - profile
+      - environment
+
+  referenceId:
+    description: 被引用的目标 id。
+    type: string
+
+  details:
+    description: 附加结构化细节（自由对象，不定义 Patch DSL）。
+    type: object
+    additionalProperties: true

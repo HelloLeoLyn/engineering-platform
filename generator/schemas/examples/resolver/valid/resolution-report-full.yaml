@@ -1,0 +1,60 @@
+# 合法样例：ResolutionReport 完整版
+# 期望：PASS
+schemaVersion: 1
+
+resolutionId: res-0002
+
+defaultsApplied:
+  - key: profiles.quality
+    value: Q2
+    source: profile-default
+  - key: technology.java
+    value: "25"
+    source: platform-default
+
+dependenciesAdded:
+  - dependencyId: sample-customer
+    reason: required by project.modules
+    requiredBy: [demo-project]
+
+providersSelected:
+  - providerId: mybatis-plus
+    capability: persistence
+    reason: explicit project declaration
+
+overrides:
+  - key: profiles.quality
+    from: Q1
+    to: Q2
+    source: project
+
+constraints:
+  - name: data-residency
+    value: cn
+    reason: customer requirement
+
+warnings:
+  - capability persistence has no registry entry
+
+compatibility:
+  - subject: sample-customer
+    target: engineering-platform
+    compatible: true
+
+securityFindings:
+  - code: SEC_OK
+    severity: INFO
+    detail: no findings
+
+qualityEscalations:
+  - from: Q1
+    to: Q2
+    reason: project requires integration gates
+
+deprecatedExperimentalAssets:
+  - platform-core v0.1 experimental
+
+suggestions:
+  - type: register-capability
+    target: persistence
+    reason: referenced but absent from registry

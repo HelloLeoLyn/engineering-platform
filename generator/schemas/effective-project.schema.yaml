@@ -1,5 +1,370 @@
-schemaVersion: 1
-schema:
-  id: effective-project
-  status: bootstrap-placeholder
-  note: Formal schema implementation is scheduled for the resolver/generator phase.
+# effective-project.schema.yaml — EffectiveProjectModel Contract Schema V1
+# 依据: Engineering Platform 设计决策记录 V0.7 §19（EffectiveProjectModel V1 [DECIDED]）
+# 定位: Resolver 输出的唯一、不可变、可执行、可追溯的项目事实模型。
+#       project.yaml 保存"选择"，EffectiveProjectModel 保存解析后的实际精确结果。
+# 本 Schema 只定义契约（语言无关），不定义 Resolver 如何计算。
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://engineering-platform.dev/schemas/effective-project.schema.v1.yaml
+title: Engineering Platform EffectiveProjectModel
+description: Resolved project fact model produced by the Resolver (V1)
+
+type: object
+additionalProperties: false
+required:
+  - schemaVersion
+  - resolution
+  - identity
+  - platform
+  - profiles
+  - technology
+  - modules
+  - capabilities
+  - providers
+  - quality
+  - environments
+  - security
+  - registries
+  - provenance
+  - warnings
+
+properties:
+  schemaVersion:
+    description: Contract schema version. Bump requires a documented migration.
+    const: 1
+
+  resolution:
+    $ref: '#/$defs/resolutionMetadata'
+
+  identity:
+    type: object
+    additionalProperties: false
+    required: [id, name, version]
+    properties:
+      id:
+        type: string
+        pattern: ^[a-z0-9]+(-[a-z0-9]+)*$
+      name:
+        type: string
+        minLength: 1
+        maxLength: 200
+      version:
+        type: string
+        pattern: ^\d+\.\d+\.\d+$
+      description:
+        type: string
+        maxLength: 2000
+
+  platform:
+    type: object
+    additionalProperties: false
+    required: [id, version]
+    properties:
+      id:
+        type: string
+        pattern: ^[a-z0-9]+(-[a-z0-9]+)*$
+      version:
+        description: Resolved platform version.
+        type: string
+        maxLength: 50
+
+  profiles:
+    type: object
+    additionalProperties: false
+    required: [application, infrastructure, security, quality]
+    properties:
+      application:
+        type: string
+      infrastructure:
+        type: string
+      security:
+        type: string
+      quality:
+        type: string
+        pattern: ^Q[1-3]$
+
+  technology:
+    description: Resolved technology choices (key -> resolved value).
+    type: object
+    additionalProperties:
+      type: [string, number, boolean]
+
+  modules:
+    type: array
+    uniqueItems: true
+    items:
+      $ref: '#/$defs/resolvedModule'
+
+  capabilities:
+    type: array
+    uniqueItems: true
+    items:
+      $ref: '#/$defs/resolvedCapability'
+
+  providers:
+    type: array
+    uniqueItems: true
+    items:
+      $ref: '#/$defs/resolvedProvider'
+
+  quality:
+    type: object
+    additionalProperties: false
+    required: [minimum]
+    properties:
+      minimum:
+        type: string
+        pattern: ^Q[1-3]$
+      gates:
+        type: array
+        uniqueItems: true
+        items:
+          type: string
+
+  environments:
+    type: array
+    uniqueItems: true
+    items:
+      type: object
+      additionalProperties: false
+      required: [name]
+      properties:
+        name:
+          type: string
+          enum: [dev, test, staging, prod]
+        infrastructure:
+          type: string
+        region:
+          type: string
+
+  security:
+    description: |
+      解析后的安全事实（声明式）：requirements / findings / policy facts。
+      不表达执行结果（如 gate 已执行并通过）；EPM 是最终声明式事实模型。
+    type: object
+    additionalProperties: false
+    properties:
+      findings:
+        type: array
+        uniqueItems: true
+        items:
+          type: string
+
+  infrastructure:
+    description: Resolved infrastructure profile (optional in V0.1).
+    type: object
+    additionalProperties:
+      type: [string, number, boolean]
+
+  delivery:
+    type: object
+    additionalProperties: false
+    properties:
+      policy:
+        type: string
+        enum: [continuous, gated, manual]
+      pipeline:
+        type: string
+      artifactRepository:
+        type: string
+
+  registries:
+    type: object
+    additionalProperties: false
+    required: [capability, provider, module]
+    properties:
+      capability: { $ref: '#/$defs/registryRef' }
+      provider: { $ref: '#/$defs/registryRef' }
+      module: { $ref: '#/$defs/registryRef' }
+      event: { $ref: '#/$defs/registryRef' }
+      task: { $ref: '#/$defs/registryRef' }
+      permission: { $ref: '#/$defs/registryRef' }
+      error: { $ref: '#/$defs/registryRef' }
+      guide: { $ref: '#/$defs/registryRef' }
+
+  provenance:
+    description: |
+      关键 Effective Value 的 Provenance 集合（map: 值路径 -> EffectiveValue）。
+      并非 EPM 每个字段都包装，只跟踪被解析/被覆盖的关键值。
+      V0.7 §19: value / source / sourcePath / profile / requiredBy。
+    type: object
+    additionalProperties:
+      $ref: '#/$defs/effectiveValue'
+
+  warnings:
+    type: array
+    uniqueItems: true
+    items:
+      type: string
+
+$defs:
+  # ---- Resolution Metadata ----
+  resolutionMetadata:
+    description: |
+      一次 Resolve 的快照标识。只定义语义，不规定生成算法。
+      resolutionId = 标识一次 Resolution Snapshot；
+      inputHash    = 本次 Resolution 声明式输入内容的指纹；
+      resolverVersion = Resolver 自身版本。
+    type: object
+    additionalProperties: false
+    required: [resolutionId, resolverVersion, inputHash]
+    properties:
+      resolutionId:
+        type: string
+        description: Identifies one resolution snapshot. Algorithm is implementation choice.
+      resolverVersion:
+        type: string
+        description: Resolver version that produced this model.
+      inputHash:
+        type: string
+        description: Fingerprint of the declarative inputs (manifests, registries, schema versions).
+
+  # ---- Provenance ----
+  effectiveValue:
+    type: object
+    additionalProperties: false
+    required: [value, source]
+    properties:
+      value:
+        type: [string, number, boolean, array, object]
+      source:
+        type: string
+        enum:
+          - platform-default
+          - profile-default
+          - project
+          - customer-constraint
+          - platform-guardrail
+          - dependency
+          - requirement
+      sourcePath:
+        type: string
+        description: Manifest path + JSON pointer, e.g. project.yaml:/profiles/quality.
+      profile:
+        type: string
+      requiredBy:
+        type: array
+        uniqueItems: true
+        items:
+          type: string
+
+  # ---- Activation (shared) ----
+  activation:
+    type: string
+    description: |
+      该 resolved item 以什么机制进入最终 EPM。
+      只表达激活机制，不表达来源（来源由 provenance.source 表达）。
+      不是运行时状态；禁止 running/failed/pending/completed。
+    enum:
+      - explicit
+      - default
+      - required
+      - optional-triggered
+
+  resolvedBase:
+    type: object
+    required: [id, activation, reason]
+    properties:
+      id:
+        type: string
+        minLength: 1
+      activation:
+        $ref: '#/$defs/activation'
+      reason:
+        type: string
+        description: 人类可读的进入最终模型的解释。
+      requiredBy:
+        type: array
+        uniqueItems: true
+        items:
+          type: string
+
+  # ---- Resolved Module ----
+  resolvedModule:
+    allOf:
+      - $ref: '#/$defs/resolvedBase'
+      - type: object
+        additionalProperties: false
+        required: [id, activation, reason]
+        properties:
+          id:
+            type: string
+            pattern: ^[a-z0-9]+(-[a-z0-9]+)*$
+          activation:
+            $ref: '#/$defs/activation'
+          reason:
+            type: string
+          requiredBy:
+            type: array
+            uniqueItems: true
+            items:
+              type: string
+          version:
+            type: string
+            pattern: ^\d+\.\d+\.\d+$
+
+  # ---- Resolved Capability ----
+  resolvedCapability:
+    allOf:
+      - $ref: '#/$defs/resolvedBase'
+      - type: object
+        additionalProperties: false
+        required: [id, activation, reason]
+        properties:
+          id:
+            type: string
+            pattern: ^[a-z0-9]+(\.[a-z0-9]+)*$
+          activation:
+            $ref: '#/$defs/activation'
+          reason:
+            type: string
+          requiredBy:
+            type: array
+            uniqueItems: true
+            items:
+              type: string
+          provider:
+            description: Resolved provider id bound to this capability slot.
+            type: string
+            pattern: ^[a-z0-9]+(-[a-z0-9]+)*$
+
+  # ---- Resolved Provider ----
+  resolvedProvider:
+    allOf:
+      - $ref: '#/$defs/resolvedBase'
+      - type: object
+        additionalProperties: false
+        required: [id, activation, reason]
+        properties:
+          id:
+            type: string
+            pattern: ^[a-z0-9]+(-[a-z0-9]+)*$
+          activation:
+            $ref: '#/$defs/activation'
+          reason:
+            type: string
+          requiredBy:
+            type: array
+            uniqueItems: true
+            items:
+              type: string
+          version:
+            type: string
+            pattern: ^\d+\.\d+\.\d+$
+          implements:
+            description: Capability slot(s) this provider implements (resolved).
+            type: array
+            uniqueItems: true
+            items:
+              type: string
+              pattern: ^[a-z0-9]+(\.[a-z0-9]+)*$
+
+  # ---- Registry Ref ----
+  registryRef:
+    type: object
+    additionalProperties: false
+    required: [path]
+    properties:
+      path:
+        type: string
+      description:
+        type: string

@@ -1,0 +1,14 @@
+# 非法样例 3：ResolutionReport 缺 resolutionId
+# 期望：FAIL（required: resolutionId 违反）
+schemaVersion: 1
+
+defaultsApplied: []
+dependenciesAdded: []
+providersSelected: []
+overrides: []
+constraints: []
+warnings: []
+compatibility: []
+securityFindings: []
+qualityEscalations: []
+deprecatedExperimentalAssets: []

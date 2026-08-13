@@ -1,0 +1,16 @@
+# 合法样例：ResolutionReport 最小版
+# 期望：PASS
+schemaVersion: 1
+
+resolutionId: res-0001
+
+defaultsApplied: []
+dependenciesAdded: []
+providersSelected: []
+overrides: []
+constraints: []
+warnings: []
+compatibility: []
+securityFindings: []
+qualityEscalations: []
+deprecatedExperimentalAssets: []

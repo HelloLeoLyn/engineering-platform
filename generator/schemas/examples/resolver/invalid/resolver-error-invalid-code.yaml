@@ -1,0 +1,8 @@
+# 非法样例 4：Resolver Error code 不在枚举内
+# 期望：FAIL（code enum 违反；RESOLVER_MAGIC 不在 12 个错误码中）
+schemaVersion: 1
+
+code: RESOLVER_MAGIC
+message: not a real resolver error code
+severity: ERROR
+source: project-manifest

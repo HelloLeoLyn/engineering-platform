@@ -1,0 +1,54 @@
+# 非法样例：activation 使用来源值（platform-default 已不再合法）
+# activation 只表达机制（explicit/default/required/optional-triggered），
+# 来源由 provenance.source 表达（platform-default/profile-default 等）。
+# 期望：FAIL（activation enum 违反；platform-default 不是合法机制值）
+schemaVersion: 1
+
+resolution:
+  resolutionId: res-0001
+  resolverVersion: 0.1.0
+  inputHash: abc123
+
+identity:
+  id: demo-project
+  name: Demo Project
+  version: 1.0.0
+
+platform:
+  id: engineering-platform
+  version: 0.1.0
+
+profiles:
+  application: lite
+  infrastructure: lite
+  security: standard
+  quality: Q1
+
+technology:
+  java: "25"
+
+modules:
+  - id: sample-customer
+    version: 0.1.0
+    activation: platform-default
+    reason: This should be expressed via provenance.source, not activation
+
+capabilities: []
+providers: []
+
+quality:
+  minimum: Q1
+
+environments:
+  - name: dev
+
+security:
+  findings: []
+
+registries:
+  capability: { path: registry/capabilities.yaml }
+  provider: { path: registry/providers.yaml }
+  module: { path: registry/modules.yaml }
+
+provenance: {}
+warnings: []
