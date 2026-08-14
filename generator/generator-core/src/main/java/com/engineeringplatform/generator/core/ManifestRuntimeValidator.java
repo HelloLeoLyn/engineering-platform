@@ -78,7 +78,25 @@ public final class ManifestRuntimeValidator implements ManifestValidationPort {
         // 已知 enum 合法性（仅当存在且为字符串时检查；不做完整 schema 语义）
         checkEnum(manifest, errors, "workItemStatus", "status");
         checkEnum(manifest, errors, "workItemType", "type");
+        // V03-WORK-001/004: project identity patterns (groupId/artifactId) validated at runtime
+        checkProjectIdentity(manifest, errors);
         return errors;
+    }
+
+    /** V03-WORK-004 minimal fix: groupId/artifactId must match the manifest contract patterns. */
+    private static void checkProjectIdentity(Map<String, Object> manifest, List<String> errors) {
+        Object project = manifest.get("project");
+        if (!(project instanceof Map<?, ?> projectMap)) {
+            return;
+        }
+        Object groupId = projectMap.get("groupId");
+        if (groupId != null && !String.valueOf(groupId).matches("^[a-z][a-z0-9]*(\\.[a-z][a-z0-9]*)*$")) {
+            errors.add("invalid project.groupId: " + groupId);
+        }
+        Object artifactId = projectMap.get("artifactId");
+        if (artifactId != null && !String.valueOf(artifactId).matches("^[a-z0-9]+(-[a-z0-9]+)*$")) {
+            errors.add("invalid project.artifactId: " + artifactId);
+        }
     }
 
     private static void checkEnum(Map<String, Object> manifest, List<String> errors,
