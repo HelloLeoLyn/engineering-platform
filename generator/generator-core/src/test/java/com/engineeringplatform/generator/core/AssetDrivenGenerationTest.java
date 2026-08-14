@@ -360,8 +360,8 @@ class AssetDrivenGenerationTest {
     void dependencyVersionConflictFails() throws Exception {
         // two enabled providers declare the same GA with different versions -> conflict
         Path fakeRoot = tempDir.resolve("repo3");
-        Files.createDirectories(fakeRoot.resolve("providers/mp-a/tests/fixtures"));
-        Files.createDirectories(fakeRoot.resolve("providers/mp-b/tests/fixtures"));
+        Files.createDirectories(fakeRoot.resolve("providers/mp-a"));
+        Files.createDirectories(fakeRoot.resolve("providers/mp-b"));
         Files.createDirectories(fakeRoot.resolve("capabilities/cap-a"));
         Files.createDirectories(fakeRoot.resolve("capabilities/cap-b"));
         Files.writeString(fakeRoot.resolve("providers/mp-a/asset.yaml"), """
@@ -375,11 +375,12 @@ class AssetDrivenGenerationTest {
                   springBoot: "3.x"
                   requiredCapabilities: [cap-a]
                 """);
-        Files.writeString(fakeRoot.resolve("providers/mp-a/tests/fixtures/mp.gav.yaml"), """
-                groupId: com.baomidou
-                artifactId: mybatis-plus-spring-boot3-starter
-                version: 3.5.9
-                scope: compile
+        Files.writeString(fakeRoot.resolve("providers/mp-a/dependencies.yaml"), """
+                dependencies:
+                  - groupId: com.baomidou
+                    artifactId: mybatis-plus-spring-boot3-starter
+                    version: 3.5.9
+                    scope: compile
                 """);
         Files.writeString(fakeRoot.resolve("providers/mp-b/asset.yaml"), """
                 schemaVersion: 1
@@ -392,11 +393,12 @@ class AssetDrivenGenerationTest {
                   springBoot: "3.x"
                   requiredCapabilities: [cap-b]
                 """);
-        Files.writeString(fakeRoot.resolve("providers/mp-b/tests/fixtures/mp.gav.yaml"), """
-                groupId: com.baomidou
-                artifactId: mybatis-plus-spring-boot3-starter
-                version: 3.5.10
-                scope: compile
+        Files.writeString(fakeRoot.resolve("providers/mp-b/dependencies.yaml"), """
+                dependencies:
+                  - groupId: com.baomidou
+                    artifactId: mybatis-plus-spring-boot3-starter
+                    version: 3.5.10
+                    scope: compile
                 """);
         Files.writeString(fakeRoot.resolve("capabilities/cap-a/asset.yaml"), """
                 schemaVersion: 1

@@ -1,0 +1,11 @@
+# Provider Maven dependency metadata — PRODUCTION FACT SOURCE (V02-WORK-006 §6)
+#
+# Provider ≠ Maven Dependency: this file declares the implementation dependencies
+# of the provider asset. It is the single production source consumed by generation
+# (DependencyAssembler / ConformanceValidator). tests/fixtures/*.gav.yaml under the
+# asset directory are test-only data and are never read by production code.
+dependencies:
+  - groupId: com.baomidou
+    artifactId: mybatis-plus-spring-boot3-starter
+    version: 3.5.17
+    scope: compile

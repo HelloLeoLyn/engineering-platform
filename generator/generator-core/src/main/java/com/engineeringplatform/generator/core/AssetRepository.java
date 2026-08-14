@@ -278,32 +278,37 @@ public final class AssetRepository {
         return Files.readString(file, StandardCharsets.UTF_8);
     }
 
-    /** Maven dependency metadata from provider GAV fixtures (tests/fixtures/*.gav.yaml). */
+    /** Maven dependency metadata from the provider's PRODUCTION fact source (dependencies.yaml).
+     *  V02-WORK-006 §6: test fixtures (tests/fixtures/*.gav.yaml) are never a production source. */
     public List<MavenDependency> gavFixtures(String providerId) throws IOException {
         Path base = providerDirs.get(providerId);
         List<MavenDependency> deps = new ArrayList<>();
         if (base == null) {
             return deps;
         }
-        Path fixturesDir = base.resolve("tests/fixtures");
-        if (!Files.isDirectory(fixturesDir)) {
+        Path dependenciesFile = base.resolve("dependencies.yaml");
+        if (!Files.isRegularFile(dependenciesFile)) {
             return deps;
         }
-        try (var stream = Files.list(fixturesDir)) {
-            List<Path> gavFiles = stream.filter(p -> p.getFileName().toString().endsWith(".gav.yaml")).sorted().toList();
-            for (Path gav : gavFiles) {
-                Map<String, Object> raw = (Map<String, Object>) AssetYamlReader.parse(
-                        Files.readString(gav, StandardCharsets.UTF_8));
-                String groupId = str(raw.get("groupId"));
-                String artifactId = str(raw.get("artifactId"));
-                if (groupId == null || artifactId == null) {
-                    continue;
-                }
-                String version = str(raw.get("version"));
-                String scope = str(raw.get("scope"));
-                deps.add(new MavenDependency(groupId, artifactId, version,
-                        scope == null ? "compile" : scope));
+        Map<String, Object> raw = (Map<String, Object>) AssetYamlReader.parse(
+                Files.readString(dependenciesFile, StandardCharsets.UTF_8));
+        Object list = raw.get("dependencies");
+        if (!(list instanceof List<?> items)) {
+            return deps;
+        }
+        for (Object item : items) {
+            if (!(item instanceof Map<?, ?> m)) {
+                continue;
             }
+            String groupId = str(m.get("groupId"));
+            String artifactId = str(m.get("artifactId"));
+            if (groupId == null || artifactId == null) {
+                continue;
+            }
+            String version = str(m.get("version"));
+            String scope = str(m.get("scope"));
+            deps.add(new MavenDependency(groupId, artifactId, version,
+                    scope == null ? "compile" : scope));
         }
         return deps;
     }

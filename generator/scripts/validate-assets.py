@@ -167,8 +167,54 @@ def check_registry_consistency() -> bool:
                 if aid not in entry_ids:
                     print(f"[FAIL] asset {dirname}/{sub.name} not registered in {registry_path.name}")
                     ok = False
+    ok = check_provider_dependencies() and ok
     if ok:
         print("[PASS] registry <-> asset consistency")
+    return ok
+
+
+def check_provider_dependencies() -> bool:
+    """V02-WORK-006 §6: provider dependency metadata must live in the production
+    fact source (dependencies.yaml), not in tests/fixtures; GAV must be valid and
+    version must match the provider asset version."""
+    ok = True
+    providers_root = ROOT / "providers"
+    if not providers_root.exists():
+        return ok
+    for sub in sorted(p for p in providers_root.iterdir() if p.is_dir()):
+        asset_file = sub / "asset.yaml"
+        if not asset_file.exists():
+            continue
+        asset = load_yaml(asset_file)
+        deps_file = sub / "dependencies.yaml"
+        legacy_gav = list((sub / "tests" / "fixtures").glob("*.gav.yaml")) if (sub / "tests" / "fixtures").exists() else []
+        if legacy_gav and not deps_file.exists():
+            print(f"[FAIL] {sub.name}: tests/fixtures/*.gav.yaml present but production"
+                  f" dependencies.yaml missing (V02-WORK-006 §6)")
+            ok = False
+            continue
+        if not deps_file.exists():
+            continue
+        deps = load_yaml(deps_file)
+        entries = deps.get("dependencies", []) or []
+        if not entries:
+            print(f"[FAIL] {sub.name}/dependencies.yaml has no dependencies")
+            ok = False
+            continue
+        for dep in entries:
+            if not dep.get("groupId") or not dep.get("artifactId"):
+                print(f"[FAIL] {sub.name}/dependencies.yaml entry missing groupId/artifactId: {dep}")
+                ok = False
+                continue
+            if not str(dep.get("version", "")).startswith("3."):
+                print(f"[WARN] {sub.name}/dependencies.yaml version looks unusual: {dep.get('version')}")
+        # version must agree with the provider asset version
+        asset_version = str(asset.get("version", ""))
+        for dep in entries:
+            if dep.get("version") and asset_version and str(dep.get("version")) != asset_version:
+                print(f"[FAIL] {sub.name}: dependencies.yaml version {dep.get('version')}"
+                      f" != asset version {asset_version}")
+                ok = False
     return ok
 
 

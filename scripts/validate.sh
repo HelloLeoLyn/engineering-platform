@@ -23,10 +23,10 @@ run_python() {
   echo "== Python Contract Validators =="
   for v in validate-manifest.py validate-registry.py validate-resolver-contracts.py \
            validate-generator-contracts.py validate-engineering-work-contracts.py \
-           validate-agent-execution-contracts.py; do
+           validate-agent-execution-contracts.py validate-assets.py; do
     ARGS=""
     case "$v" in
-      validate-manifest.py|validate-registry.py) ARGS="--all" ;;
+      validate-manifest.py|validate-registry.py|validate-assets.py) ARGS="--all" ;;
     esac
     if python3 "$ROOT/generator/scripts/$v" $ARGS >/dev/null 2>&1; then
       echo "  ✔ $v"

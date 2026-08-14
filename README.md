@@ -20,6 +20,24 @@ AI 研发控制（Requirement/WorkItem/Agent Runtime/Tool Control/Approval/任�
 - AI Engineering Control Plane：WorkItem / EngineeringPlan / ImplementationTasks / Agent Execution /
   Tool Guard / VerificationReport（Agent-neutral，不依赖任何具体 Agent Runtime）
 
+## V0.2 能做什么（Reusable Engineering Asset Platform）
+
+从一份 project.yaml 生成真实可编译的 Spring Boot Reference 项目：
+
+```
+project.yaml → 真实 Assets（capabilities/ + providers/）→ Resolver/EPM
+→ GenerationPlan → GeneratorExecutor → 真实 Spring Boot 项目
+→ Engineering Conformance → mvn test = BUILD SUCCESS
+```
+
+- **Asset Contract V1**：MODULE/CAPABILITY/PROVIDER/TEMPLATE 机器可读资产（engineering-asset.schema.yaml）
+- **Reference Asset Set**：web/validation/exception-handling/logging/persistence/audit + mybatis-plus provider
+- **Asset-aware Resolver**：真实资产依赖闭包（required 自动加入、环/缺失/兼容检查）→ EffectiveProjectModel
+- **Asset-driven Generation**：资产模板渲染 + Maven 依赖装配（去重/冲突检测）→ 真实项目
+- **Engineering Conformance**：technology/structure/dependency/config/provider/asset 六类规则 → ConformanceResult
+- 指南：[Asset Guide](docs/guides/asset-guide.md) ｜ [Generation Guide](docs/guides/generation-guide.md) ｜ [Conformance Guide](docs/guides/conformance-guide.md)
+- 发布状态：[V0.2 Release Checklist](docs/release/V0.2-RELEASE-CHECKLIST.md)
+
 ## V0.1 能做什么
 
 - 解析 Platform/Project/Module/Provider Manifest（13 步 Resolver Pipeline → EffectiveProjectModel）

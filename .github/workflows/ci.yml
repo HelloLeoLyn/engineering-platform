@@ -27,6 +27,8 @@ jobs:
         run: python3 generator/scripts/validate-engineering-work-contracts.py
       - name: Agent Execution Contract Validation
         run: python3 generator/scripts/validate-agent-execution-contracts.py
+      - name: Asset Contract Validation
+        run: python3 generator/scripts/validate-assets.py --all
 
   java-build:
     name: Java 25 Build + Test

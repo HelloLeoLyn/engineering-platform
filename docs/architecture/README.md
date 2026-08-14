@@ -23,6 +23,16 @@ Platform/Project/Module/Provider Manifest (YAML)
   → Acceptance Decision (ACCEPT / REJECT / BLOCKED)
 ```
 
+## V0.2 资产驱动链路（Reusable Engineering Asset Platform）
+
+```
+project.yaml → capabilities/ + providers/（Asset Contract V1）→ AssetAwareResolver（依赖闭包+兼容）
+→ EffectiveProjectModel → AssetProjectGenerator（模板渲染+依赖装配）→ GenerationPlan → GeneratorExecutor
+→ 真实 Spring Boot 项目 → ConformanceValidator（六类规则）→ ConformanceResult → mvn test
+```
+
+详细：docs/guides/asset-guide.md ｜ generation-guide.md ｜ conformance-guide.md ｜ release/V0.2-RELEASE-CHECKLIST.md
+
 ## 子系统划分
 
 | 子系统 | 目录 | 职责 |

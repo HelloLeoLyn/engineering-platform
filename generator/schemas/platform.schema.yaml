@@ -68,6 +68,14 @@ properties:
         type: object
         additionalProperties:
           type: string
+      java:
+        description: Reference Java baseline constraint (V02-WORK-006 single source of truth), e.g. "25".
+        type: string
+        maxLength: 50
+      springBoot:
+        description: Reference Spring Boot baseline constraint (V02-WORK-006), e.g. "3.x".
+        type: string
+        maxLength: 50
 
   profiles:
     type: object

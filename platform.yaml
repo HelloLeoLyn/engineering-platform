@@ -11,6 +11,10 @@ technology:
   bom:
     id: platform-bom
     version: 0.1.0
+  # V0.2 Reference Stack single source of truth (V02-WORK-006 §7):
+  # surfaced via EPM.technology and enforced by Engineering Conformance.
+  java: "25"
+  springBoot: "3.x"
 
 profiles:
   presets:
