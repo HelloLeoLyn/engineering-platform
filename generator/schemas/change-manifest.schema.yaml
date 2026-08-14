@@ -1,5 +1,154 @@
-schemaVersion: 1
-schema:
-  id: change-manifest
-  status: bootstrap-placeholder
-  note: Formal schema implementation is scheduled for the resolver/generator phase.
+# change-manifest.schema.yaml — Change Manifest Contract Schema V1
+# 依据: Engineering Platform 设计决策记录 V0.7 §22（AI Engineering Artifact Schema V1 [DECIDED]）
+#       与 §21（Generation Executor / Rollback Standard V1 [DECIDED]）
+# 定位: ChangeManifest 是 Executor 实际准备/执行的工程变化记录，是核心结构化 Artifact。
+#       与 GenerationPlan（声明式计划）不同：ChangeManifest 记录实际执行的 before/after。
+# 注意: 不要把完整大文件内容无条件塞进 Manifest；使用 hash / size / artifact reference 等最小方式。
+# 本 Schema 只定义契约（语言无关），不定义 Executor 如何计算。
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://engineering-platform.dev/schemas/change-manifest.schema.v1.yaml
+title: Engineering Platform Change Manifest
+description: Executed change manifest (V1)
+
+type: object
+additionalProperties: false
+required:
+  - schemaVersion
+  - changeId
+  - planId
+  - transactionId
+  - entries
+  - result
+
+properties:
+  schemaVersion:
+    description: Contract schema version. Bump requires a documented migration.
+    const: 1
+
+  changeId:
+    description: Change Manifest 标识（稳定、可引用）。
+    type: string
+    minLength: 1
+
+  planId:
+    description: 引用的 GenerationPlan（Provenance Graph：planId → changeId）。
+    type: string
+    minLength: 1
+
+  transactionId:
+    description: 引用的 GenerationTransaction。
+    type: string
+    minLength: 1
+
+  workItemId:
+    description: 可选 Work Item 关联（Provenance）。
+    type: string
+
+  entries:
+    description: 每个实际准备/执行的工程变化。
+    type: array
+    items:
+      $ref: "#/$defs/changeEntry"
+
+  result:
+    description: 整体执行结果。
+    $ref: "#/$defs/result"
+
+  createdAt:
+    description: 执行层允许记录时间（Executor 是执行层；Resolver pure computation 的无时间戳规则不适用于 Executor Transaction）。
+    type: string
+    format: date-time
+
+$defs:
+  changeEntry:
+    type: object
+    additionalProperties: false
+    required:
+      - targetPath
+      - operationType
+      - ownership
+      - status
+    properties:
+      targetPath:
+        description: Workspace root 内的相对路径。
+        type: string
+        minLength: 1
+
+      operationType:
+        type: string
+        enum:
+          - CREATE_DIRECTORY
+          - CREATE_FILE
+          - UPDATE_MANAGED_FILE
+          - DELETE
+
+      ownership:
+        type: string
+        enum:
+          - GENERATED
+          - MANAGED
+          - USER_OWNED
+          - IMMUTABLE
+
+      status:
+        description: 该 entry 的执行状态。
+        type: string
+        enum:
+          - STAGED
+          - APPLIED
+          - SKIPPED
+          - BLOCKED
+          - ROLLED_BACK
+
+      before:
+        description: before state（最小方式：hash/size/ref，不塞完整文件内容）。
+        $ref: "#/$defs/fileState"
+
+      after:
+        description: after state。
+        $ref: "#/$defs/fileState"
+
+      reason:
+        type: string
+
+  fileState:
+    type: object
+    additionalProperties: false
+    required:
+      - exists
+    properties:
+      exists:
+        type: boolean
+      hash:
+        description: SHA-256 或等价内容 hash（最小方式）。
+        type: string
+      size:
+        type: integer
+        minimum: 0
+      ref:
+        description: Artifact 引用（staging/backup 路径），避免内嵌大内容。
+        type: string
+
+  result:
+    type: object
+    additionalProperties: false
+    required:
+      - status
+    properties:
+      status:
+        type: string
+        enum:
+          - SUCCESS
+          - FAILED
+          - ROLLED_BACK
+      appliedCount:
+        type: integer
+        minimum: 0
+      failedCount:
+        type: integer
+        minimum: 0
+      skippedCount:
+        type: integer
+        minimum: 0
+      message:
+        type: string
