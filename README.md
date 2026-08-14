@@ -6,6 +6,14 @@ Engineering Platform 是 Java/Vue 工程底座 + Generator（AI 辅助工程生�
 
 ## Engineering Platform 是什么
 
+**定位：Engineering Platform 是 reusable engineering capability platform（可复用软件工程能力底座）。**
+它沉淀 Engineering Standards / Modules / Capabilities / Providers / Templates / Generator / Engineering Rules
+为机器可读、可组合、可解析、可生成、可验证的工程资产，让新项目优先通过 **复用 + 配置 + 生成** 获得标准工程能力。
+
+Engineering Platform **不是**：AI Agent orchestrator、OpenClaw platform、AI Dev OS replacement。
+AI 研发控制（Requirement/WorkItem/Agent Runtime/Tool Control/Approval/任务验收）属于 AI Dev OS。
+详见 [ADR-001](docs/adr/ADR-001-engineering-platform-ai-dev-os-boundary.md) 与 [System Boundary](docs/architecture/system-boundary.md)。
+
 - 工程底座：Java 25 + Spring Boot + Vue 3 的工程骨架与规范（backend/ frontend/）
 - Generator 子系统：Manifest → Registry → Resolver → GenerationPlan → Executor → Verification 的
   确定性、可验证工程生成链路

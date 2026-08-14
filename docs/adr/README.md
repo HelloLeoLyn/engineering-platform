@@ -7,6 +7,12 @@
 设计基线文档：`Engineering Platform 设计决策记录 V0.7`（累计设计基线）。
 本仓库的实现严格遵循 V0.7 已 DECIDED 内容；实现层面的补充决策记录如下。
 
+## 正式 ADR
+
+| 编号 | 决策 | 状态 |
+|---|---|---|
+| [ADR-001](ADR-001-engineering-platform-ai-dev-os-boundary.md) | Engineering Platform and AI Dev OS Responsibility Boundary | ACCEPTED |
+
 ## 已记录的实现决策（Implementation Choices）
 
 | 决策 | 依据 | 记录位置 |

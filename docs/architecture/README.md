@@ -5,6 +5,9 @@
 Engineering Platform 是 Java/Vue 工程底座 + Generator（V0.7 §7 [DECIDED]）。
 AI Dev OS 与 Engineering Platform 是两个独立项目；Business Projects 复用 Engineering Platform。
 
+**系统边界**：Engineering Platform = 拿什么开发（可复用工程能力底座）；AI Dev OS = 怎么开发（AI 研发控制平面）。
+详见 [System Boundary](system-boundary.md) 与 [ADR-001](../adr/ADR-001-engineering-platform-ai-dev-os-boundary.md)。
+
 ## 核心架构
 
 ```
