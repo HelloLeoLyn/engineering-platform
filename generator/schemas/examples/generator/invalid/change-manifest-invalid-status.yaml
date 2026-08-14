@@ -1,0 +1,17 @@
+# change-manifest-invalid-status.yaml — 非法：未知 entry status
+schemaVersion: 1
+changeId: ch-1234567890ab
+planId: gp-0123456789ab
+transactionId: tx-0123456789ab
+entries:
+  - targetPath: src/Main.java
+    operationType: CREATE_FILE
+    ownership: GENERATED
+    status: VAPORIZED
+    before:
+      exists: false
+result:
+  status: SUCCESS
+  appliedCount: 0
+  failedCount: 0
+  skippedCount: 0

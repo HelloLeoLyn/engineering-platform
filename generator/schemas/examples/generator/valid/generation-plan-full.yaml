@@ -1,0 +1,47 @@
+# generation-plan-full.yaml — 完整合法示例
+schemaVersion: 1
+planId: gp-0123456789ab
+type: SCAFFOLD
+generatorVersion: 0.1.0
+source:
+  resolutionId: res-abcdef123456
+  inputHash: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+scope: Sample CRUD resource scaffold
+operations:
+  - operationId: op-1
+    type: CREATE_DIRECTORY
+    targetPath: backend/modules/sample-customer
+    ownership: GENERATED
+    overwritePolicy: ALLOWED
+    reason: Create module directory
+  - operationId: op-2
+    type: CREATE_FILE
+    targetPath: backend/modules/sample-customer/api/SampleCustomerController.java
+    ownership: GENERATED
+    overwritePolicy: ALLOWED
+    templateSource: crud-controller@0.1.0
+    reason: Controller skeleton
+    dependencies: [op-1]
+  - operationId: op-3
+    type: UPDATE_MANAGED_FILE
+    targetPath: backend/modules/registry.yaml
+    ownership: MANAGED
+    overwritePolicy: STRUCTURED_ONLY
+    reason: Register module
+    expectedBeforeHash: aaaa
+dependencies:
+  - from: op-2
+    to: op-1
+risks:
+  - No destructive operations in this plan
+warnings:
+  - message: Update touches a MANAGED registry file
+    operationId: op-3
+summary:
+  create: 2
+  modify: 1
+  delete: 0
+  skip: 0
+  ownerships:
+    GENERATED: 2
+    MANAGED: 1

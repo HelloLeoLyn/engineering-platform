@@ -1,0 +1,19 @@
+# generation-plan-invalid-ownership.yaml — 非法：未知 Ownership
+schemaVersion: 1
+planId: gp-0123456789ab
+type: SCAFFOLD
+generatorVersion: 0.1.0
+source:
+  resolutionId: res-abcdef123456
+  inputHash: abc
+operations:
+  - operationId: op-1
+    type: CREATE_FILE
+    targetPath: src/Main.java
+    ownership: MAYBEMINE
+    overwritePolicy: ALLOWED
+    reason: nope
+summary:
+  create: 1
+  modify: 0
+  delete: 0

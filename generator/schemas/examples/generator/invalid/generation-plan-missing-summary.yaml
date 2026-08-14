@@ -1,0 +1,15 @@
+# generation-plan-missing-summary.yaml — 非法：缺少 summary
+schemaVersion: 1
+planId: gp-0123456789ab
+type: SCAFFOLD
+generatorVersion: 0.1.0
+source:
+  resolutionId: res-abcdef123456
+  inputHash: abc
+operations:
+  - operationId: op-1
+    type: CREATE_FILE
+    targetPath: src/Main.java
+    ownership: GENERATED
+    overwritePolicy: ALLOWED
+    reason: nope

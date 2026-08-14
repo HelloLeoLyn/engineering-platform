@@ -1,0 +1,18 @@
+# change-manifest-minimal.yaml — 最小合法示例
+schemaVersion: 1
+changeId: ch-111111111111
+planId: gp-aaaaaaaaaaaa
+transactionId: tx-111111111111
+entries:
+  - targetPath: frontend/apps/admin-web/src/views/demo/ListPage.vue
+    operationType: CREATE_FILE
+    ownership: GENERATED
+    status: STAGED
+    before:
+      exists: false
+result:
+  status: FAILED
+  appliedCount: 0
+  failedCount: 1
+  skippedCount: 0
+  message: Staging failed before apply

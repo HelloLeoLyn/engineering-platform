@@ -1,0 +1,37 @@
+# change-manifest-full.yaml — 完整合法示例
+schemaVersion: 1
+changeId: ch-1234567890ab
+planId: gp-0123456789ab
+transactionId: tx-0123456789ab
+workItemId: WI-42
+entries:
+  - targetPath: backend/modules/sample-customer/api/SampleCustomerController.java
+    operationType: CREATE_FILE
+    ownership: GENERATED
+    status: APPLIED
+    before:
+      exists: false
+    after:
+      exists: true
+      hash: bbbb
+      size: 2048
+    reason: Controller skeleton
+  - targetPath: backend/modules/registry.yaml
+    operationType: UPDATE_MANAGED_FILE
+    ownership: MANAGED
+    status: APPLIED
+    before:
+      exists: true
+      hash: aaaa
+      size: 1024
+    after:
+      exists: true
+      hash: cccc
+      size: 1088
+    reason: Register module
+result:
+  status: SUCCESS
+  appliedCount: 2
+  failedCount: 0
+  skippedCount: 0
+createdAt: "2026-08-14T00:50:00Z"

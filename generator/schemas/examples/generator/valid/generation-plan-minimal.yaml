@@ -1,0 +1,19 @@
+# generation-plan-minimal.yaml — 最小合法示例
+schemaVersion: 1
+planId: gp-aaaaaaaaaaaa
+type: FRONTEND_PAGE
+generatorVersion: 0.1.0
+source:
+  resolutionId: res-abcdef123456
+  inputHash: abc
+operations:
+  - operationId: op-1
+    type: CREATE_FILE
+    targetPath: frontend/apps/admin-web/src/views/demo/ListPage.vue
+    ownership: GENERATED
+    overwritePolicy: ALLOWED
+    reason: Page skeleton
+summary:
+  create: 1
+  modify: 0
+  delete: 0

@@ -1,0 +1,10 @@
+# change-manifest-missing-plan-id.yaml — 非法：缺少 planId
+schemaVersion: 1
+changeId: ch-1234567890ab
+transactionId: tx-0123456789ab
+entries: []
+result:
+  status: SUCCESS
+  appliedCount: 0
+  failedCount: 0
+  skippedCount: 0
