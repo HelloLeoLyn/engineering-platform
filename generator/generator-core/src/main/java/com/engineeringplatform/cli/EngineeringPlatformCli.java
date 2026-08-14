@@ -202,6 +202,7 @@ public final class EngineeringPlatformCli {
         try {
             if (Files.exists(outputDir) && !isEmptyDir(outputDir)) {
                 err.println("ERROR: output directory is not empty (refusing to overwrite): " + outputDir);
+                err.println("  use a fresh output directory, e.g. ep generate <project.yaml> --output ./" + manifestPath.getFileName() + "-gen");
                 return 1;
             }
             ResolutionResult resolution = resolveProject(manifestPath);
@@ -223,13 +224,13 @@ public final class EngineeringPlatformCli {
                 }
                 return 1;
             }
-            out.println("Generation:");
-            out.println("  Output: " + outputDir);
-            out.println("  Files: " + result.generatedFiles().size());
-            out.println("  Result: SUCCESS");
-            for (String file : result.generatedFiles()) {
-                out.println("    - " + file);
-            }
+            out.println("Generated: " + outputDir);
+            out.println("Files: " + result.generatedFiles().size());
+            out.println();
+            out.println("Next:");
+            out.println("  cd " + outputDir);
+            out.println("  mvn test");
+            printPlaceholderGuidance(repo, resolution.effectiveProject());
             return 0;
         } catch (GenerationException | IOException e) {
             err.println("ERROR: " + e.getMessage());
@@ -336,9 +337,9 @@ public final class EngineeringPlatformCli {
         return manifest;
     }
 
+    /** User-supplied paths resolve against the caller's working directory (cwd-independent). */
     private Path resolvePath(String input) {
-        Path path = Path.of(input);
-        return path.isAbsolute() ? path.normalize() : platformRoot.resolve(path).normalize();
+        return Path.of(input).toAbsolutePath().normalize();
     }
 
     private static boolean isEmptyDir(Path dir) {
@@ -346,6 +347,29 @@ public final class EngineeringPlatformCli {
             return stream.findAny().isEmpty();
         } catch (IOException e) {
             return false;
+        }
+    }
+
+    /** V03-WORK-003: tells the developer which configuration references need values (never outputs secrets). */
+    private void printPlaceholderGuidance(AssetRepository repo, EffectiveProjectModel epm) {
+        List<String> referenceKeys = new ArrayList<>();
+        List<String> enabled = new ArrayList<>();
+        epm.capabilities().forEach(c -> enabled.add(c.id()));
+        epm.providers().forEach(p -> enabled.add(p.id()));
+        for (String assetId : enabled) {
+            for (AssetRepository.ConfigSpec config : repo.assetConfiguration(assetId)) {
+                if (config.type().equals("secretRef") || config.type().equals("configRef")) {
+                    referenceKeys.add(config.key());
+                }
+            }
+        }
+        if (!referenceKeys.isEmpty()) {
+            out.println();
+            out.println("Note: the following configuration references need values before runtime:");
+            for (String key : referenceKeys) {
+                out.println("  " + key + " -> env " + key.toUpperCase(java.util.Locale.ROOT)
+                        .replace('.', '_').replace('-', '_'));
+            }
         }
     }
 

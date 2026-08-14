@@ -166,7 +166,7 @@ class CliTest {
         Path out = tempDir.resolve("gen");
         CliResult r = run("generate", referenceManifest().toString(), "--output", out.toString());
         assertThat(r.code()).isZero();
-        assertThat(r.out()).contains("Result: SUCCESS");
+        assertThat(r.out()).contains("Generated: " + out);
         assertThat(Files.exists(out.resolve("pom.xml"))).isTrue();
     }
 

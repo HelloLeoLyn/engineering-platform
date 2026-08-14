@@ -73,7 +73,7 @@ class CliSmokeTest {
         ProcessResult generate = exec(root, List.of(ep, "generate", manifest.toString(),
                 "--output", output.toString()));
         assertThat(generate.code()).as("ep generate:\n%s", generate.output()).isZero();
-        assertThat(generate.output()).contains("Result: SUCCESS");
+        assertThat(generate.output()).contains("Generated:");
         assertThat(Files.exists(output.resolve("pom.xml"))).isTrue();
 
         // conformance
