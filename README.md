@@ -20,6 +20,18 @@ AI 研发控制（Requirement/WorkItem/Agent Runtime/Tool Control/Approval/任�
 - AI Engineering Control Plane：WorkItem / EngineeringPlan / ImplementationTasks / Agent Execution /
   Tool Guard / VerificationReport（Agent-neutral，不依赖任何具体 Agent Runtime）
 
+## Getting Started（V0.3）
+
+新用户从这里开始：[Getting Started Guide](docs/guides/getting-started.md) —— 只需一份 `project.yaml` + `./ep` 命令，即可生成真实可编译的 Spring Boot 项目：
+
+```bash
+./ep validate project.yaml
+./ep resolve project.yaml
+./ep generate project.yaml --output ./my-project
+./ep conformance project.yaml ./my-project
+cd my-project && mvn test
+```
+
 ## V0.2 能做什么（Reusable Engineering Asset Platform）
 
 从一份 project.yaml 生成真实可编译的 Spring Boot Reference 项目：
