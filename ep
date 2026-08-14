@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# Engineering Platform CLI launcher (V03-WORK-002)
+# Usage: ./ep validate|resolve|generate|conformance ...
+# The script only builds (when needed) and starts the CLI — no business logic here.
+set -u
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Maven settings: EP_MAVEN_SETTINGS wins; fall back to the local proxy settings if present.
+SETTINGS=""
+if [ -n "${EP_MAVEN_SETTINGS:-}" ]; then
+  SETTINGS="-s ${EP_MAVEN_SETTINGS}"
+elif [ -f /tmp/m2-settings-proxy.xml ]; then
+  SETTINGS="-s /tmp/m2-settings-proxy.xml"
+fi
+
+CORE_CLASSES="$ROOT/generator/generator-core/target/classes"
+CONTRACTS_CLASSES="$ROOT/generator/generator-contracts/target/classes"
+
+if [ ! -d "$CORE_CLASSES" ] || [ ! -d "$CONTRACTS_CLASSES" ]; then
+  echo "Engineering Platform CLI: compiling generator (first run)..." >&2
+  mvn -q $SETTINGS -f "$ROOT/generator/pom.xml" compile -pl generator-core -am >/dev/null 2>&1 \
+    || { echo "ERROR: generator compile failed (run mvn -f generator/pom.xml compile manually)" >&2; exit 1; }
+fi
+
+exec java -cp "$CORE_CLASSES:$CONTRACTS_CLASSES" \
+  com.engineeringplatform.cli.EngineeringPlatformCli --platform-root "$ROOT" "$@"

@@ -19,12 +19,12 @@ import java.util.Map;
  * Not a general YAML parser: flow maps, anchors, multi-doc, block scalars are unsupported.
  * Deliberately no external dependency (generator-core is dependency-free).
  */
-final class AssetYamlReader {
+public final class AssetYamlReader {
 
     private AssetYamlReader() {
     }
 
-    static Object parse(String text) {
+    public static Object parse(String text) {
         List<String> lines = new ArrayList<>();
         for (String line : text.split("\n", -1)) {
             String trimmed = stripComment(line);

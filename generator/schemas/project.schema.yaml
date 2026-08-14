@@ -17,7 +17,6 @@ required:
   - schemaVersion
   - project
   - platform
-  - modules
 
 properties:
   schemaVersion:

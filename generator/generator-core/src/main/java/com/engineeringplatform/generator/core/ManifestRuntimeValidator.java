@@ -34,7 +34,7 @@ public final class ManifestRuntimeValidator implements ManifestValidationPort {
 
     private static final Map<String, Set<String>> REQUIRED_FIELDS = Map.of(
             "platform", Set.of("schemaVersion", "platform", "technology", "profiles", "registries"),
-            "project", Set.of("schemaVersion", "project", "platform", "modules"),
+            "project", Set.of("schemaVersion", "project", "platform"),
             "module", Set.of("schemaVersion", "module"),
             "provider", Set.of("schemaVersion", "provider"));
 
