@@ -1,0 +1,6 @@
+schemaVersion: 1
+id: unknown-prop
+type: CAPABILITY
+version: 0.1.0
+description: Unknown top-level property present.
+marketplace: true

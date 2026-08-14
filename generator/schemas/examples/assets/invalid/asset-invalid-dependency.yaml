@@ -1,0 +1,9 @@
+schemaVersion: 1
+id: dep-broken
+type: MODULE
+version: 0.1.0
+description: Dependency with invalid type.
+dependencies:
+  - type: PLUGIN
+    id: whatever
+    required: true

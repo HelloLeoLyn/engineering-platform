@@ -1,0 +1,61 @@
+schemaVersion: 1
+id: spring-boot-web-base
+type: TEMPLATE
+version: 0.1.0
+description: Base Spring Boot web project template (pom, application config, exception handling, logging, audit baseline).
+dependencies:
+  - type: CAPABILITY
+    id: web
+    version: 1.x
+    required: true
+compatibility:
+  java: "25"
+  springBoot: "3.x"
+files:
+  - source: templates/pom.xml.ftl
+    target: pom.xml
+    ownership: GENERATED
+    mode: render
+  - source: templates/application.yaml.ftl
+    target: src/main/resources/application.yaml
+    ownership: GENERATED
+    mode: render
+  - source: templates/Application.java.ftl
+    target: src/main/java/{package}/{Name}Application.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/exception/GlobalExceptionHandler.java.ftl
+    target: src/main/java/{package}/common/exception/GlobalExceptionHandler.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/audit/AuditLogAspect.java.ftl
+    target: src/main/java/{package}/common/audit/AuditLogAspect.java
+    ownership: GENERATED
+    mode: render
+configuration:
+  - key: spring.application.name
+    type: string
+    required: true
+    description: Application name.
+  - key: server.port
+    type: integer
+    required: false
+    default: 8080
+    description: HTTP port.
+conformance:
+  requiredFiles:
+    - pom.xml
+    - src/main/resources/application.yaml
+  requiredDependencies:
+    - org.springframework.boot:spring-boot-starter-web
+  requiredConfig:
+    - spring.application.name
+tests:
+  files:
+    - templates/test/ApplicationContextTest.java.ftl
+documentation:
+  guide: docs/templates/spring-boot-web-base.md
+metadata:
+  author: engineering-platform
+  maturity: experimental
+  tags: [template, spring-boot, web]

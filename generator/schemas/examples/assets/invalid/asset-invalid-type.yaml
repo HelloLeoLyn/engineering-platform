@@ -1,0 +1,5 @@
+schemaVersion: 1
+id: plugin-thing
+type: PLUGIN
+version: 0.1.0
+description: Type outside the V1 enum.

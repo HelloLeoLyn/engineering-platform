@@ -1,0 +1,234 @@
+# engineering-asset.schema.yaml — Engineering Asset Contract V1
+# 依据: V0.2 Scope & Work Packages (V02-WORK-001)；ADR-001 六域边界
+# 描述: 机器可读工程资产契约。V1 支持四种类型：
+#       MODULE / CAPABILITY / PROVIDER / TEMPLATE。
+# 约束: 声明式 Contract 仅；禁止 Secret Value / 运行时值 / 可执行代码 /
+#       绝对路径与 ../ 语义 / Agent 语义 / 插件 SDK / Marketplace。
+# 语义红线:
+#   - Capability ≠ Module
+#   - Provider ≠ Maven Dependency
+#   - Template ≠ Agent Prompt
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://engineering-platform.dev/schemas/engineering-asset.schema.v1.yaml
+title: Engineering Asset
+description: Reusable engineering asset contract (V1)
+
+type: object
+additionalProperties: false
+required:
+  - schemaVersion
+  - id
+  - type
+  - version
+  - description
+
+properties:
+  schemaVersion:
+    description: Asset schema version. Bump requires a documented migration.
+    const: 1
+
+  id:
+    description: Asset identity. Lowercase kebab-case, unique within type.
+    type: string
+    pattern: ^[a-z0-9]+(-[a-z0-9]+)*$
+    maxLength: 100
+
+  type:
+    description: Asset type. V1 supports exactly four types.
+    type: string
+    enum: [MODULE, CAPABILITY, PROVIDER, TEMPLATE]
+
+  version:
+    description: Asset semantic version (MAJOR.MINOR.PATCH).
+    type: string
+    pattern: ^\d+\.\d+\.\d+$
+
+  description:
+    description: Human-readable purpose of the asset.
+    type: string
+    minLength: 1
+    maxLength: 2000
+
+  dependencies:
+    description: Minimal asset dependencies. No version solver; constraints are free-form strings.
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      required: [id]
+      properties:
+        type:
+          description: Dependency asset type.
+          type: string
+          enum: [MODULE, CAPABILITY, PROVIDER, TEMPLATE]
+        id:
+          description: Dependency asset id (kebab-case).
+          type: string
+          pattern: ^[a-z0-9]+(-[a-z0-9]+)*$
+        version:
+          description: Simple version constraint, e.g. "1.x", "^1.2.0", ">=2".
+          type: string
+          pattern: ^[A-Za-z0-9.\-*^~<>=xX\s]+$
+          maxLength: 50
+        required:
+          description: Whether the dependency is mandatory (default true).
+          type: boolean
+
+  compatibility:
+    description: Declared compatibility surface. Contract only; no algorithm here.
+    type: object
+    additionalProperties: false
+    properties:
+      java:
+        description: Java version constraint, e.g. "25".
+        type: string
+        maxLength: 50
+      springBoot:
+        description: Spring Boot version constraint, e.g. "3.x".
+        type: string
+        maxLength: 50
+      requiredCapabilities:
+        description: Capability asset ids this asset requires.
+        type: array
+        items:
+          type: string
+          pattern: ^[a-z0-9]+(-[a-z0-9]+)*$
+      compatibleProviders:
+        description: Provider asset ids known to be compatible.
+        type: array
+        items:
+          type: string
+          pattern: ^[a-z0-9]+(-[a-z0-9]+)*$
+
+  files:
+    description: Files/templates the asset contributes. Paths must be relative; no absolute paths, no "..".
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      required: [source, target]
+      properties:
+        source:
+          description: Asset-relative source path (template or file).
+          type: string
+          pattern: ^[^./].*$
+        target:
+          description: Project-relative target path.
+          type: string
+          pattern: ^[^./].*$
+        ownership:
+          description: Target ownership after generation (aligns with EP Ownership levels).
+          type: string
+          enum: [GENERATED, MANAGED, USER_OWNED, IMMUTABLE]
+        mode:
+          description: render = template rendering; copy = verbatim copy.
+          type: string
+          enum: [render, copy]
+
+  configuration:
+    description: Declarative configuration inputs. NEVER holds secret values; only references.
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      required: [key, type]
+      properties:
+        key:
+          description: Configuration key, e.g. "spring.datasource.url".
+          type: string
+          pattern: ^[A-Za-z0-9._\-]+$
+          maxLength: 200
+        type:
+          description: Value type. secretRef/configRef reference external secret/config stores.
+          type: string
+          enum: [string, number, integer, boolean, secretRef, configRef]
+        required:
+          description: Whether the key must be provided by the consuming project.
+          type: boolean
+        default:
+          description: Default value. FORBIDDEN for secretRef/configRef (no secret defaults in contract).
+          type: [string, number, integer, boolean]
+        description:
+          description: Purpose of the configuration key.
+          type: string
+          maxLength: 500
+
+  conformance:
+    description: Minimal conformance rules this asset declares. No generic rule DSL.
+    type: object
+    additionalProperties: false
+    properties:
+      requiredFiles:
+        description: Files that must exist in the generated project.
+        type: array
+        items:
+          type: string
+          pattern: ^[^./].*$
+      requiredDependencies:
+        description: Maven coordinates that must be present (groupId:artifactId form).
+        type: array
+        items:
+          type: string
+          pattern: ^[A-Za-z0-9_.\-]+:[A-Za-z0-9_.\-]+$
+      requiredConfig:
+        description: Configuration keys that must be present in the generated project.
+        type: array
+        items:
+          type: string
+          pattern: ^[A-Za-z0-9._\-]+$
+      forbiddenDependencies:
+        description: Maven coordinates that must NOT be present (groupId:artifactId form).
+        type: array
+        items:
+          type: string
+          pattern: ^[A-Za-z0-9_.\-]+:[A-Za-z0-9_.\-]+$
+
+  tests:
+    description: Test files/fixtures references (paths only; no embedded content).
+    type: object
+    additionalProperties: false
+    properties:
+      files:
+        type: array
+        items:
+          type: string
+          pattern: ^[^./].*$
+      fixtures:
+        type: array
+        items:
+          type: string
+          pattern: ^[^./].*$
+
+  documentation:
+    description: Documentation references (paths only).
+    type: object
+    additionalProperties: false
+    properties:
+      guide:
+        type: string
+        pattern: ^[^./].*$
+      references:
+        type: array
+        items:
+          type: string
+          pattern: ^[^./].*$
+
+  metadata:
+    description: Asset metadata (optional).
+    type: object
+    additionalProperties: false
+    properties:
+      author:
+        type: string
+        maxLength: 200
+      maturity:
+        type: string
+        enum: [experimental, stable, mature]
+      license:
+        type: string
+        maxLength: 200
+      tags:
+        type: array
+        items:
+          type: string
+          maxLength: 50

@@ -1,0 +1,10 @@
+schemaVersion: 1
+id: path-escape
+type: TEMPLATE
+version: 0.1.0
+description: Path traversal attempt in file target.
+files:
+  - source: templates/x.java.ftl
+    target: src/../../escape.java
+    ownership: GENERATED
+    mode: render

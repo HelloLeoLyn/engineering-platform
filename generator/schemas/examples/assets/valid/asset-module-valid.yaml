@@ -1,0 +1,51 @@
+schemaVersion: 1
+id: sample-customer
+type: MODULE
+version: 0.1.0
+description: Reusable customer CRUD module (controller/service/mapper/record baseline).
+dependencies:
+  - type: CAPABILITY
+    id: persistence
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: validation
+    required: true
+compatibility:
+  java: "25"
+  springBoot: "3.x"
+  requiredCapabilities: [persistence, validation]
+  compatibleProviders: [mybatis-plus]
+files:
+  - source: templates/api/controller.java.ftl
+    target: src/main/java/{package}/api/controller/{Name}Controller.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/api/request.java.ftl
+    target: src/main/java/{package}/api/request/Create{Name}Request.java
+    ownership: GENERATED
+    mode: render
+configuration:
+  - key: module.sample-customer.table-prefix
+    type: string
+    required: false
+    default: t_
+    description: Table name prefix for generated customer tables.
+conformance:
+  requiredFiles:
+    - src/main/java/{package}/api/controller/{Name}Controller.java
+  requiredDependencies:
+    - org.springframework.boot:spring-boot-starter-web
+  requiredConfig:
+    - spring.application.name
+tests:
+  files:
+    - templates/test/controller-test.java.ftl
+  fixtures:
+    - fixtures/sample-customer/requests/valid.json
+documentation:
+  guide: docs/modules/sample-customer.md
+metadata:
+  author: engineering-platform
+  maturity: experimental
+  tags: [module, crud, sample]
