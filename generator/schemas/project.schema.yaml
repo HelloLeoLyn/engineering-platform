@@ -46,6 +46,26 @@ properties:
         description: Base Java package for generated code (V02-WORK-004).
         type: string
         pattern: ^[a-z][a-z0-9]*(\.[a-z][a-z0-9]*)*$
+      groupId:
+        description: Maven groupId (V03-WORK-001). Optional; defaults derived from basePackage.
+        type: string
+        pattern: ^[a-z][a-z0-9]*(\.[a-z][a-z0-9]*)*$
+      artifactId:
+        description: Maven artifactId (V03-WORK-001). Optional; defaults to project.id.
+        type: string
+        pattern: ^[a-z0-9]+(-[a-z0-9]+)*$
+      configuration:
+        description: Project-level configuration inputs for enabled assets (V03-WORK-001).
+          Declarative scalar values only; secret values are never allowed here
+          (secretRef/configRef asset keys always stay placeholders in generated output).
+        type: object
+        additionalProperties: false
+        propertyNames:
+          pattern: ^[a-zA-Z0-9._-]+$
+        maxProperties: 50
+        patternProperties:
+          "^.*$":
+            type: [string, number, integer, boolean]
 
   platform:
     type: object

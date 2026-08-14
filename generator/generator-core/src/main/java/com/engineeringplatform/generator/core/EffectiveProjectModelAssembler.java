@@ -47,7 +47,10 @@ public final class EffectiveProjectModelAssembler {
         Object project = input.projectManifest().get("project");
         if (project instanceof Map<?, ?> m) {
             // V02-WORK-004: basePackage drives generated code package (optional field)
-            for (String key : new String[]{"id", "name", "version", "description", "basePackage"}) {
+            // V03-WORK-001: groupId/artifactId/configuration keep manifest as the only
+            //   project-level generation input (no second project options model)
+            for (String key : new String[]{"id", "name", "version", "description",
+                    "basePackage", "groupId", "artifactId", "configuration"}) {
                 if (m.get(key) != null) {
                     result.put(key, m.get(key));
                 }

@@ -1,0 +1,20 @@
+schemaVersion: 1
+project:
+  id: inventory-service
+  name: Inventory Service
+  version: 2.1.0
+  basePackage: com.acme.inventory
+  groupId: com.acme
+  artifactId: inventory-service
+  configuration:
+    server.port: 9090
+    mybatis-plus.mapper-locations: classpath*:mapper/inventory/**/*.xml
+platform:
+  id: engineering-platform
+capabilities:
+  - id: web
+  - id: validation
+  - id: exception-handling
+  - id: audit
+quality:
+  minimum: Q3

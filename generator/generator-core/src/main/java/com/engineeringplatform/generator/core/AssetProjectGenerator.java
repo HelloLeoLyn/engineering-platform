@@ -39,6 +39,47 @@ public final class AssetProjectGenerator {
         public Options {
             providedConfig = providedConfig == null ? Map.of() : Map.copyOf(providedConfig);
         }
+
+        /**
+         * V03-WORK-001: build options from the resolved EPM (manifest as the only input).
+         * Defaults: groupId derived from basePackage; artifactId = project id;
+         * version defaults to 0.1.0; providedConfig from manifest configuration.
+         */
+        public static Options fromEpm(EffectiveProjectModel epm) {
+            Map<String, Object> identity = epm.identity() == null ? Map.of() : epm.identity();
+            String basePackage = str(identity.get("basePackage"));
+            String id = str(identity.get("id"));
+            String name = str(identity.get("name"));
+            String version = str(identity.get("version"));
+            String groupId = str(identity.get("groupId"));
+            String artifactId = str(identity.get("artifactId"));
+
+            String projectName = name != null ? name : (id != null ? id : "generated-app");
+            String derivedGroupId = groupId != null ? groupId
+                    : (basePackage != null ? deriveGroupId(basePackage) : "com.engineeringplatform");
+            String derivedArtifactId = artifactId != null ? artifactId
+                    : (id != null ? id : "generated-app");
+            String derivedVersion = version != null ? version : "0.1.0";
+
+            @SuppressWarnings("unchecked")
+            Map<String, Object> config = identity.get("configuration") instanceof Map<?, ?> m
+                    ? (Map<String, Object>) m : Map.of();
+            return new Options(basePackage, projectName, derivedGroupId, derivedArtifactId,
+                    derivedVersion, config);
+        }
+
+        private static String str(Object value) {
+            return value == null ? null : String.valueOf(value);
+        }
+
+        /** groupId default: first two segments of basePackage (com.engineeringplatform.demo -> com.engineeringplatform). */
+        private static String deriveGroupId(String basePackage) {
+            String[] segments = basePackage.split("\\.");
+            if (segments.length >= 2) {
+                return segments[0] + "." + segments[1];
+            }
+            return "com." + basePackage;
+        }
     }
 
     public record GenerationResult(GenerationPlan plan, ExecutionResult execution,
@@ -60,6 +101,15 @@ public final class AssetProjectGenerator {
     public AssetProjectGenerator(GenerationPlanner planner, GeneratorExecutor executor) {
         this.planner = planner;
         this.executor = executor;
+    }
+
+    /**
+     * V03-WORK-001: manifest-driven generation entry — project identity/configuration
+     * come from the EPM (project.yaml), no Java Options required from the developer.
+     */
+    public GenerationResult generate(EffectiveProjectModel epm, AssetRepository repo,
+                                     java.nio.file.Path targetDir) throws IOException {
+        return generate(epm, repo, Options.fromEpm(epm), targetDir);
     }
 
     public GenerationResult generate(EffectiveProjectModel epm, AssetRepository repo,
@@ -284,7 +334,9 @@ public final class AssetProjectGenerator {
                                        EffectiveProjectModel epm, Options options) {
         StringBuilder sb = new StringBuilder();
         sb.append("spring.application.name: ").append(vars.get("projectName")).append("\n");
-        sb.append("server.port: 8080\n");
+        // V03-WORK-001: manifest configuration may override the base server.port default
+        Object portOverride = options.providedConfig().get("server.port");
+        sb.append("server.port: ").append(portOverride != null ? portOverride : "8080").append("\n");
         // asset configuration inputs (defaults / provided values / secret & config references)
         List<String> enabled = new ArrayList<>();
         for (ResolvedCapability capability : epm.capabilities()) {
@@ -300,7 +352,9 @@ public final class AssetProjectGenerator {
                     continue; // base lines already present
                 }
                 Object provided = options.providedConfig().get(key);
-                if (provided != null) {
+                if (provided != null && !config.type().equals("secretRef") && !config.type().equals("configRef")) {
+                    // V03-WORK-001: manifest configuration may never provide secret values;
+                    // reference-typed asset keys always stay placeholders in generated output.
                     sb.append(key).append(": ").append(provided).append("\n");
                     continue;
                 }
