@@ -49,13 +49,24 @@ public final class CompleteResolver {
     private final EffectiveProjectModelAssembler epmAssembler;
     private final ResolutionReportAssembler reportAssembler;
     private final SummaryRenderer summaryRenderer;
+    private final AssetContext assetContext;
 
     public CompleteResolver(ManifestValidationPort validationPort) {
-        this(validationPort, SnapshotFactory.RESOLVER_VERSION);
+        this(validationPort, SnapshotFactory.RESOLVER_VERSION, null);
     }
 
     /** Package-private / test-friendly: allows a different resolverVersion. */
     CompleteResolver(ManifestValidationPort validationPort, String resolverVersion) {
+        this(validationPort, resolverVersion, null);
+    }
+
+    /** V02-WORK-003: asset-aware resolution enriches the same pipeline (may be null). */
+    public CompleteResolver(ManifestValidationPort validationPort, AssetContext assetContext) {
+        this(validationPort, SnapshotFactory.RESOLVER_VERSION, assetContext);
+    }
+
+    private CompleteResolver(ManifestValidationPort validationPort, String resolverVersion,
+                             AssetContext assetContext) {
         this.validationPort = validationPort;
         this.referenceResolver = new ReferenceResolver();
         this.profileExpander = new ProfileExpander();
@@ -73,6 +84,7 @@ public final class CompleteResolver {
         this.epmAssembler = new EffectiveProjectModelAssembler();
         this.reportAssembler = new ResolutionReportAssembler();
         this.summaryRenderer = new SummaryRenderer();
+        this.assetContext = assetContext;
     }
 
     public ResolutionResult resolve(ResolverInput input) {
@@ -83,6 +95,13 @@ public final class CompleteResolver {
 
         // Step 2 — Reference Resolution
         referenceResolver.resolve(input, state);
+
+        // V02-WORK-003: asset-level errors (missing/cycle/compatibility) join the same state
+        if (assetContext != null) {
+            for (var error : assetContext.errors()) {
+                state.error(error);
+            }
+        }
 
         // Step 3 — Profile Expansion
         List<String> activeProfiles = profileExpander.expand(input, state);
@@ -102,8 +121,25 @@ public final class CompleteResolver {
         // Step 8 — Capability Resolution
         List<ResolvedCapability> capabilities = capabilityResolver.resolve(input, modules, state);
 
-        // Step 9 — Provider Resolution
-        List<ResolvedProvider> providers = providerResolver.resolve(input, capabilities, state);
+        // V02-WORK-003: asset dependency closure joins the same capability model (dedup, stable order)
+        if (assetContext != null) {
+            for (ResolvedCapability capability : assetContext.capabilityClosure()) {
+                state.capability(capability);
+            }
+            capabilities = new ArrayList<>(capabilities);
+            for (ResolvedCapability capability : assetContext.capabilityClosure()) {
+                if (capabilities.stream().noneMatch(c -> c.id().equals(capability.id()))) {
+                    capabilities.add(capability);
+                }
+            }
+        }
+
+        // Step 9 — Provider Resolution (only capabilities that declare a provider need one)
+        List<ResolvedCapability> providerCandidates = assetContext == null ? capabilities
+                : capabilities.stream()
+                        .filter(c -> assetContext.providerRequiredCapabilityIds().contains(c.id()))
+                        .toList();
+        List<ResolvedProvider> providers = providerResolver.resolve(input, providerCandidates, state);
 
         // Step 10 — Compatibility Validation
         compatibilityValidator.validate(input, modules, providers, state);

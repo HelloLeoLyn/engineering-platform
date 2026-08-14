@@ -1,0 +1,14 @@
+schemaVersion: 1
+project:
+  id: demo-order-service
+  name: Demo Order Service
+  version: 1.0.0
+platform:
+  id: engineering-platform
+capabilities:
+  - id: web
+  - id: validation
+  - id: exception-handling
+  - id: audit
+quality:
+  minimum: Q3

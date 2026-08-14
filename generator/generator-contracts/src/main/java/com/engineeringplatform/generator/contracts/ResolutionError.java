@@ -104,4 +104,43 @@ public record ResolutionError(
                 capabilityId,
                 Map.of());
     }
+
+    /** V02-WORK-003: referenced engineering asset does not exist. */
+    public static ResolutionError assetMissing(String assetId, String requiredBy) {
+        return new ResolutionError(
+                "ASSET_MISSING",
+                "Engineering asset not found: " + assetId + " (required by " + requiredBy + ")",
+                Severity.ERROR,
+                "assets",
+                "capabilities/" + assetId + "/asset.yaml",
+                "asset",
+                assetId,
+                Map.of("requiredBy", requiredBy));
+    }
+
+    /** V02-WORK-003: cyclic asset dependency. */
+    public static ResolutionError assetDependencyCycle(String capabilityId, String cyclePath) {
+        return new ResolutionError(
+                "ASSET_DEPENDENCY_CYCLE",
+                "Cyclic asset dependency involving: " + capabilityId + " (" + cyclePath + ")",
+                Severity.ERROR,
+                "assets",
+                "capabilities/" + capabilityId + "/asset.yaml",
+                "capability",
+                capabilityId,
+                Map.of("cycle", cyclePath));
+    }
+
+    /** V02-WORK-003: asset compatibility mismatch (java/springBoot/provider/capability). */
+    public static ResolutionError incompatibleAsset(String assetId, String requirement, String actual) {
+        return new ResolutionError(
+                "COMPATIBILITY_FAILURE",
+                "Asset " + assetId + " incompatible: " + requirement + " (actual: " + actual + ")",
+                Severity.ERROR,
+                "assets",
+                "compatibility",
+                "asset",
+                assetId,
+                Map.of("requirement", requirement, "actual", String.valueOf(actual)));
+    }
 }
