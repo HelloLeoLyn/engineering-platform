@@ -1,0 +1,23 @@
+# test-plan-valid-full.yaml — 合法示例
+schemaVersion: 1
+testPlanId: TP-1
+workItemId: WI-42
+engineeringPlanId: EP-1
+testCases:
+  - testCaseId: TC-1
+    type: UNIT
+    target: SampleCustomerApplicationService
+    expectedResult: create/read/update/delete pass
+    required: true
+    acceptanceCriterion: AC-2
+  - testCaseId: TC-2
+    type: CONTRACT
+    target: /api/sample-customer
+    expectedResult: OpenAPI contract valid
+    required: true
+    acceptanceCriterion: AC-2
+  - testCaseId: TC-3
+    type: MANUAL
+    target: UI smoke
+    expectedResult: list page renders
+    required: false

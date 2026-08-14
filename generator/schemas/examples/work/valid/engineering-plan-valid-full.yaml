@@ -1,0 +1,19 @@
+# engineering-plan-valid-full.yaml — 合法示例
+schemaVersion: 1
+planId: EP-1
+workItemId: WI-42
+steps:
+  - stepId: s1
+    objective: Resolve project model
+  - stepId: s2
+    objective: Generate scaffold
+    dependencies: [s1]
+  - stepId: s3
+    objective: Implement semantics
+    dependencies: [s2]
+testStrategy: unit tests on sample-customer service + contract test on API
+expectedChanges:
+  - gp-0123456789ab
+risks:
+  - registry update is managed
+rollbackConsideration: executor rollback covers created files

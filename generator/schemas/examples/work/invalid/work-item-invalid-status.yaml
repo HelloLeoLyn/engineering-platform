@@ -1,0 +1,15 @@
+# work-item-invalid-status.yaml — 非法：未知 status
+schemaVersion: 1
+workItemId: WI-99
+title: bad
+objective: bad
+type: REQUIREMENT
+status: VAPORIZED
+scope:
+  allowedPaths:
+    - src/
+acceptanceCriteria:
+  - criterionId: AC-1
+    description: x
+    type: BUILD
+    required: true

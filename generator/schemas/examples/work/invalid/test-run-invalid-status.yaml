@@ -1,0 +1,16 @@
+# test-run-invalid-status.yaml — 非法：未知 case status
+schemaVersion: 1
+testRunId: TR-99
+testPlanId: TP-1
+startedAt: "2026-08-14T01:00:00Z"
+completedAt: "2026-08-14T01:05:00Z"
+environment: local
+results:
+  - testCaseId: TC-1
+    status: VAPORIZED
+summary:
+  total: 1
+  passed: 0
+  failed: 0
+  skipped: 0
+  blocked: 0

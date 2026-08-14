@@ -1,5 +1,78 @@
-schemaVersion: 1
-schema:
-  id: test-plan
-  status: bootstrap-placeholder
-  note: Formal schema implementation is scheduled for the resolver/generator phase.
+# test-plan.schema.yaml — Test Plan Contract Schema V1
+# 依据: V0.7 §14（Test Planning Engine 决定 WHAT）/ §22（TestPlan 是核心 Artifact）
+# 定位: TestPlan 是声明式计划，绑定 workItemId + engineeringPlanId。不得执行测试。
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://engineering-platform.dev/schemas/test-plan.schema.v1.yaml
+title: Engineering Platform Test Plan
+description: Declarative test plan for a WorkItem (V1)
+
+type: object
+additionalProperties: false
+required:
+  - schemaVersion
+  - testPlanId
+  - workItemId
+  - engineeringPlanId
+  - testCases
+
+properties:
+  schemaVersion:
+    description: Contract schema version. Bump requires a documented migration.
+    const: 1
+
+  testPlanId:
+    type: string
+    minLength: 1
+
+  workItemId:
+    description: Provenance：绑定 WorkItem。
+    type: string
+    minLength: 1
+
+  engineeringPlanId:
+    description: Provenance：绑定 EngineeringPlan。
+    type: string
+    minLength: 1
+
+  testCases:
+    type: array
+    minItems: 1
+    items:
+      $ref: "#/$defs/testCase"
+
+$defs:
+  testCase:
+    type: object
+    additionalProperties: false
+    required:
+      - testCaseId
+      - type
+      - target
+      - expectedResult
+      - required
+    properties:
+      testCaseId:
+        type: string
+        minLength: 1
+      type:
+        description: 测试类型（V0.7 §5 测试栈：Unit/Integration/Contract/E2E/Compatibility/Manual）。
+        type: string
+        enum:
+          - UNIT
+          - INTEGRATION
+          - CONTRACT
+          - E2E
+          - COMPATIBILITY
+          - MANUAL
+      target:
+        description: 测试目标（module/class/endpoint/contract id）。
+        type: string
+      expectedResult:
+        description: 期望结果（结构化 expected/assertion 描述）。
+        type: string
+      required:
+        description: 是否为 required 测试（false = optional）。
+        type: boolean
+      acceptanceCriterion:
+        description: 关联的 WorkItem acceptance criterionId。
+        type: string

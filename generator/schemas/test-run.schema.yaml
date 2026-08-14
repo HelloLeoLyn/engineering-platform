@@ -1,5 +1,111 @@
-schemaVersion: 1
-schema:
-  id: test-run
-  status: bootstrap-placeholder
-  note: Formal schema implementation is scheduled for the resolver/generator phase.
+# test-run.schema.yaml — Test Run Contract Schema V1
+# 依据: V0.7 §14（Execution Planner 决定 HOW）/ §22（TestRun 是核心 Artifact）
+# 定位: TestRun 是执行事实（非声明式）。SKIPPED 不得自动等于 PASS。
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://engineering-platform.dev/schemas/test-run.schema.v1.yaml
+title: Engineering Platform Test Run
+description: Executed test run facts (V1)
+
+type: object
+additionalProperties: false
+required:
+  - schemaVersion
+  - testRunId
+  - testPlanId
+  - startedAt
+  - completedAt
+  - environment
+  - results
+  - summary
+
+properties:
+  schemaVersion:
+    description: Contract schema version. Bump requires a documented migration.
+    const: 1
+
+  testRunId:
+    type: string
+    minLength: 1
+
+  testPlanId:
+    description: Provenance：绑定 TestPlan。
+    type: string
+    minLength: 1
+
+  startedAt:
+    description: 执行层允许记录时间（Executor/Test 是执行层）。
+    type: string
+    format: date-time
+
+  completedAt:
+    type: string
+    format: date-time
+
+  environment:
+    description: 执行环境描述（结构化字符串；不读机器信息）。
+    type: string
+
+  results:
+    type: array
+    minItems: 1
+    items:
+      $ref: "#/$defs/testCaseResult"
+
+  summary:
+    description: 汇总（SKIPPED 单独计数，不得并入 PASS）。
+    type: object
+    additionalProperties: false
+    required:
+      - total
+      - passed
+      - failed
+      - skipped
+      - blocked
+    properties:
+      total:
+        type: integer
+        minimum: 0
+      passed:
+        type: integer
+        minimum: 0
+      failed:
+        type: integer
+        minimum: 0
+      skipped:
+        type: integer
+        minimum: 0
+      blocked:
+        type: integer
+        minimum: 0
+
+  evidence:
+    description: TestRun 级 Evidence 引用（不塞内容）。
+    type: array
+    items:
+      type: string
+
+$defs:
+  testCaseResult:
+    type: object
+    additionalProperties: false
+    required:
+      - testCaseId
+      - status
+    properties:
+      testCaseId:
+        type: string
+        minLength: 1
+      status:
+        type: string
+        enum:
+          - PASS
+          - FAIL
+          - SKIPPED
+          - BLOCKED
+      message:
+        type: string
+      evidence:
+        description: 本 case 的 Evidence 引用。
+        type: array
+        items:
+          type: string

@@ -1,0 +1,36 @@
+# implementation-tasks-valid-full.yaml — 合法示例（含依赖 DAG）
+schemaVersion: 1
+workItemId: WI-42
+planId: EP-1
+tasks:
+  - taskId: T-1
+    workItemId: WI-42
+    planId: EP-1
+    objective: Resolve project model
+    status: DONE
+    expectedArtifacts:
+      - effective-project-summary.md
+    acceptanceCriteria:
+      - AC-1
+  - taskId: T-2
+    workItemId: WI-42
+    planId: EP-1
+    objective: Generate sample-customer scaffold
+    status: DONE
+    dependencies: [T-1]
+    expectedArtifacts:
+      - ch-1234567890ab
+    acceptanceCriteria:
+      - AC-3
+    evidence:
+      - ev-1
+  - taskId: T-3
+    workItemId: WI-42
+    planId: EP-1
+    objective: Run unit tests
+    status: IN_PROGRESS
+    dependencies: [T-2]
+    expectedArtifacts:
+      - test-run-1
+    acceptanceCriteria:
+      - AC-2

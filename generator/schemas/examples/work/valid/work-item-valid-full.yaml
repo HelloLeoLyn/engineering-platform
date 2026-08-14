@@ -1,0 +1,59 @@
+# work-item-valid-full.yaml — 完整合法示例（含结构化 scope + acceptance criteria）
+schemaVersion: 1
+workItemId: WI-42
+title: Add sample-customer CRUD resource
+objective: Scaffold a CRUD resource for sample-customer module
+type: REQUIREMENT
+status: PLANNED
+scope:
+  description: Sample customer module only
+  allowedPaths:
+    - backend/modules/sample-customer/
+    - frontend/apps/admin-web/src/views/sample-customer/
+  forbiddenPaths:
+    - backend/modules/sample-order/
+  allowedModules:
+    - sample-customer
+  forbiddenOperationTypes:
+    - DELETE
+allowedChanges:
+  paths:
+    - backend/modules/sample-customer/
+forbiddenChanges:
+  paths:
+    - backend/modules/sample-order/
+acceptanceCriteria:
+  - criterionId: AC-1
+    description: Project compiles
+    type: BUILD
+    required: true
+    evidenceRequirements:
+      - build-result
+  - criterionId: AC-2
+    description: CRUD unit tests pass
+    type: TEST
+    required: true
+    evidenceRequirements:
+      - test-run
+  - criterionId: AC-3
+    description: Changes confined to sample-customer module
+    type: FILE_SCOPE
+    required: true
+  - criterionId: AC-4
+    description: Controller artifact produced
+    type: ARTIFACT
+    required: true
+  - criterionId: AC-5
+    description: Manual UI smoke check
+    type: MANUAL
+    required: false
+inputs:
+  - gp-0123456789ab
+outputs:
+  - ch-1234567890ab
+risks:
+  - touches managed registry
+dependencies: []
+evidenceRequirements:
+  - build-result
+  - test-run

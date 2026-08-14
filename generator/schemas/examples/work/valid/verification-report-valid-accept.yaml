@@ -1,0 +1,46 @@
+# verification-report-valid-accept.yaml — 合法示例（ACCEPT）
+schemaVersion: 1
+verificationId: VR-1
+workItemId: WI-42
+engineeringPlanId: EP-1
+implementationTasksId: IT-1
+generationPlanId: gp-0123456789ab
+changeManifestId: ch-1234567890ab
+testPlanId: TP-1
+testRunId: TR-1
+criteriaResults:
+  - criterionId: AC-1
+    status: PASS
+    evidence: [ev-build-1]
+  - criterionId: AC-2
+    status: PASS
+    evidence: [ev-test-1]
+  - criterionId: AC-3
+    status: PASS
+  - criterionId: AC-4
+    status: PASS
+    evidence: [ev-artifact-1]
+  - criterionId: AC-5
+    status: PENDING_MANUAL
+    message: awaiting human confirmation
+scopeResult:
+  status: PASS
+  violations: []
+testResult:
+  passed: 2
+  failed: 0
+  skipped: 1
+  blocked: 0
+artifactResult:
+  controller: "ref:artifacts/controller.jar"
+findings: []
+decision: ACCEPT
+evidence:
+  - evidenceId: ev-build-1
+    type: BUILD_RESULT
+    reference: "artifacts/build-report.json"
+    metadata:
+      status: SUCCESS
+  - evidenceId: ev-test-1
+    type: TEST_RESULT
+    reference: "artifacts/test-run.json"

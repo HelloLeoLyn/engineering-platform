@@ -1,0 +1,7 @@
+# engineering-plan-invalid-missing-strategy.yaml — 非法：缺少 testStrategy
+schemaVersion: 1
+planId: EP-99
+workItemId: WI-42
+steps:
+  - stepId: s1
+    objective: x

@@ -1,0 +1,10 @@
+# implementation-tasks-invalid-status.yaml — 非法：未知 task status
+schemaVersion: 1
+workItemId: WI-42
+planId: EP-1
+tasks:
+  - taskId: T-1
+    workItemId: WI-42
+    planId: EP-1
+    objective: x
+    status: VAPORIZED

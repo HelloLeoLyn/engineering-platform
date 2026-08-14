@@ -1,0 +1,16 @@
+# verification-report-invalid-decision.yaml — 非法：未知 decision
+schemaVersion: 1
+verificationId: VR-99
+workItemId: WI-42
+criteriaResults:
+  - criterionId: AC-1
+    status: PASS
+scopeResult:
+  status: PASS
+  violations: []
+testResult:
+  passed: 1
+  failed: 0
+  skipped: 0
+  blocked: 0
+decision: MAYBE

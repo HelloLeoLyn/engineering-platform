@@ -1,5 +1,211 @@
-schemaVersion: 1
-schema:
-  id: work-item
-  status: bootstrap-placeholder
-  note: Formal schema implementation is scheduled for the resolver/generator phase.
+# work-item.schema.yaml — Work Item Contract Schema V1
+# 依据: V0.7 §14（AI Engineering Contract [DECIDED]）/ §23（Work Item Schema + State Machine V1 [DECIDED]）
+# 定位: WorkItem 是一次工程工作的身份与边界。Artifact 负责记录进入状态的依据。
+# 本 Schema 只定义契约（语言无关），不定义状态迁移 Guard 如何计算。
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://engineering-platform.dev/schemas/work-item.schema.v1.yaml
+title: Engineering Platform Work Item
+description: Engineering work item identity and boundary (V1)
+
+type: object
+additionalProperties: false
+required:
+  - schemaVersion
+  - workItemId
+  - title
+  - objective
+  - type
+  - status
+  - scope
+  - acceptanceCriteria
+
+properties:
+  schemaVersion:
+    description: Contract schema version. Bump requires a documented migration.
+    const: 1
+
+  workItemId:
+    description: 稳定、可引用的 WorkItem 标识。
+    type: string
+    minLength: 1
+
+  title:
+    type: string
+    minLength: 1
+
+  objective:
+    type: string
+    minLength: 1
+
+  type:
+    description: V0.7 §23 WorkItem 覆盖类型。
+    type: string
+    enum:
+      - REQUIREMENT
+      - BUG
+      - REFACTOR
+      - MIGRATION
+      - UPGRADE
+      - OPERATIONS
+      - SECURITY
+      - TECH_DEBT
+
+  status:
+    description: V0.7 §23 主状态机 + 异常状态 + 验收终态 ACCEPTED。
+    type: string
+    enum:
+      - NEW
+      - ANALYZING
+      - PLANNED
+      - APPROVED
+      - IMPLEMENTING
+      - IMPLEMENTED
+      - VERIFYING
+      - READY
+      - DONE
+      - ACCEPTED
+      - REJECTED
+      - BLOCKED
+      - FAILED
+      - CANCELLED
+      - REOPENED
+
+  scope:
+    description: 机器可读 Scope（结构化路径/操作范围；自然语言 description 可保留但 Guard 消费结构化字段）。
+    $ref: "#/$defs/scope"
+
+  allowedChanges:
+    description: 允许变更摘要（结构化引用；冗余表达便于审计）。
+    $ref: "#/$defs/changeBounds"
+
+  forbiddenChanges:
+    description: 禁止变更摘要（结构化引用）。
+    $ref: "#/$defs/changeBounds"
+
+  acceptanceCriteria:
+    description: 验收标准（稳定 identity + 最小类型；不建立复杂规则语言）。
+    type: array
+    minItems: 1
+    items:
+      $ref: "#/$defs/acceptanceCriterion"
+
+  inputs:
+    description: 输入 Artifact 引用（generation-plan / change-manifest / evidence 等 id 列表）。
+    type: array
+    items:
+      type: string
+
+  outputs:
+    description: 输出 Artifact 引用。
+    type: array
+    items:
+      type: string
+
+  risks:
+    type: array
+    items:
+      type: string
+
+  dependencies:
+    description: 依赖的其他 workItemId。
+    type: array
+    items:
+      type: string
+
+  evidenceRequirements:
+    description: 本 WorkItem 需要收集的 Evidence 类型/引用要求。
+    type: array
+    items:
+      type: string
+
+$defs:
+  scope:
+    type: object
+    additionalProperties: false
+    required:
+      - allowedPaths
+    properties:
+      description:
+        type: string
+      allowedPaths:
+        description: 允许的文件路径范围（相对路径前缀/glob）。
+        type: array
+        items:
+          type: string
+      forbiddenPaths:
+        description: 禁止路径（优先级高于 allowedPaths）。
+        type: array
+        items:
+          type: string
+      allowedModules:
+        description: 模块范围（module id 列表）。
+        type: array
+        items:
+          type: string
+      forbiddenModules:
+        type: array
+        items:
+          type: string
+      allowedOperationTypes:
+        description: 允许的操作类型（复用 GenerationPlan OperationType 语义）。
+        type: array
+        items:
+          type: string
+          enum:
+            - CREATE_DIRECTORY
+            - CREATE_FILE
+            - UPDATE_MANAGED_FILE
+            - DELETE
+      forbiddenOperationTypes:
+        type: array
+        items:
+          type: string
+          enum:
+            - CREATE_DIRECTORY
+            - CREATE_FILE
+            - UPDATE_MANAGED_FILE
+            - DELETE
+
+  changeBounds:
+    type: object
+    additionalProperties: false
+    properties:
+      paths:
+        type: array
+        items:
+          type: string
+      operationTypes:
+        type: array
+        items:
+          type: string
+
+  acceptanceCriterion:
+    type: object
+    additionalProperties: false
+    required:
+      - criterionId
+      - description
+      - type
+      - required
+    properties:
+      criterionId:
+        type: string
+        minLength: 1
+      description:
+        type: string
+      type:
+        description: V1 最小类型（V0.7 无正式枚举 → 最小实现）。
+        type: string
+        enum:
+          - BUILD
+          - TEST
+          - FILE_SCOPE
+          - ARTIFACT
+          - MANUAL
+          - CUSTOM
+      required:
+        type: boolean
+      evidenceRequirements:
+        type: array
+        items:
+          type: string

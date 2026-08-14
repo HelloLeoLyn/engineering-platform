@@ -1,0 +1,15 @@
+# work-item-invalid-criterion-type.yaml — 非法：未知 acceptance criterion type
+schemaVersion: 1
+workItemId: WI-101
+title: bad
+objective: bad
+type: REFACTOR
+status: PLANNED
+scope:
+  allowedPaths:
+    - src/
+acceptanceCriteria:
+  - criterionId: AC-1
+    description: x
+    type: HYPERDRIVE
+    required: true

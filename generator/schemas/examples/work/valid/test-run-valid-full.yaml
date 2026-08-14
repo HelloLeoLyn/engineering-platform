@@ -1,0 +1,25 @@
+# test-run-valid-full.yaml — 合法示例（PASS + SKIPPED 分离计数）
+schemaVersion: 1
+testRunId: TR-1
+testPlanId: TP-1
+startedAt: "2026-08-14T01:00:00Z"
+completedAt: "2026-08-14T01:05:00Z"
+environment: local-jdk21
+results:
+  - testCaseId: TC-1
+    status: PASS
+    evidence:
+      - ev-test-1
+  - testCaseId: TC-2
+    status: PASS
+  - testCaseId: TC-3
+    status: SKIPPED
+    message: manual smoke deferred
+summary:
+  total: 3
+  passed: 2
+  failed: 0
+  skipped: 1
+  blocked: 0
+evidence:
+  - ev-test-1

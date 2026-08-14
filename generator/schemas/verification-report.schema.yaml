@@ -1,5 +1,181 @@
-schemaVersion: 1
-schema:
-  id: verification-report
-  status: bootstrap-placeholder
-  note: Formal schema implementation is scheduled for the resolver/generator phase.
+# verification-report.schema.yaml — Verification Report Contract Schema V1
+# 依据: V0.7 §14（Verification Engine 是正式测试结论唯一来源）/ §22（VerificationReport 是核心 Artifact）
+# 定位: 汇总 WorkItem + Plan/Tasks + GenerationPlan/ChangeManifest + TestPlan/TestRun + Evidence
+#       为验收判断。decision: ACCEPT / REJECT / BLOCKED。
+#       机械部分由 Verification Engine 计算；MANUAL criterion 保持 PENDING_MANUAL。
+#       执行 Agent 不得直接设置 WorkItem=ACCEPTED。
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://engineering-platform.dev/schemas/verification-report.schema.v1.yaml
+title: Engineering Platform Verification Report
+description: Acceptance verification report (V1)
+
+type: object
+additionalProperties: false
+required:
+  - schemaVersion
+  - verificationId
+  - workItemId
+  - criteriaResults
+  - scopeResult
+  - testResult
+  - decision
+
+properties:
+  schemaVersion:
+    description: Contract schema version. Bump requires a documented migration.
+    const: 1
+
+  verificationId:
+    type: string
+    minLength: 1
+
+  workItemId:
+    type: string
+    minLength: 1
+
+  engineeringPlanId:
+    type: string
+
+  implementationTasksId:
+    type: string
+
+  generationPlanId:
+    type: string
+
+  changeManifestId:
+    type: string
+
+  testPlanId:
+    type: string
+
+  testRunId:
+    type: string
+
+  criteriaResults:
+    description: 每个 acceptance criterion 的验证结果。
+    type: array
+    items:
+      $ref: "#/$defs/criterionResult"
+
+  scopeResult:
+    description: Scope 验证结果。
+    $ref: "#/$defs/scopeResult"
+
+  testResult:
+    description: 测试汇总（引用 TestRun summary）。
+    type: object
+    additionalProperties: false
+    required:
+      - passed
+      - failed
+      - skipped
+      - blocked
+    properties:
+      passed:
+        type: integer
+        minimum: 0
+      failed:
+        type: integer
+        minimum: 0
+      skipped:
+        type: integer
+        minimum: 0
+      blocked:
+        type: integer
+        minimum: 0
+
+  artifactResult:
+    description: ARTIFACT criterion 结果（artifact ref → status）。
+    type: object
+    additionalProperties: true
+
+  findings:
+    type: array
+    items:
+      type: string
+
+  decision:
+    description: 验收决策。ACCEPT 只能由 Verification result（必要时 + Human Approval）产生。
+    type: string
+    enum:
+      - ACCEPT
+      - REJECT
+      - BLOCKED
+
+  evidence:
+    description: Report 级 Evidence 引用（不塞内容）。
+    type: array
+    items:
+      $ref: "#/$defs/evidence"
+
+$defs:
+  criterionResult:
+    type: object
+    additionalProperties: false
+    required:
+      - criterionId
+      - status
+    properties:
+      criterionId:
+        type: string
+      status:
+        type: string
+        enum:
+          - PASS
+          - FAIL
+          - BLOCKED
+          - PENDING_MANUAL
+      evidence:
+        type: array
+        items:
+          type: string
+      message:
+        type: string
+
+  scopeResult:
+    type: object
+    additionalProperties: false
+    required:
+      - status
+    properties:
+      status:
+        type: string
+        enum:
+          - PASS
+          - FAIL
+      violations:
+        type: array
+        items:
+          type: string
+
+  evidence:
+    type: object
+    additionalProperties: false
+    required:
+      - evidenceId
+      - type
+      - reference
+    properties:
+      evidenceId:
+        type: string
+        minLength: 1
+      type:
+        description: Evidence 类型（引用最小方式；不塞完整日志/二进制/大文件内容）。
+        type: string
+        enum:
+          - BUILD_RESULT
+          - TEST_RESULT
+          - FILE_DIFF
+          - ARTIFACT
+          - LOG
+          - SCREENSHOT
+          - COMMAND_RESULT
+          - CHANGE_MANIFEST
+          - GENERATION_PLAN
+          - VERIFICATION_ARTIFACT
+      reference:
+        description: 引用（artifact ref / file ref / id）。metadata 之外不内嵌大内容。
+        type: string
+      metadata:
+        type: object
+        additionalProperties: true

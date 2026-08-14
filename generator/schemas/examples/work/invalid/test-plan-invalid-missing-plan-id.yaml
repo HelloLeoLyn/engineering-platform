@@ -1,0 +1,10 @@
+# test-plan-invalid-missing-plan-id.yaml — 非法：缺少 engineeringPlanId
+schemaVersion: 1
+testPlanId: TP-99
+workItemId: WI-42
+testCases:
+  - testCaseId: TC-1
+    type: UNIT
+    target: x
+    expectedResult: pass
+    required: true

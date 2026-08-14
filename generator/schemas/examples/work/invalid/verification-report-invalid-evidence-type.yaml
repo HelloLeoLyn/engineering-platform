@@ -1,0 +1,20 @@
+# verification-report-invalid-evidence-type.yaml — 非法：未知 evidence type
+schemaVersion: 1
+verificationId: VR-100
+workItemId: WI-42
+criteriaResults:
+  - criterionId: AC-1
+    status: PASS
+scopeResult:
+  status: PASS
+  violations: []
+testResult:
+  passed: 0
+  failed: 0
+  skipped: 0
+  blocked: 0
+decision: BLOCKED
+evidence:
+  - evidenceId: ev-1
+    type: TELEPATHY
+    reference: x

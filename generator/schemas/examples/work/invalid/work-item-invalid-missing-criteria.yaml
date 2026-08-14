@@ -1,0 +1,10 @@
+# work-item-invalid-missing-criteria.yaml — 非法：缺少 acceptanceCriteria
+schemaVersion: 1
+workItemId: WI-100
+title: bad
+objective: bad
+type: BUG
+status: PLANNED
+scope:
+  allowedPaths:
+    - src/
