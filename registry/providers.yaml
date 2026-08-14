@@ -2,4 +2,6 @@ schemaVersion: 1
 registry:
   type: providers
   version: 1
-entries: []
+entries:
+  - id: mybatis-plus
+    description: MyBatis-Plus provider for persistence（providers/mybatis-plus）

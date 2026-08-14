@@ -1,0 +1,31 @@
+schemaVersion: 1
+id: exception-handling
+type: CAPABILITY
+version: 0.1.0
+description: 统一异常响应与全局异常处理（ApiError + GlobalExceptionHandler 基线）。
+dependencies:
+  - type: CAPABILITY
+    id: web
+    version: 1.x
+    required: true
+compatibility:
+  java: "25"
+  springBoot: "3.x"
+  requiredCapabilities: [web]
+files:
+  - source: templates/ApiError.java.ftl
+    target: src/main/java/{package}/common/error/ApiError.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/GlobalExceptionHandler.java.ftl
+    target: src/main/java/{package}/common/error/GlobalExceptionHandler.java
+    ownership: GENERATED
+    mode: render
+conformance:
+  requiredFiles:
+    - src/main/java/{package}/common/error/ApiError.java
+    - src/main/java/{package}/common/error/GlobalExceptionHandler.java
+  requiredDependencies:
+    - org.springframework.boot:spring-boot-starter-web
+documentation:
+  guide: docs/README.md

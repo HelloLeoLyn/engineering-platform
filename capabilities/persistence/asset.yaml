@@ -1,0 +1,24 @@
+schemaVersion: 1
+id: persistence
+type: CAPABILITY
+version: 0.1.0
+description: 持久化 capability contract（datasource 配置契约；由 provider 提供技术实现）。
+compatibility:
+  java: "25"
+  springBoot: "3.x"
+  compatibleProviders: [mybatis-plus]
+configuration:
+  - key: spring.datasource.url
+    type: secretRef
+    required: true
+    description: JDBC URL reference (secret/config store).
+  - key: spring.datasource.username
+    type: configRef
+    required: true
+    description: DB username reference.
+conformance:
+  requiredConfig:
+    - spring.datasource.url
+    - spring.datasource.username
+documentation:
+  guide: docs/README.md

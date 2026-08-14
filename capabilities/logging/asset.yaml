@@ -1,0 +1,18 @@
+schemaVersion: 1
+id: logging
+type: CAPABILITY
+version: 0.1.0
+description: 标准应用日志基线（logback 配置、结构化日志约定）。
+compatibility:
+  java: "25"
+  springBoot: "3.x"
+files:
+  - source: templates/logback-spring.xml.ftl
+    target: src/main/resources/logback-spring.xml
+    ownership: GENERATED
+    mode: render
+conformance:
+  requiredFiles:
+    - src/main/resources/logback-spring.xml
+documentation:
+  guide: docs/README.md

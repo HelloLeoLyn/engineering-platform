@@ -1,0 +1,13 @@
+schemaVersion: 1
+id: validation
+type: CAPABILITY
+version: 0.1.0
+description: Jakarta Validation 基础能力（bean validation + method validation 基线）。
+compatibility:
+  java: "25"
+  springBoot: "3.x"
+conformance:
+  requiredDependencies:
+    - org.springframework.boot:spring-boot-starter-validation
+documentation:
+  guide: docs/README.md

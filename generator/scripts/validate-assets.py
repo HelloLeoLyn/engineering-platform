@@ -43,6 +43,12 @@ INVALID_FILES = [
     "invalid/asset-secret-value.yaml",
 ]
 
+# V02-WORK-002: 真实资产目录 → 对应 Registry 文件（一致性检查用）
+ASSET_DIRS = [
+    ("capabilities", ROOT / "registry" / "capabilities.yaml", "CAPABILITY"),
+    ("providers", ROOT / "registry" / "providers.yaml", "PROVIDER"),
+]
+
 SECRET_KEY = re.compile(r"(password|token|secret|apikey)", re.IGNORECASE)
 
 
@@ -127,6 +133,45 @@ def validate_one(asset_path: Path, expect: str):
     return passed
 
 
+def check_registry_consistency() -> bool:
+    """V02-WORK-002: Registry 登记的 asset 必须能在资产目录找到，且 id/type 匹配。"""
+    ok = True
+    for dirname, registry_path, expect_type in ASSET_DIRS:
+        registry = load_yaml(registry_path)
+        entries = registry.get("entries", []) or []
+        entry_ids = {e.get("id") for e in entries if isinstance(e, dict)}
+        asset_root = ROOT / dirname
+        # 1) 每个 registry entry 必须有对应资产目录与 asset.yaml
+        for eid in sorted(entry_ids):
+            asset_file = asset_root / eid / "asset.yaml"
+            if not asset_file.exists():
+                print(f"[FAIL] registry entry {eid} has no asset at {dirname}/{eid}/asset.yaml")
+                ok = False
+        # 2) 每个资产目录（非隐藏/非文件）必须有 asset.yaml，且 id/type 与 registry 匹配
+        if asset_root.exists():
+            for sub in sorted(p for p in asset_root.iterdir() if p.is_dir()):
+                asset_file = sub / "asset.yaml"
+                if not asset_file.exists():
+                    print(f"[FAIL] asset dir {dirname}/{sub.name} missing asset.yaml")
+                    ok = False
+                    continue
+                asset = load_yaml(asset_file)
+                aid = asset.get("id")
+                atype = asset.get("type")
+                if aid != sub.name:
+                    print(f"[FAIL] {dirname}/{sub.name}/asset.yaml id '{aid}' != dir name")
+                    ok = False
+                if atype != expect_type:
+                    print(f"[FAIL] {dirname}/{sub.name}/asset.yaml type '{atype}' != {expect_type}")
+                    ok = False
+                if aid not in entry_ids:
+                    print(f"[FAIL] asset {dirname}/{sub.name} not registered in {registry_path.name}")
+                    ok = False
+    if ok:
+        print("[PASS] registry <-> asset consistency")
+    return ok
+
+
 def run_all() -> bool:
     ok = True
     for f in VALID_FILES:
@@ -143,6 +188,7 @@ def run_all() -> bool:
             ok = False
             continue
         ok = validate_one(p, "fail") and ok
+    ok = check_registry_consistency() and ok
     return ok
 
 

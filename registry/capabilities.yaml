@@ -2,4 +2,16 @@ schemaVersion: 1
 registry:
   type: capabilities
   version: 1
-entries: []
+entries:
+  - id: web
+    description: Spring Web 基础能力（capabilities/web）
+  - id: validation
+    description: Jakarta Validation 基础能力（capabilities/validation）
+  - id: exception-handling
+    description: 统一异常响应与全局异常处理（capabilities/exception-handling）
+  - id: logging
+    description: 标准应用日志基线（capabilities/logging）
+  - id: persistence
+    description: 持久化 capability contract（capabilities/persistence）
+  - id: audit
+    description: 工程级审计基础能力（capabilities/audit）

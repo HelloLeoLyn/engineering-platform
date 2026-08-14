@@ -1,0 +1,21 @@
+schemaVersion: 1
+id: web
+type: CAPABILITY
+version: 0.1.0
+description: Spring Web 基础能力（controller/request mapping/JSON 响应基线）。
+compatibility:
+  java: "25"
+  springBoot: "3.x"
+configuration:
+  - key: server.port
+    type: integer
+    required: false
+    default: 8080
+    description: HTTP server port.
+conformance:
+  requiredDependencies:
+    - org.springframework.boot:spring-boot-starter-web
+  requiredConfig:
+    - spring.application.name
+documentation:
+  guide: docs/README.md

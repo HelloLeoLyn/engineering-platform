@@ -1,0 +1,33 @@
+schemaVersion: 1
+id: audit
+type: CAPABILITY
+version: 0.1.0
+description: 工程级审计基础能力（审计切面 + 审计记录存储基线）。
+dependencies:
+  - type: CAPABILITY
+    id: persistence
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: logging
+    version: 1.x
+    required: true
+compatibility:
+  java: "25"
+  springBoot: "3.x"
+  requiredCapabilities: [persistence, logging]
+files:
+  - source: templates/AuditLogAspect.java.ftl
+    target: src/main/java/{package}/common/audit/AuditLogAspect.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/audit-schema.sql.ftl
+    target: src/main/resources/db/migration/V001__audit_log.sql
+    ownership: GENERATED
+    mode: render
+conformance:
+  requiredFiles:
+    - src/main/java/{package}/common/audit/AuditLogAspect.java
+    - src/main/resources/db/migration/V001__audit_log.sql
+documentation:
+  guide: docs/README.md

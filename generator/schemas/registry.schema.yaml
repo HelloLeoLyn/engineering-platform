@@ -75,7 +75,9 @@ allOf:
         entries:
           items:
             properties:
-              id: { pattern: '^[a-z0-9]+(\.[a-z0-9]+)*$' }
+              # V02-WORK-002 对齐：Asset Contract V1 的资产 id 为 kebab-case，
+              # Registry 登记必须与资产 id 一致；兼容 V0.7 dotted 命名。
+              id: { pattern: '^[a-z0-9]+([.\-][a-z0-9]+)*$' }
   - if:
       properties:
         registry:
