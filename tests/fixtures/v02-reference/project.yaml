@@ -3,6 +3,7 @@ project:
   id: demo-order-service
   name: Demo Order Service
   version: 1.0.0
+  basePackage: com.engineeringplatform.demoorderservice
 platform:
   id: engineering-platform
 capabilities:

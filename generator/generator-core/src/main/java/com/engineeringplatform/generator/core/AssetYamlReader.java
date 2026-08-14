@@ -139,7 +139,7 @@ final class AssetYamlReader {
                 list.add(child == null ? Map.of() : child);
             } else if (item.startsWith("[")) {
                 list.add(parseInlineList(item));
-            } else if (item.contains(":")) {
+            } else if (item.contains(": ")) {
                 // inline map item: "- key: value" starts a map block; deeper lines belong to it
                 List<String> synthetic = new ArrayList<>();
                 synthetic.add(item);

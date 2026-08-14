@@ -42,6 +42,10 @@ properties:
       description:
         type: string
         maxLength: 2000
+      basePackage:
+        description: Base Java package for generated code (V02-WORK-004).
+        type: string
+        pattern: ^[a-z][a-z0-9]*(\.[a-z][a-z0-9]*)*$
 
   platform:
     type: object

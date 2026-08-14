@@ -46,7 +46,8 @@ public final class EffectiveProjectModelAssembler {
         Map<String, Object> result = new LinkedHashMap<>();
         Object project = input.projectManifest().get("project");
         if (project instanceof Map<?, ?> m) {
-            for (String key : new String[]{"id", "name", "version", "description"}) {
+            // V02-WORK-004: basePackage drives generated code package (optional field)
+            for (String key : new String[]{"id", "name", "version", "description", "basePackage"}) {
                 if (m.get(key) != null) {
                     result.put(key, m.get(key));
                 }

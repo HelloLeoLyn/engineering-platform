@@ -29,5 +29,7 @@ conformance:
   requiredFiles:
     - src/main/java/{package}/common/audit/AuditLogAspect.java
     - src/main/resources/db/migration/V001__audit_log.sql
+  requiredDependencies:
+    - org.springframework.boot:spring-boot-starter-aop
 documentation:
   guide: docs/README.md

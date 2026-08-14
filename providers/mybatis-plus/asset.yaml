@@ -17,8 +17,8 @@ files:
     target: src/main/resources/application-mybatis.yaml
     ownership: GENERATED
     mode: render
-  - source: templates/MapperScan.java.ftl
-    target: src/main/java/{package}/infrastructure/persistence/MapperScan.java
+  - source: templates/MapperScanConfig.java.ftl
+    target: src/main/java/{package}/infrastructure/persistence/MapperScanConfig.java
     ownership: GENERATED
     mode: render
 configuration:
@@ -29,7 +29,7 @@ configuration:
     description: Mapper XML locations.
 conformance:
   requiredFiles:
-    - src/main/java/{package}/infrastructure/persistence/MapperScan.java
+    - src/main/java/{package}/infrastructure/persistence/MapperScanConfig.java
   requiredDependencies:
     - com.baomidou:mybatis-plus-spring-boot3-starter
   forbiddenDependencies:

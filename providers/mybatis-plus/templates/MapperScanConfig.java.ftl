@@ -9,5 +9,5 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @MapperScan("${package}.infrastructure.persistence.mapper")
-public class MapperScan {
+public class MapperScanConfig {
 }
