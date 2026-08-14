@@ -1,0 +1,107 @@
+package com.engineeringplatform.generator.contracts;
+
+import java.util.Map;
+
+/**
+ * Resolver error envelope (004A Contract).
+ * Aligns with resolver-error.schema.yaml. Only minimal codes used by 004B
+ * (UNKNOWN_REFERENCE / UNKNOWN_PROFILE / CONSTRAINT_VIOLATION) are produced here;
+ * the full 12-code catalog belongs to the Resolver Error Contract.
+ *
+ * @param code          resolver error code (UPPER_SNAKE_CASE)
+ * @param message       human readable message
+ * @param severity      INFO / WARNING / ERROR / CRITICAL
+ * @param source        error source (e.g. project-manifest, registry, profile)
+ * @param sourcePath    precise location (manifest path + JSON pointer)
+ * @param referenceType reference type when reference-related (may be null)
+ * @param referenceId   referenced id (may be null)
+ * @param details       extra structured details (may be empty)
+ */
+public record ResolutionError(
+        String code,
+        String message,
+        Severity severity,
+        String source,
+        String sourcePath,
+        String referenceType,
+        String referenceId,
+        Map<String, Object> details) {
+
+    public enum Severity { INFO, WARNING, ERROR, CRITICAL }
+
+    public ResolutionError {
+        details = details == null ? Map.of() : Map.copyOf(details);
+    }
+
+    public static ResolutionError unknownReference(String referenceType, String referenceId, String sourcePath) {
+        return new ResolutionError(
+                "UNKNOWN_REFERENCE",
+                "Unknown " + referenceType + " reference: " + referenceId,
+                Severity.ERROR,
+                "registry",
+                sourcePath,
+                referenceType,
+                referenceId,
+                Map.of());
+    }
+
+    public static ResolutionError unknownProfile(String profile, String sourcePath) {
+        return new ResolutionError(
+                "UNKNOWN_PROFILE",
+                "Unknown profile: " + profile,
+                Severity.ERROR,
+                "project-manifest",
+                sourcePath,
+                "profile",
+                profile,
+                Map.of());
+    }
+
+    public static ResolutionError constraintViolation(String message, String sourcePath) {
+        return new ResolutionError(
+                "CONSTRAINT_VIOLATION",
+                message,
+                Severity.ERROR,
+                "project-manifest",
+                sourcePath,
+                null,
+                null,
+                Map.of());
+    }
+
+    public static ResolutionError dependencyConflict(String message, String sourcePath) {
+        return new ResolutionError(
+                "DEPENDENCY_CONFLICT",
+                message,
+                Severity.ERROR,
+                "project-manifest",
+                sourcePath,
+                "module",
+                null,
+                Map.of());
+    }
+
+    public static ResolutionError capabilityMissing(String capabilityId, String sourcePath) {
+        return new ResolutionError(
+                "CAPABILITY_MISSING",
+                "Capability requirement cannot be satisfied: " + capabilityId,
+                Severity.ERROR,
+                "registry",
+                sourcePath,
+                "capability",
+                capabilityId,
+                Map.of());
+    }
+
+    public static ResolutionError providerMissing(String capabilityId, String sourcePath) {
+        return new ResolutionError(
+                "PROVIDER_MISSING",
+                "No provider satisfies capability: " + capabilityId,
+                Severity.ERROR,
+                "registry",
+                sourcePath,
+                "provider",
+                capabilityId,
+                Map.of());
+    }
+}
