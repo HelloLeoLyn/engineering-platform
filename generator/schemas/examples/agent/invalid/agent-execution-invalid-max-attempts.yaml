@@ -1,0 +1,13 @@
+# agent-execution-invalid-max-attempts.yaml — 非法：maxAttempts=0
+schemaVersion: 1
+executionId: EX-100
+workItemId: WI-42
+implementationTaskId: T-2
+scope:
+  allowedPaths:
+    - src/
+allowedCapabilities:
+  - FILESYSTEM_READ
+status: PLANNED
+timeoutSeconds: 300
+maxAttempts: 0

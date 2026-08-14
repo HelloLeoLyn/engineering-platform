@@ -1,0 +1,11 @@
+# tool-request-valid-full.yaml — 合法示例
+schemaVersion: 1
+requestId: RQ-1
+executionId: EX-1
+capability: FILESYSTEM_WRITE
+toolType: FILESYSTEM
+operation: fs.write
+arguments:
+  contentRef: staging/tx-1/op-1
+target: backend/modules/sample-customer/api/Controller.java
+reason: write generated controller

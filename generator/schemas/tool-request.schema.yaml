@@ -1,0 +1,76 @@
+# tool-request.schema.yaml — Tool Request Contract Schema V1
+# 依据: V0.7 §15（机器可读规则；Agent 不得自行决定权限）
+# 定位: Agent-neutral ToolRequest。所有 ToolRequest 必须经过 ToolPolicyEvaluator
+#       （ALLOW / DENY / REQUIRE_APPROVAL）。Agent 不得绕过。
+# 定义 Tool Capability 是本 Contract 的事实源（V0.7 无正式分类 → 最小枚举）。
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://engineering-platform.dev/schemas/tool-request.schema.v1.yaml
+title: Engineering Platform Tool Request
+description: Agent-neutral tool request (V1)
+
+type: object
+additionalProperties: false
+required:
+  - schemaVersion
+  - requestId
+  - executionId
+  - capability
+  - operation
+  - target
+  - reason
+
+properties:
+  schemaVersion:
+    const: 1
+
+  requestId:
+    type: string
+    minLength: 1
+
+  executionId:
+    type: string
+    minLength: 1
+
+  capability:
+    $ref: "#/$defs/capability"
+
+  toolType:
+    description: 工具类型（与 capability 对齐；V1 结构化分类）。
+    type: string
+    enum:
+      - FILESYSTEM
+      - GIT
+      - SHELL
+      - BROWSER
+
+  operation:
+    description: 结构化操作名（例如 fs.read / fs.write / git.status / git.commit / shell.exec）。
+    type: string
+    minLength: 1
+
+  arguments:
+    description: 结构化参数（对象，不鼓励任意字符串拼接）。
+    type: object
+    additionalProperties: true
+
+  target:
+    description: 操作目标（文件相对路径 / git ref / command）。
+    type: string
+
+  reason:
+    description: Agent 给出的请求理由（不作为授权依据；授权只由 Policy 决定）。
+    type: string
+
+$defs:
+  capability:
+    description: Tool Capability V1（定义 capability ≠ 本轮实现 Browser）。
+    type: string
+    enum:
+      - FILESYSTEM_READ
+      - FILESYSTEM_WRITE
+      - GIT_READ
+      - GIT_WRITE
+      - SHELL_READ
+      - SHELL_WRITE
+      - BROWSER_READ
+      - BROWSER_WRITE

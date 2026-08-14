@@ -1,0 +1,5 @@
+# tool-result-invalid-status.yaml — 非法：未知 status
+schemaVersion: 1
+requestId: RQ-99
+status: VAPORIZED
+durationMs: 0

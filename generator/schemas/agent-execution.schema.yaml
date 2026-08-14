@@ -1,0 +1,139 @@
+# agent-execution.schema.yaml — Agent Execution Contract Schema V1
+# 依据: V0.7 §15（AI Dev OS ↔ Engineering Platform 集成模型 [DECIDED]）
+#       规则应机器可读；平台不内嵌具体 Agent Runtime SDK。
+# 定位: Agent-neutral Engineering Execution Control Plane V1。
+#       ExecutionRequest 必须来自平台控制面；Agent 不得自行扩大 scope/tool/timeout/retry。
+#       SUCCEEDED 只表示 Agent execution 完成，不等于 WorkItem ACCEPTED / Verification ACCEPT。
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://engineering-platform.dev/schemas/agent-execution.schema.v1.yaml
+title: Engineering Platform Agent Execution
+description: Agent-neutral execution request and result (V1)
+
+type: object
+additionalProperties: false
+required:
+  - schemaVersion
+  - executionId
+  - workItemId
+  - implementationTaskId
+  - scope
+  - allowedCapabilities
+  - status
+  - timeoutSeconds
+  - maxAttempts
+
+properties:
+  schemaVersion:
+    description: Contract schema version. Bump requires a documented migration.
+    const: 1
+
+  executionId:
+    type: string
+    minLength: 1
+
+  workItemId:
+    type: string
+    minLength: 1
+
+  implementationTaskId:
+    type: string
+    minLength: 1
+
+  scope:
+    description: 执行范围（复用 WorkItem Scope 语义；结构化 paths/modules）。
+    type: object
+    additionalProperties: false
+    required:
+      - allowedPaths
+    properties:
+      allowedPaths:
+        type: array
+        items:
+          type: string
+      forbiddenPaths:
+        type: array
+        items:
+          type: string
+      allowedModules:
+        type: array
+        items:
+          type: string
+      forbiddenModules:
+        type: array
+        items:
+          type: string
+
+  allowedCapabilities:
+    description: 明确授权的 Tool Capability 列表（Least Privilege：默认 DENY）。
+    type: array
+    items:
+      type: string
+      enum:
+        - FILESYSTEM_READ
+        - FILESYSTEM_WRITE
+        - GIT_READ
+        - GIT_WRITE
+        - SHELL_READ
+        - SHELL_WRITE
+        - BROWSER_READ
+        - BROWSER_WRITE
+
+  allowedOperations:
+    description: 明确授权的 operation 列表（例如 git add / git commit / fs write）。
+    type: array
+    items:
+      type: string
+
+  policy:
+    description: 附加 policy 引用/描述（结构化字段在 ToolPolicyEvaluator）。
+    type: string
+
+  inputs:
+    type: array
+    items:
+      type: string
+
+  expectedArtifacts:
+    type: array
+    items:
+      type: string
+
+  evidenceRequirements:
+    type: array
+    items:
+      type: string
+
+  timeoutSeconds:
+    description: 平台控制的 timeout。Agent 不得自行扩大。
+    type: integer
+    minimum: 1
+
+  maxAttempts:
+    description: 平台控制的 retry 上限。Agent 不得自行扩大。
+    type: integer
+    minimum: 1
+
+  status:
+    description: 执行状态。SUCCEEDED ≠ WorkItem ACCEPTED。
+    type: string
+    enum:
+      - PLANNED
+      - RUNNING
+      - SUCCEEDED
+      - FAILED
+      - BLOCKED
+      - TIMED_OUT
+      - CANCELLED
+
+  attempts:
+    description: 已尝试次数（由 Execution Controller 维护）。
+    type: integer
+    minimum: 0
+
+  errors:
+    type: array
+    items:
+      type: string
+
+  summary:
+    type: string

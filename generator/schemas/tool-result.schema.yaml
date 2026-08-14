@@ -1,0 +1,50 @@
+# tool-result.schema.yaml — Tool Result Contract Schema V1
+# 定位: Agent-neutral ToolResult。不要把任意大 stdout/stderr 无条件塞进 Contract。
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://engineering-platform.dev/schemas/tool-result.schema.v1.yaml
+title: Engineering Platform Tool Result
+description: Agent-neutral tool result (V1)
+
+type: object
+additionalProperties: false
+required:
+  - schemaVersion
+  - requestId
+  - status
+  - durationMs
+
+properties:
+  schemaVersion:
+    const: 1
+
+  requestId:
+    type: string
+    minLength: 1
+
+  status:
+    type: string
+    enum:
+      - SUCCESS
+      - FAILED
+      - BLOCKED
+
+  outputReference:
+    description: 输出引用（artifact ref / file ref），不内嵌大内容。
+    type: string
+
+  evidence:
+    description: Evidence 引用（复用 007+008 Evidence Contract）。
+    type: array
+    items:
+      type: string
+
+  error:
+    type: string
+
+  durationMs:
+    type: integer
+    minimum: 0
+
+  metadata:
+    type: object
+    additionalProperties: true

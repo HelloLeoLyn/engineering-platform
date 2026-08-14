@@ -1,0 +1,10 @@
+# tool-result-valid-full.yaml — 合法示例
+schemaVersion: 1
+requestId: RQ-1
+status: SUCCESS
+outputReference: artifacts/controller.java
+evidence:
+  - ev-1
+durationMs: 12
+metadata:
+  bytes: 2048

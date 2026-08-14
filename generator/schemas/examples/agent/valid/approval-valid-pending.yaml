@@ -1,0 +1,8 @@
+# approval-valid-pending.yaml — 合法示例
+schemaVersion: 1
+approvalId: AP-1
+executionId: EX-1
+toolRequestId: RQ-7
+risk: HIGH
+reason: shell write outside managed scope
+status: PENDING

@@ -1,0 +1,8 @@
+# approval-invalid-status.yaml — 非法：未知 status
+schemaVersion: 1
+approvalId: AP-99
+executionId: EX-1
+toolRequestId: RQ-7
+risk: HIGH
+reason: x
+status: MAYBE

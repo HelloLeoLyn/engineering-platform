@@ -1,0 +1,55 @@
+# approval.schema.yaml — Approval Contract Schema V1
+# 依据: V0.7 §14（Human Approval 按 Risk Profile）/ §15
+# 定位: 高风险操作 → REQUIRE_APPROVAL。Agent 不得自己批准。
+#       本轮只实现 Contract + Policy 状态，不实现 UI。
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://engineering-platform.dev/schemas/approval.schema.v1.yaml
+title: Engineering Platform Approval
+description: Human approval request and state (V1)
+
+type: object
+additionalProperties: false
+required:
+  - schemaVersion
+  - approvalId
+  - executionId
+  - toolRequestId
+  - risk
+  - reason
+  - status
+
+properties:
+  schemaVersion:
+    const: 1
+
+  approvalId:
+    type: string
+    minLength: 1
+
+  executionId:
+    type: string
+    minLength: 1
+
+  toolRequestId:
+    type: string
+    minLength: 1
+
+  risk:
+    description: 风险分类（LOW / MEDIUM / HIGH / CRITICAL）。
+    type: string
+    enum:
+      - LOW
+      - MEDIUM
+      - HIGH
+      - CRITICAL
+
+  reason:
+    type: string
+
+  status:
+    type: string
+    enum:
+      - PENDING
+      - APPROVED
+      - REJECTED
+      - EXPIRED

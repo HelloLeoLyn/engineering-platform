@@ -1,0 +1,8 @@
+# tool-request-invalid-capability.yaml — 非法：未知 capability
+schemaVersion: 1
+requestId: RQ-99
+executionId: EX-1
+capability: TELEKINESIS
+operation: fs.write
+target: src/A.java
+reason: nope
