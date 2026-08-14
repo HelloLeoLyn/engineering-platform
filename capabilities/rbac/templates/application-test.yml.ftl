@@ -11,8 +11,10 @@ spring:
   sql:
     init:
       mode: always
-      schema-locations: classpath:db/migration/V002__rbac.sql
-      data-locations: classpath:db/seed/seed-test-data.sql
+      # Wildcard loads V002__rbac.sql (+ V003/V004 when organization/data-permission enabled)
+      schema-locations: classpath:db/migration/*.sql
+      # Wildcard loads seed-test-data.sql (rbac) then seed-z-data-permission.sql (data-permission)
+      data-locations: classpath:db/seed/*.sql
 
 auth:
   token:

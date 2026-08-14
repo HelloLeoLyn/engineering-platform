@@ -60,6 +60,30 @@ public class MybatisUserQueryRepository implements UserQueryPort {
     }
 
     @Override
+    public Set<String> dataScopesOf(Long userId) {
+        List<SysUserRole> userRoles = userRoleMapper.selectList(
+                new QueryWrapper<SysUserRole>().eq("user_id", userId));
+        if (userRoles.isEmpty()) {
+            return Set.of();
+        }
+        Set<Long> roleIds = userRoles.stream().map(SysUserRole::getRoleId).collect(Collectors.toSet());
+        List<SysRole> roles = roleMapper.selectBatchIds(roleIds);
+        return roles.stream()
+                .filter(r -> r.getEnabled() != null && r.getEnabled())
+                .map(SysRole::getDataScope)
+                .filter(java.util.Objects::nonNull)
+                .filter(s -> !s.isBlank())
+                .collect(Collectors.toSet());
+    }
+
+    @Override
+    public java.util.Optional<Long> departmentIdOf(Long userId) {
+        SysUser user = userMapper.selectById(userId);
+        return user == null ? java.util.Optional.empty()
+                : java.util.Optional.ofNullable(user.getDepartmentId());
+    }
+
+    @Override
     public Set<String> permissionCodesOf(Long userId) {
         List<SysUserRole> userRoles = userRoleMapper.selectList(
                 new QueryWrapper<SysUserRole>().eq("user_id", userId));

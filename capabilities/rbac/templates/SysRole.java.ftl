@@ -12,6 +12,7 @@ public class SysRole {
     private String code;
     private String name;
     private Boolean enabled;
+    private String dataScope;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -48,6 +49,14 @@ public class SysRole {
 
     public void setEnabled(Boolean enabled) {
         this.enabled = enabled;
+    }
+
+    public String getDataScope() {
+        return dataScope;
+    }
+
+    public void setDataScope(String dataScope) {
+        this.dataScope = dataScope;
     }
 
     public LocalDateTime getCreatedAt() {

@@ -21,3 +21,7 @@ entries:
     description: 轻量认证能力（BCrypt + HMAC Token + 认证拦截器 + 统一安全错误）
   - id: rbac
     description: RBAC 企业能力（User/Role/Permission + @RequirePermission enforcement）
+  - id: organization
+    description: 组织/部门基础能力（Department 树 + 用户部门关联）
+  - id: data-permission
+    description: 数据权限 V1（DataScope 四种范围 + 查询层 enforcement）

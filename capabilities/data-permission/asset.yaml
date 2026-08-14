@@ -1,0 +1,107 @@
+schemaVersion: 1
+id: data-permission
+type: CAPABILITY
+version: 0.1.0
+description: 数据权限 V1（DataScope ALL/DEPARTMENT/DEPARTMENT_AND_CHILDREN/SELF + 查询层真实 enforcement），消费 platform-core + organization + rbac + persistence。
+dependencies:
+  - type: CAPABILITY
+    id: platform-core
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: organization
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: rbac
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: persistence
+    version: 1.x
+    required: true
+compatibility:
+  java: "25"
+  springBoot: "3.x"
+  requiredCapabilities: [platform-core, organization, rbac, persistence]
+files:
+  - source: templates/DataScope.java.ftl
+    target: src/main/java/{package}/common/security/DataScope.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/DataPermissionContext.java.ftl
+    target: src/main/java/{package}/application/datascope/DataPermissionContext.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/DataScopeResolver.java.ftl
+    target: src/main/java/{package}/application/datascope/DataScopeResolver.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/Product.java.ftl
+    target: src/main/java/{package}/domain/entity/Product.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/ProductMapper.java.ftl
+    target: src/main/java/{package}/infrastructure/persistence/mapper/ProductMapper.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/ProductPort.java.ftl
+    target: src/main/java/{package}/application/datascope/ProductPort.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/MybatisProductRepository.java.ftl
+    target: src/main/java/{package}/infrastructure/persistence/MybatisProductRepository.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/ProductController.java.ftl
+    target: src/main/java/{package}/api/product/ProductController.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/DataPermissionBeansConfig.java.ftl
+    target: src/main/java/{package}/infrastructure/persistence/DataPermissionBeansConfig.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/V004__data_permission.sql.ftl
+    target: src/main/resources/db/migration/V004__data_permission.sql
+    ownership: GENERATED
+    mode: render
+  - source: templates/seed-z-data-permission.sql.ftl
+    target: src/test/resources/db/seed/seed-z-data-permission.sql
+    ownership: GENERATED
+    mode: render
+  - source: templates/DataScopeE2ETest.java.ftl
+    target: src/test/java/{package}/DataScopeE2ETest.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/OrgModelUnitTest.java.ftl
+    target: src/test/java/{package}/OrgModelUnitTest.java
+    ownership: GENERATED
+    mode: render
+conformance:
+  requiredFiles:
+    - src/main/java/{package}/common/security/DataScope.java
+    - src/main/java/{package}/application/datascope/DataPermissionContext.java
+    - src/main/java/{package}/application/datascope/DataScopeResolver.java
+    - src/main/java/{package}/domain/entity/Product.java
+    - src/main/java/{package}/infrastructure/persistence/mapper/ProductMapper.java
+    - src/main/java/{package}/application/datascope/ProductPort.java
+    - src/main/java/{package}/infrastructure/persistence/MybatisProductRepository.java
+    - src/main/java/{package}/api/product/ProductController.java
+    - src/main/java/{package}/infrastructure/persistence/DataPermissionBeansConfig.java
+    - src/main/resources/db/migration/V004__data_permission.sql
+    - src/test/resources/db/seed/seed-z-data-permission.sql
+    - src/test/java/{package}/DataScopeE2ETest.java
+    - src/test/java/{package}/OrgModelUnitTest.java
+  requiredDependencies:
+    - org.springframework.boot:spring-boot-starter-aop
+    - com.h2database:h2
+  requiredConfig:
+    - spring.datasource.url
+  forbiddenImports:
+    - cn.dev33.satoken
+    - org.springframework.security.web
+    - org.springframework.security.config
+  forbiddenImportsExcludedPaths:
+    - src/main/java/{package}/infrastructure/
+documentation:
+  guide: docs/README.md

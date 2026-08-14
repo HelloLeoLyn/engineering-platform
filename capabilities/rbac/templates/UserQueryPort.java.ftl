@@ -11,7 +11,7 @@ import java.util.Set;
  *
  * Stable application-level query contract. The implementation lives in the
  * infrastructure layer (MyBatis-Plus); application/business code depends only
- * on this interface — never on QueryWrapper / BaseMapper / IPage.
+ * on this interface — never on MyBatis persistence types.
  */
 public interface UserQueryPort {
 
@@ -23,4 +23,10 @@ public interface UserQueryPort {
 
     /** All permission codes granted to a user via their enabled roles. */
     Set<String> permissionCodesOf(Long userId);
+
+    /** Data scopes of the user's enabled roles (V04-WORK-003); empty when no role defines one. */
+    Set<String> dataScopesOf(Long userId);
+
+    /** Department id of the user's primary department (V04-WORK-003); empty when unassigned. */
+    java.util.Optional<Long> departmentIdOf(Long userId);
 }

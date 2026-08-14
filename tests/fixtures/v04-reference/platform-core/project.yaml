@@ -15,5 +15,7 @@ capabilities:
   - id: platform-core
   - id: authentication
   - id: rbac
+  - id: organization
+  - id: data-permission
 quality:
   minimum: Q2

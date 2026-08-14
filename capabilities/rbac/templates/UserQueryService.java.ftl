@@ -11,7 +11,7 @@ import java.util.Set;
  *
  * Depends only on the stable {@link UserQueryPort} contract — the MyBatis-Plus
  * implementation lives in the infrastructure layer. Application/business code
- * never sees QueryWrapper / BaseMapper / IPage.
+ * never sees MyBatis persistence types.
  */
 public class UserQueryService {
 

@@ -1,0 +1,65 @@
+schemaVersion: 1
+id: platform-core
+type: CAPABILITY
+version: 0.1.0
+description: Enterprise Platform Core——稳定、无业务语义、框架无关的统一基础契约（ApiResponse/ErrorCode/PlatformException/PageQuery/PageResult/RequestContext/CurrentClock/IdGenerator）。
+compatibility:
+  java: "25"
+  springBoot: "3.x"
+files:
+  - source: templates/ApiResponse.java.ftl
+    target: src/main/java/{package}/common/core/ApiResponse.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/ErrorCode.java.ftl
+    target: src/main/java/{package}/common/core/ErrorCode.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/PlatformException.java.ftl
+    target: src/main/java/{package}/common/core/PlatformException.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/PageQuery.java.ftl
+    target: src/main/java/{package}/common/core/PageQuery.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/PageResult.java.ftl
+    target: src/main/java/{package}/common/core/PageResult.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/RequestContext.java.ftl
+    target: src/main/java/{package}/common/core/RequestContext.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/CurrentClock.java.ftl
+    target: src/main/java/{package}/common/core/CurrentClock.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/IdGenerator.java.ftl
+    target: src/main/java/{package}/common/core/IdGenerator.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/PlatformCoreConsumptionTest.java.ftl
+    target: src/test/java/{package}/common/core/PlatformCoreConsumptionTest.java
+    ownership: GENERATED
+    mode: render
+conformance:
+  requiredFiles:
+    - src/main/java/{package}/common/core/ApiResponse.java
+    - src/main/java/{package}/common/core/ErrorCode.java
+    - src/main/java/{package}/common/core/PlatformException.java
+    - src/main/java/{package}/common/core/PageQuery.java
+    - src/main/java/{package}/common/core/PageResult.java
+    - src/main/java/{package}/common/core/RequestContext.java
+    - src/main/java/{package}/common/core/CurrentClock.java
+    - src/main/java/{package}/common/core/IdGenerator.java
+  forbiddenImports:
+    - org.mybatis
+    - org.springframework.security
+    - cn.dev33.satoken
+    - jakarta.servlet
+tests:
+  files:
+    - src/test/java/{package}/common/core/PlatformCoreConsumptionTest.java
+documentation:
+  guide: docs/README.md
