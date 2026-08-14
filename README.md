@@ -1,91 +1,85 @@
-# Engineering Platform V0.1 Bootstrap
+# Engineering Platform
 
-这是根据已完成的 Engineering Platform V0.1 Repository Bootstrap 阶段重新整理的基础包。
+Engineering Platform 是 Java/Vue 工程底座 + Generator（AI 辅助工程生成）系统。
+基于《Engineering Platform 设计决策记录 V0.7》实现，目标是让
+"任务是什么、允许改什么、做了什么、如何证明、是否验收通过"全部成为机器可读 Contract。
 
-当前包含：
+## Engineering Platform 是什么
 
-- Repository Skeleton
-- `platform.yaml` / Registry / Schema 占位
-- Maven Multi-Module Backend
-- Java 25 / Spring Boot 4.1 基线
-- platform-core / platform-web / platform-validation / platform-data
-- Maven Enforcer / Spotless / Checkstyle / ArchUnit
-- Foundation API：Error / Paging / Clock / Id / RequestContext / ApiResponse
-- RequestId Filter / GlobalExceptionHandler
-- OpenAPI / Flyway / MySQL / MyBatis-Plus / MapStruct
-- `sample-customer` CRUD 示例模块
-- Testcontainers MySQL 集成测试
+- 工程底座：Java 25 + Spring Boot + Vue 3 的工程骨架与规范（backend/ frontend/）
+- Generator 子系统：Manifest → Registry → Resolver → GenerationPlan → Executor → Verification 的
+  确定性、可验证工程生成链路
+- AI Engineering Control Plane：WorkItem / EngineeringPlan / ImplementationTasks / Agent Execution /
+  Tool Guard / VerificationReport（Agent-neutral，不依赖任何具体 Agent Runtime）
 
-## 建议放置位置
+## V0.1 能做什么
+
+- 解析 Platform/Project/Module/Provider Manifest（13 步 Resolver Pipeline → EffectiveProjectModel）
+- 生成 GenerationPlan（PLAN BEFORE WRITE）→ Dry Run → 事务式 Executor（Staging/Apply/Rollback）
+- 表达 WorkItem Scope / Acceptance Criteria / EngineeringPlan / Task DAG
+- 执行 Agent-neutral Tool Guard（Filesystem / Git / Shell + Least Privilege + Approval）
+- 计算机械验收（BUILD / TEST / FILE_SCOPE / ARTIFACT；MANUAL → PENDING_MANUAL）
+- 6 个 Python Contract Validator 全绿（build-time）+ Java Runtime 静态编译检查
+
+## 核心架构
+
+```
+Manifest (YAML) → Registry → Resolver (13 步) → EffectiveProjectModel
+  → GenerationPlan → DryRun → Executor → ChangeManifest/Transaction
+  → WorkItem → EngineeringPlan → ImplementationTasks
+  → Agent Execution (AgentAdapter + Tool Guards) → Evidence
+  → TestPlan/TestRun → VerificationEngine → VerificationReport → Acceptance Decision
+```
+
+## 模块结构
+
+| 目录 | 说明 |
+|---|---|
+| `generator/schemas/` | 语言无关 Contract（YAML Schema + valid/invalid fixtures） |
+| `generator/generator-contracts/` | Contract Java 模型（无业务逻辑） |
+| `generator/generator-core/` | Resolver / Planner / Executor / Work Model / Verification / Agent Control |
+| `generator/scripts/` | Python Contract Validators（build-time） |
+| `registry/` | 能力/提供方/模块/错误等 8 类索引 |
+| `backend/` `frontend/` | V0.1 工程骨架（占位/演进中） |
+| `docs/` | 架构/指南/标准/AI/ADR + release 文档 |
+| `tests/fixtures/e2e/minimal-project/` | E2E 最小项目 fixture |
+
+## Quick Start
 
 ```bash
-/home/administrator/workspace/engineering-platform
+# 统一校验入口（Python validators + Java 静态编译检查）
+./scripts/validate.sh
+
+# 仅 Python Contract 校验
+./scripts/validate.sh --python
+
+# 仅 Java 静态编译检查（本机 JDK 21 辅助；正式测试需 JDK 25）
+./scripts/validate.sh --java
 ```
 
-## 使用方式
+## Validation
 
-如果目标目录不存在：
+6 个 Python Contract Validator（全部必须 exit 0）：
 
 ```bash
-cd /home/administrator/workspace
-unzip engineering-platform-v0.1-bootstrap.zip
-mv engineering-platform-v0.1-bootstrap engineering-platform
-cd engineering-platform
+python3 generator/scripts/validate-manifest.py --all              # Manifest 9/9
+python3 generator/scripts/validate-registry.py --all              # Registry 21/21
+python3 generator/scripts/validate-resolver-contracts.py          # Resolver 11/11
+python3 generator/scripts/validate-generator-contracts.py         # Generator 9/9
+python3 generator/scripts/validate-engineering-work-contracts.py # Work 15/15
+python3 generator/scripts/validate-agent-execution-contracts.py   # Agent 9/9
 ```
 
-然后初始化 Git（如果需要）：
+## Build/Test
 
-```bash
-git init
-git branch -m main
-git add .
-git commit -m "chore: restore engineering platform v0.1 bootstrap"
-```
+- 正式技术基线：**Java 25**（禁止降级）
+- CI（.github/workflows/ci.yml）：Python validators + `mvn -f generator/pom.xml test`（Java 25）
+- 本机 JDK 21 为已知环境限制：`JDK25_BUILD_GATE = PENDING`；
+  静态编译（javac --release 21）PASS，但 `TESTS_EXECUTED = NO` / `TESTS_PASSED = NOT_VERIFIED`
+- 测试全部使用临时目录 / in-memory fixture；不执行真实 sudo / destructive Git / 系统命令 / Browser
 
-## 后端验证
+## 当前限制
 
-要求 Java 25、Maven 3.9+、Docker 可用。
-
-```bash
-cd backend
-mvn wrapper:wrapper
-./mvnw spotless:apply
-./mvnw clean verify
-```
-
-> 如果你当前环境还没生成 Maven Wrapper，先执行 `mvn wrapper:wrapper`。
-
-## 本地启动
-
-先启动 MySQL：
-
-```bash
-docker run -d \
-  --name engineering-platform-mysql \
-  -e MYSQL_ROOT_PASSWORD=root \
-  -e MYSQL_DATABASE=engineering_platform \
-  -p 3306:3306 \
-  mysql:8.4
-```
-
-然后：
-
-```bash
-cd backend
-./mvnw -pl application/platform-app -am spring-boot:run
-```
-
-API：
-
-```text
-GET  /api/platform/ping
-GET  /api/sample/customers
-POST /api/sample/customers
-GET  /v3/api-docs
-GET  /swagger-ui.html
-GET  /actuator/health
-```
-
-## 当前刻意保留的 Bootstrap 技术债
-
-`sample-customer` 当前使用 `AtomicLong` 和 `LocalDateTime.now()`，这是为了先验证完整 CRUD 纵向链路。下一阶段应替换为平台的 `IdGenerator` 和 `CurrentClock` Provider。
+详见 `docs/release/V0.1-LIMITATIONS.md` 与 `docs/release/V0.1-RELEASE-CHECKLIST.md`。
+要点：无真实 Agent Adapter；Browser capability 未实现；Shell Guard 是 Policy Guard 非 OS sandbox；
+Approval 无 UI；JDK25 本地 Build Gate 未执行；部分 Operation 类型为 Contract-only（SKIPPED）。

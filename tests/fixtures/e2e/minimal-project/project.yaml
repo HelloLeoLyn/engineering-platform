@@ -1,0 +1,20 @@
+# tests/fixtures/e2e/minimal-project/ — E2E Minimal Project Fixture
+# 用途：测试 fixture（不是正式 Registry bootstrap 数据）。
+# 表达完整最小流程的声明式输入：Project Manifest → Resolver → EPM → GenerationPlan
+# → DryRun → Executor(temp workspace) → WorkItem → Fake Agent → Evidence → TestRun
+# → VerificationReport → Acceptance Decision。
+# E2E Java 测试使用与本 fixture 等价的 in-memory 声明式输入（无 YAML 解析依赖）。
+schemaVersion: 1
+project:
+  id: e2e-minimal
+  name: E2E Minimal Project
+  version: 1.0.0
+platform:
+  id: engineering-platform
+  version: 0.1.0
+profiles:
+  default: standard
+modules:
+  - id: sample-customer
+capabilities: []
+providers: []

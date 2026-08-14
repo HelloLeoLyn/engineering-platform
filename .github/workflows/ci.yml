@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  contract-validation:
+    name: Contract Validation (Python)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install jsonschema
+        run: pip install jsonschema pyyaml
+      - name: Manifest Contract Validation
+        run: python3 generator/scripts/validate-manifest.py --all
+      - name: Registry Validation
+        run: python3 generator/scripts/validate-registry.py --all
+      - name: Resolver Contract Validation
+        run: python3 generator/scripts/validate-resolver-contracts.py
+      - name: Generator Contract Validation
+        run: python3 generator/scripts/validate-generator-contracts.py
+      - name: Engineering Work Contract Validation
+        run: python3 generator/scripts/validate-engineering-work-contracts.py
+      - name: Agent Execution Contract Validation
+        run: python3 generator/scripts/validate-agent-execution-contracts.py
+
+  java-build:
+    name: Java 25 Build + Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
+      - name: Maven compile + test (generator)
+        run: mvn -f generator/pom.xml test

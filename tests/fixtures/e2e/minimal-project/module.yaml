@@ -1,0 +1,9 @@
+# tests/fixtures/e2e/minimal-project/ — E2E Minimal Project Fixture: module manifest
+# 与 project.yaml 配套；E2E 测试以等价 in-memory Map 提供。
+schemaVersion: 1
+module:
+  id: sample-customer
+  name: Sample Customer
+  version: 0.1.0
+compatibility:
+  platformVersion: 0.1.x

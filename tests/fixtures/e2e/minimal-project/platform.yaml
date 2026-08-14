@@ -1,0 +1,28 @@
+# tests/fixtures/e2e/minimal-project/ — E2E Minimal Project Fixture: platform manifest
+# 与 project.yaml 配套；E2E 测试以等价 in-memory Map 提供。
+schemaVersion: 1
+platform:
+  id: engineering-platform
+  version: 0.1.0
+technology:
+  java: "25"
+  node: "24"
+profiles:
+  presets:
+    standard:
+      application: standard
+      infrastructure: standard
+      security: standard
+      quality: Q2
+  default:
+    application: standard
+    infrastructure: standard
+    security: standard
+    quality: Q2
+registries:
+  capability:
+    path: registry/capabilities.yaml
+  provider:
+    path: registry/providers.yaml
+  module:
+    path: registry/modules.yaml
