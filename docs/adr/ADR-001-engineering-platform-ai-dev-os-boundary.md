@@ -123,6 +123,7 @@ Task-oriented Verification / Agent Execution / Tool Guard / Approval / Retry / T
 V0.2 Implementation 的前置条件：
 
 1. 本 ADR 已 ACCEPTED（本文档）；
-2. V0.1 Exploration Legacy 逐项 Ownership Review 完成，每项得到 KEEP / SPLIT / DEPRECATE / MOVE_TO_AI_DEV_OS；
+2. V0.1 Exploration Legacy 逐项 Ownership Review 完成，每项得到 KEEP / SPLIT / DEPRECATE / MOVE_TO_AI_DEV_OS
+   （已交付：[v0.1-legacy-ownership-review](../architecture/v0.1-legacy-ownership-review.md)，12/12 明确）；
 3. 边界落地文档（docs/architecture/system-boundary.md）与 README 定位已同步；
 4. 任何 MOVE_TO_AI_DEV_OS 项在 AI Dev OS 侧有明确承接方后再迁移（不在 Engineering Platform 内继续扩展）。

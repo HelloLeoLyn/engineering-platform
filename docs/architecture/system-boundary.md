@@ -97,6 +97,7 @@ Agent Execution、Tool Guard、Approval、Retry、Timeout、Execution Log
 ## V0.2 Entry Gate
 
 1. ADR-001 ACCEPTED ✅（2026-08-14）
-2. V0.1 Exploration Legacy 逐项 Ownership Review 完成（KEEP/SPLIT/DEPRECATE/MOVE_TO_AI_DEV_OS）
+2. V0.1 Exploration Legacy 逐项 Ownership Review 完成（KEEP/SPLIT/DEPRECATE/MOVE_TO_AI_DEV_OS）✅
+   → [v0.1-legacy-ownership-review.md](v0.1-legacy-ownership-review.md)（12/12 明确，ENTRY_GATE=PASS）
 3. 本文档与 README 定位同步
 4. MOVE_TO_AI_DEV_OS 项由 AI Dev OS 侧承接后迁移
