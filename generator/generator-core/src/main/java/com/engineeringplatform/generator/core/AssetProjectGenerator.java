@@ -88,7 +88,7 @@ public final class AssetProjectGenerator {
 
         // 2. file set
         Map<String, ProjectFile> files = new LinkedHashMap<>();
-        addBaseFiles(files, vars, dependencies, groupId, artifactId, projectVersion);
+        addBaseFiles(files, vars, dependencies, groupId, artifactId, projectVersion, repo, epm, options);
         addAssetFiles(files, repo, epm, options, vars);
 
         // 3. operations (plan stage: path safety checked; failure stops before any write)
@@ -124,10 +124,12 @@ public final class AssetProjectGenerator {
 
     private void addBaseFiles(Map<String, ProjectFile> files, Map<String, String> vars,
                               List<AssetRepository.MavenDependency> dependencies,
-                              String groupId, String artifactId, String projectVersion) {
+                              String groupId, String artifactId, String projectVersion,
+                              AssetRepository repo, EffectiveProjectModel epm, Options options) {
         addFile(files, "pom.xml", buildPom(groupId, artifactId, projectVersion, dependencies),
                 Ownership.GENERATED, "base-project", false);
-        addFile(files, "src/main/resources/application.yml", buildApplicationYml(vars),
+        addFile(files, "src/main/resources/application.yml",
+                buildApplicationYml(vars, repo, epm, options),
                 Ownership.GENERATED, "base-project", false);
         addFile(files, "src/main/java/" + vars.get("basePackagePath") + "/" + vars.get("Name") + "Application.java",
                 render(APPLICATION_TEMPLATE, vars), Ownership.GENERATED, "base-project", true);
@@ -278,9 +280,45 @@ public final class AssetProjectGenerator {
 
     // ---- application.yml ----
 
-    private String buildApplicationYml(Map<String, String> vars) {
-        return "spring.application.name: " + vars.get("projectName") + "\n"
-                + "server.port: 8080\n";
+    private String buildApplicationYml(Map<String, String> vars, AssetRepository repo,
+                                       EffectiveProjectModel epm, Options options) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("spring.application.name: ").append(vars.get("projectName")).append("\n");
+        sb.append("server.port: 8080\n");
+        // asset configuration inputs (defaults / provided values / secret & config references)
+        List<String> enabled = new ArrayList<>();
+        for (ResolvedCapability capability : epm.capabilities()) {
+            enabled.add(capability.id());
+        }
+        for (ResolvedProvider provider : epm.providers()) {
+            enabled.add(provider.id());
+        }
+        for (String assetId : enabled) {
+            for (AssetRepository.ConfigSpec config : repo.assetConfiguration(assetId)) {
+                String key = config.key();
+                if (key.equals("server.port") || key.equals("spring.application.name")) {
+                    continue; // base lines already present
+                }
+                Object provided = options.providedConfig().get(key);
+                if (provided != null) {
+                    sb.append(key).append(": ").append(provided).append("\n");
+                    continue;
+                }
+                if (config.defaultValue() != null) {
+                    sb.append(key).append(": ").append(config.defaultValue()).append("\n");
+                    continue;
+                }
+                if (config.type().equals("secretRef") || config.type().equals("configRef")) {
+                    // reference placeholder; never a plaintext value in the contract
+                    sb.append(key).append(": ${")
+                            .append(key.toUpperCase(java.util.Locale.ROOT).replace('.', '_').replace('-', '_'))
+                            .append("}\n");
+                }
+                // required non-reference without default and not provided -> already rejected
+                // by validateRequiredConfig before any write
+            }
+        }
+        return sb.toString();
     }
 
     // ---- base templates ----
