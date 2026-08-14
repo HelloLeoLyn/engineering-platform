@@ -1,0 +1,142 @@
+schemaVersion: 1
+id: rbac
+type: CAPABILITY
+version: 0.1.0
+description: RBAC 企业能力（User/Role/Permission + @RequirePermission 真实 enforcement），消费 platform-core + persistence。
+dependencies:
+  - type: CAPABILITY
+    id: platform-core
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: persistence
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: web
+    version: 1.x
+    required: true
+compatibility:
+  java: "25"
+  springBoot: "3.x"
+  requiredCapabilities: [platform-core, persistence, web]
+files:
+  - source: templates/SysUser.java.ftl
+    target: src/main/java/{package}/domain/entity/SysUser.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/SysRole.java.ftl
+    target: src/main/java/{package}/domain/entity/SysRole.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/SysPermission.java.ftl
+    target: src/main/java/{package}/domain/entity/SysPermission.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/SysUserRole.java.ftl
+    target: src/main/java/{package}/domain/entity/SysUserRole.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/SysRolePermission.java.ftl
+    target: src/main/java/{package}/domain/entity/SysRolePermission.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/SysUserMapper.java.ftl
+    target: src/main/java/{package}/infrastructure/persistence/mapper/SysUserMapper.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/SysRoleMapper.java.ftl
+    target: src/main/java/{package}/infrastructure/persistence/mapper/SysRoleMapper.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/SysPermissionMapper.java.ftl
+    target: src/main/java/{package}/infrastructure/persistence/mapper/SysPermissionMapper.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/SysUserRoleMapper.java.ftl
+    target: src/main/java/{package}/infrastructure/persistence/mapper/SysUserRoleMapper.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/SysRolePermissionMapper.java.ftl
+    target: src/main/java/{package}/infrastructure/persistence/mapper/SysRolePermissionMapper.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/UserQueryService.java.ftl
+    target: src/main/java/{package}/application/rbac/UserQueryService.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/UserQueryPort.java.ftl
+    target: src/main/java/{package}/application/rbac/UserQueryPort.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/MybatisUserQueryRepository.java.ftl
+    target: src/main/java/{package}/infrastructure/persistence/MybatisUserQueryRepository.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/RequirePermission.java.ftl
+    target: src/main/java/{package}/common/security/RequirePermission.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/PermissionAspect.java.ftl
+    target: src/main/java/{package}/infrastructure/security/PermissionAspect.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/RbacBeansConfig.java.ftl
+    target: src/main/java/{package}/infrastructure/persistence/RbacBeansConfig.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/UserController.java.ftl
+    target: src/main/java/{package}/api/user/UserController.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/V002__rbac.sql.ftl
+    target: src/main/resources/db/migration/V002__rbac.sql
+    ownership: GENERATED
+    mode: render
+  - source: templates/seed-test-data.sql.ftl
+    target: src/test/resources/db/seed/seed-test-data.sql
+    ownership: GENERATED
+    mode: render
+  - source: templates/application-test.yml.ftl
+    target: src/test/resources/application-test.yml
+    ownership: GENERATED
+    mode: render
+  - source: templates/AuthRbacE2ETest.java.ftl
+    target: src/test/java/{package}/AuthRbacE2ETest.java
+    ownership: GENERATED
+    mode: render
+conformance:
+  requiredFiles:
+    - src/main/java/{package}/domain/entity/SysUser.java
+    - src/main/java/{package}/domain/entity/SysRole.java
+    - src/main/java/{package}/domain/entity/SysPermission.java
+    - src/main/java/{package}/domain/entity/SysUserRole.java
+    - src/main/java/{package}/domain/entity/SysRolePermission.java
+    - src/main/java/{package}/infrastructure/persistence/mapper/SysUserMapper.java
+    - src/main/java/{package}/infrastructure/persistence/mapper/SysRoleMapper.java
+    - src/main/java/{package}/infrastructure/persistence/mapper/SysPermissionMapper.java
+    - src/main/java/{package}/infrastructure/persistence/mapper/SysUserRoleMapper.java
+    - src/main/java/{package}/infrastructure/persistence/mapper/SysRolePermissionMapper.java
+    - src/main/java/{package}/application/rbac/UserQueryService.java
+    - src/main/java/{package}/application/rbac/UserQueryPort.java
+    - src/main/java/{package}/infrastructure/persistence/MybatisUserQueryRepository.java
+    - src/main/java/{package}/common/security/RequirePermission.java
+    - src/main/java/{package}/infrastructure/security/PermissionAspect.java
+    - src/main/java/{package}/infrastructure/persistence/RbacBeansConfig.java
+    - src/main/java/{package}/api/user/UserController.java
+    - src/main/resources/db/migration/V002__rbac.sql
+    - src/test/resources/application-test.yml
+    - src/test/java/{package}/AuthRbacE2ETest.java
+  requiredDependencies:
+    - org.springframework.boot:spring-boot-starter-aop
+    - com.h2database:h2
+  requiredConfig:
+    - spring.datasource.url
+  forbiddenImports:
+    - cn.dev33.satoken
+    - org.springframework.security.web
+    - org.springframework.security.config
+  forbiddenImportsExcludedPaths:
+    - src/main/java/{package}/infrastructure/
+documentation:
+  guide: docs/README.md

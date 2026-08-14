@@ -15,3 +15,9 @@ entries:
     description: 持久化 capability contract（capabilities/persistence）
   - id: audit
     description: 工程级审计基础能力（capabilities/audit）
+  - id: platform-core
+    description: 企业平台核心契约（ApiResponse/ErrorCode/PlatformException/PageQuery/PageResult/RequestContext/CurrentClock/IdGenerator）
+  - id: authentication
+    description: 轻量认证能力（BCrypt + HMAC Token + 认证拦截器 + 统一安全错误）
+  - id: rbac
+    description: RBAC 企业能力（User/Role/Permission + @RequirePermission enforcement）

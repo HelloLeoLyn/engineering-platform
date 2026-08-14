@@ -63,6 +63,7 @@ public final class ConformanceValidator {
         dependencyRules(enabled, pomText, findings);
         configurationRules(enabled, appYml, mybatisYml, findings);
         providerRules(epm, pomText, findings);
+        sourceLeakRules(epm, enabled, projectRoot, findings);
         assetTestReferenceWarnings(enabled, projectRoot, findings);
 
         String summary = "Conformance checked " + findings.size() + " finding(s) against "
@@ -199,7 +200,68 @@ public final class ConformanceValidator {
         }
     }
 
-    // ---- F. Asset test references (warning only) ----
+    // ---- F. Source-level framework leak guard (V04-WORK-001) ----
+
+    private void sourceLeakRules(EffectiveProjectModel epm, List<String> enabled, Path projectRoot,
+                                 List<ConformanceFinding> findings) {
+        String basePackage = epm.identity() == null ? null
+                : (String) epm.identity().get("basePackage");
+        String packagePath = basePackage == null ? null : basePackage.replace('.', '/');
+        for (String assetId : enabled) {
+            List<String> forbiddenImports = forbiddenImports(assetId);
+            if (forbiddenImports.isEmpty()) {
+                continue;
+            }
+            List<String> excludedPaths = forbiddenImportsExcludedPaths(assetId);
+            for (String requiredFile : requiredFiles(assetId)) {
+                String resolved = packagePath == null ? requiredFile
+                        : requiredFile.replace("{package}", packagePath);
+                if (isExcluded(resolved, excludedPaths)) {
+                    continue; // infrastructure layer: MyBatis/technical types allowed
+                }
+                Path file = projectRoot.resolve(resolved);
+                if (!Files.exists(file)) {
+                    continue; // structure rule already flags missing file
+                }
+                String content = readOptional(file);
+                for (String forbidden : forbiddenImports) {
+                    if (containsImport(content, forbidden)) {
+                        findings.add(ConformanceFinding.error("source.forbidden-import",
+                                "asset " + assetId + " forbids framework import: " + forbidden
+                                        + " (in " + resolved + ")", assetId, resolved));
+                    }
+                }
+            }
+        }
+    }
+
+    private static boolean isExcluded(String resolved, List<String> excludedPaths) {
+        if (excludedPaths.isEmpty()) {
+            return false;
+        }
+        for (String prefix : excludedPaths) {
+            if (resolved.startsWith(prefix)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean containsImport(String source, String prefix) {
+        if (source == null || source.isEmpty()) {
+            return false;
+        }
+        for (String line : source.split("\n")) {
+            String trimmed = line.trim();
+            if (trimmed.startsWith("import " + prefix + ".")
+                    || trimmed.startsWith("import " + prefix + ";")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // ---- G. Asset test references (warning only) ----
 
     private void assetTestReferenceWarnings(List<String> enabled, Path projectRoot,
                                             List<ConformanceFinding> findings) {
@@ -226,6 +288,14 @@ public final class ConformanceValidator {
 
     private List<String> forbiddenDependencies(String assetId) {
         return conformanceList(assetId, "forbiddenDependencies");
+    }
+
+    private List<String> forbiddenImports(String assetId) {
+        return conformanceList(assetId, "forbiddenImports");
+    }
+
+    private List<String> forbiddenImportsExcludedPaths(String assetId) {
+        return conformanceList(assetId, "forbiddenImportsExcludedPaths");
     }
 
     private List<String> requiredConfig(String assetId) {

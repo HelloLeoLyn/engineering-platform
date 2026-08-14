@@ -182,6 +182,18 @@ properties:
         items:
           type: string
           pattern: ^[A-Za-z0-9_.\-]+:[A-Za-z0-9_.\-]+$
+      forbiddenImports:
+        description: Java import prefixes that generated sources of this asset must NOT contain (framework-leak guard).
+        type: array
+        items:
+          type: string
+          pattern: ^[A-Za-z0-9_.\-]+$
+      forbiddenImportsExcludedPaths:
+        description: Required-file path prefixes exempt from forbiddenImports (e.g. infrastructure layer where technical types are allowed).
+        type: array
+        items:
+          type: string
+          pattern: ^[^./].*$
 
   tests:
     description: Test files/fixtures references (paths only; no embedded content).

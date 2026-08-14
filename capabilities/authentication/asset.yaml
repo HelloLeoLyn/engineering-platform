@@ -1,0 +1,102 @@
+schemaVersion: 1
+id: authentication
+type: CAPABILITY
+version: 0.1.0
+description: 轻量认证能力（BCrypt 密码 + HMAC Token + 认证拦截器 + 统一安全错误），消费 platform-core。
+dependencies:
+  - type: CAPABILITY
+    id: platform-core
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: web
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: rbac
+    version: 1.x
+    required: true
+compatibility:
+  java: "25"
+  springBoot: "3.x"
+  requiredCapabilities: [platform-core, web, rbac]
+configuration:
+  - key: auth.token.expiration-seconds
+    type: integer
+    required: false
+    default: 3600
+    description: Token 有效期（秒）。
+  - key: auth.token.secret
+    type: secretRef
+    required: true
+    description: Token HMAC 密钥（环境变量引用，禁止明文）。
+files:
+  - source: templates/SecurityErrorCodes.java.ftl
+    target: src/main/java/{package}/common/security/SecurityErrorCodes.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/PasswordEncoder.java.ftl
+    target: src/main/java/{package}/common/security/PasswordEncoder.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/TokenService.java.ftl
+    target: src/main/java/{package}/common/security/TokenService.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/LoginRequest.java.ftl
+    target: src/main/java/{package}/api/auth/LoginRequest.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/LoginResponse.java.ftl
+    target: src/main/java/{package}/api/auth/LoginResponse.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/AuthService.java.ftl
+    target: src/main/java/{package}/application/auth/AuthService.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/AuthController.java.ftl
+    target: src/main/java/{package}/api/auth/AuthController.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/AuthInterceptor.java.ftl
+    target: src/main/java/{package}/infrastructure/security/AuthInterceptor.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/SecurityWebConfig.java.ftl
+    target: src/main/java/{package}/infrastructure/security/SecurityWebConfig.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/AuthBeansConfig.java.ftl
+    target: src/main/java/{package}/infrastructure/security/AuthBeansConfig.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/SecurityExceptionHandler.java.ftl
+    target: src/main/java/{package}/infrastructure/security/SecurityExceptionHandler.java
+    ownership: GENERATED
+    mode: render
+conformance:
+  requiredFiles:
+    - src/main/java/{package}/common/security/SecurityErrorCodes.java
+    - src/main/java/{package}/common/security/PasswordEncoder.java
+    - src/main/java/{package}/common/security/TokenService.java
+    - src/main/java/{package}/api/auth/LoginRequest.java
+    - src/main/java/{package}/api/auth/LoginResponse.java
+    - src/main/java/{package}/application/auth/AuthService.java
+    - src/main/java/{package}/api/auth/AuthController.java
+    - src/main/java/{package}/infrastructure/security/AuthInterceptor.java
+    - src/main/java/{package}/infrastructure/security/SecurityWebConfig.java
+    - src/main/java/{package}/infrastructure/security/AuthBeansConfig.java
+    - src/main/java/{package}/infrastructure/security/SecurityExceptionHandler.java
+  requiredDependencies:
+    - org.springframework.security:spring-security-crypto
+  requiredConfig:
+    - auth.token.secret
+    - auth.token.expiration-seconds
+  forbiddenImports:
+    - org.mybatis
+    - cn.dev33.satoken
+    - org.springframework.security.web
+    - org.springframework.security.config
+documentation:
+  guide: docs/README.md
