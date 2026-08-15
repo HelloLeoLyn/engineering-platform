@@ -9,6 +9,10 @@ dependencies:
     version: 1.x
     required: true
   - type: CAPABILITY
+    id: exception-handling
+    version: 1.x
+    required: true
+  - type: CAPABILITY
     id: web
     version: 1.x
     required: true
@@ -51,7 +55,7 @@ dependencies:
 compatibility:
   java: "25"
   springBoot: "3.x"
-  requiredCapabilities: [platform-core, web, validation, persistence, authentication, rbac, organization, data-permission, dictionary, operation-log, menu]
+  requiredCapabilities: [platform-core, exception-handling, web, validation, persistence, authentication, rbac, organization, data-permission, dictionary, operation-log, menu]
 files:
   - source: templates/Product.java.ftl
     target: src/main/java/{package}/domain/entity/Product.java

@@ -32,6 +32,21 @@ AI 研发控制（Requirement/WorkItem/Agent Runtime/Tool Control/Approval/任�
 cd my-project && mvn test
 ```
 
+## V0.4 能做什么（Enterprise Application Foundation）
+
+从一份**单声明** project.yaml 生成可登录、可授权、可数据权限隔离、可记操作日志的完整企业后端（V0.4 Enterprise Foundation）：
+
+```yaml
+capabilities:
+  - id: product-reference   # Resolver 自动补齐全部企业能力
+```
+
+- **企业资产集**：Platform Core / Authentication / RBAC（User/Role/Permission）/ Organization / Data Permission V1 / Menu / Dictionary / Operation Log
+- **Reference Product**（验证宿主）：真实消费全部企业能力的 CRUD 业务模块（登录→RBAC→数据权限→菜单→字典→操作日志→落库全链路）
+- **单声明自动组合**：`product-reference` 的依赖闭包自动补齐 12 项企业能力 + mybatis-plus，无需手工声明
+- **真实运行验收**：生成项目 boot → 真实 HTTP（Auth/RBAC/DataScope/Menu/Dictionary/Product/Operation Log）→ 操作日志从 DB 查证
+- 发布状态：[V0.4 Release Checklist](docs/release/V0.4-RELEASE-CHECKLIST.md)
+
 ## V0.2 能做什么（Reusable Engineering Asset Platform）
 
 从一份 project.yaml 生成真实可编译的 Spring Boot Reference 项目：
