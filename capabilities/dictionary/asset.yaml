@@ -1,0 +1,103 @@
+schemaVersion: 1
+id: dictionary
+type: CAPABILITY
+version: 0.1.0
+description: 字典企业能力（DictionaryType + DictionaryItem + GET /api/dictionaries/{code}/items + disabled 过滤 + 稳定排序 + DTO 不暴露实体），消费 platform-core + persistence。
+dependencies:
+  - type: CAPABILITY
+    id: platform-core
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: persistence
+    version: 1.x
+    required: true
+compatibility:
+  java: "25"
+  springBoot: "3.x"
+  requiredCapabilities: [platform-core, persistence]
+files:
+  - source: templates/DictionaryType.java.ftl
+    target: src/main/java/{package}/domain/entity/DictionaryType.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/DictionaryItem.java.ftl
+    target: src/main/java/{package}/domain/entity/DictionaryItem.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/DictionaryTypeMapper.java.ftl
+    target: src/main/java/{package}/infrastructure/persistence/mapper/DictionaryTypeMapper.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/DictionaryItemMapper.java.ftl
+    target: src/main/java/{package}/infrastructure/persistence/mapper/DictionaryItemMapper.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/DictionaryPort.java.ftl
+    target: src/main/java/{package}/application/dictionary/DictionaryPort.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/MybatisDictionaryRepository.java.ftl
+    target: src/main/java/{package}/infrastructure/persistence/MybatisDictionaryRepository.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/DictionaryItemDto.java.ftl
+    target: src/main/java/{package}/application/dictionary/DictionaryItemDto.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/DictionaryService.java.ftl
+    target: src/main/java/{package}/application/dictionary/DictionaryService.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/DictionaryController.java.ftl
+    target: src/main/java/{package}/api/dictionary/DictionaryController.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/DictionaryBeansConfig.java.ftl
+    target: src/main/java/{package}/infrastructure/persistence/DictionaryBeansConfig.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/V006__dictionary.sql.ftl
+    target: src/main/resources/db/migration/V006__dictionary.sql
+    ownership: GENERATED
+    mode: render
+  - source: templates/seed-zz-dictionary.sql.ftl
+    target: src/test/resources/db/seed/seed-zz-dictionary.sql
+    ownership: GENERATED
+    mode: render
+  - source: templates/DictionaryModelUnitTest.java.ftl
+    target: src/test/java/{package}/DictionaryModelUnitTest.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/DictionaryE2ETest.java.ftl
+    target: src/test/java/{package}/DictionaryE2ETest.java
+    ownership: GENERATED
+    mode: render
+conformance:
+  requiredFiles:
+    - src/main/java/{package}/domain/entity/DictionaryType.java
+    - src/main/java/{package}/domain/entity/DictionaryItem.java
+    - src/main/java/{package}/infrastructure/persistence/mapper/DictionaryTypeMapper.java
+    - src/main/java/{package}/infrastructure/persistence/mapper/DictionaryItemMapper.java
+    - src/main/java/{package}/application/dictionary/DictionaryPort.java
+    - src/main/java/{package}/infrastructure/persistence/MybatisDictionaryRepository.java
+    - src/main/java/{package}/application/dictionary/DictionaryItemDto.java
+    - src/main/java/{package}/application/dictionary/DictionaryService.java
+    - src/main/java/{package}/api/dictionary/DictionaryController.java
+    - src/main/java/{package}/infrastructure/persistence/DictionaryBeansConfig.java
+    - src/main/resources/db/migration/V006__dictionary.sql
+    - src/test/resources/db/seed/seed-zz-dictionary.sql
+    - src/test/java/{package}/DictionaryModelUnitTest.java
+    - src/test/java/{package}/DictionaryE2ETest.java
+  requiredDependencies:
+    - com.h2database:h2
+  requiredConfig:
+    - spring.datasource.url
+  forbiddenImports:
+    - cn.dev33.satoken
+    - org.springframework.security.web
+    - org.springframework.security.config
+  forbiddenImportsExcludedPaths:
+    - src/main/java/{package}/infrastructure/
+documentation:
+  guide: docs/README.md

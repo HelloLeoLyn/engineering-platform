@@ -17,5 +17,8 @@ capabilities:
   - id: rbac
   - id: organization
   - id: data-permission
+  - id: menu
+  - id: dictionary
+  - id: operation-log
 quality:
   minimum: Q2

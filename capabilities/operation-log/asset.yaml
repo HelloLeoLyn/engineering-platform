@@ -1,0 +1,98 @@
+schemaVersion: 1
+id: operation-log
+type: CAPABILITY
+version: 0.1.0
+description: 操作日志企业能力（@OperationLog 注解 + 真实切面 enforcement + SUCCESS/FAILURE + sys_operation_log 落库 + 敏感数据安全硬 Gate），消费 platform-core + rbac + persistence。
+dependencies:
+  - type: CAPABILITY
+    id: platform-core
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: rbac
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: persistence
+    version: 1.x
+    required: true
+compatibility:
+  java: "25"
+  springBoot: "3.x"
+  requiredCapabilities: [platform-core, rbac, persistence]
+files:
+  - source: templates/OperationLog.java.ftl
+    target: src/main/java/{package}/common/security/OperationLog.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/OperationResult.java.ftl
+    target: src/main/java/{package}/common/security/OperationResult.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/SysOperationLog.java.ftl
+    target: src/main/java/{package}/domain/entity/SysOperationLog.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/SysOperationLogMapper.java.ftl
+    target: src/main/java/{package}/infrastructure/persistence/mapper/SysOperationLogMapper.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/OperationLogPort.java.ftl
+    target: src/main/java/{package}/application/operationlog/OperationLogPort.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/MybatisOperationLogRepository.java.ftl
+    target: src/main/java/{package}/infrastructure/persistence/MybatisOperationLogRepository.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/OperationLogAspect.java.ftl
+    target: src/main/java/{package}/infrastructure/security/OperationLogAspect.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/OperationLogBeansConfig.java.ftl
+    target: src/main/java/{package}/infrastructure/persistence/OperationLogBeansConfig.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/OperationLogReferenceController.java.ftl
+    target: src/main/java/{package}/api/operationlog/OperationLogReferenceController.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/V007__operation_log.sql.ftl
+    target: src/main/resources/db/migration/V007__operation_log.sql
+    ownership: GENERATED
+    mode: render
+  - source: templates/OperationLogModelUnitTest.java.ftl
+    target: src/test/java/{package}/OperationLogModelUnitTest.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/OperationLogE2ETest.java.ftl
+    target: src/test/java/{package}/OperationLogE2ETest.java
+    ownership: GENERATED
+    mode: render
+conformance:
+  requiredFiles:
+    - src/main/java/{package}/common/security/OperationLog.java
+    - src/main/java/{package}/common/security/OperationResult.java
+    - src/main/java/{package}/domain/entity/SysOperationLog.java
+    - src/main/java/{package}/infrastructure/persistence/mapper/SysOperationLogMapper.java
+    - src/main/java/{package}/application/operationlog/OperationLogPort.java
+    - src/main/java/{package}/infrastructure/persistence/MybatisOperationLogRepository.java
+    - src/main/java/{package}/infrastructure/security/OperationLogAspect.java
+    - src/main/java/{package}/infrastructure/persistence/OperationLogBeansConfig.java
+    - src/main/java/{package}/api/operationlog/OperationLogReferenceController.java
+    - src/main/resources/db/migration/V007__operation_log.sql
+    - src/test/java/{package}/OperationLogModelUnitTest.java
+    - src/test/java/{package}/OperationLogE2ETest.java
+  requiredDependencies:
+    - org.springframework.boot:spring-boot-starter-aop
+    - com.h2database:h2
+  requiredConfig:
+    - spring.datasource.url
+  forbiddenImports:
+    - cn.dev33.satoken
+    - org.springframework.security.web
+    - org.springframework.security.config
+  forbiddenImportsExcludedPaths:
+    - src/main/java/{package}/infrastructure/
+documentation:
+  guide: docs/README.md

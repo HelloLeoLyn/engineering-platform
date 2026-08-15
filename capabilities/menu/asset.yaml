@@ -1,0 +1,97 @@
+schemaVersion: 1
+id: menu
+type: CAPABILITY
+version: 0.1.0
+description: 菜单企业能力（后端权限资源模型 DIRECTORY/MENU/ACTION + permissionCode 引用 RBAC + GET /api/menus/me 权限过滤 + 树安全校验），消费 platform-core + rbac + persistence。
+dependencies:
+  - type: CAPABILITY
+    id: platform-core
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: rbac
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: persistence
+    version: 1.x
+    required: true
+compatibility:
+  java: "25"
+  springBoot: "3.x"
+  requiredCapabilities: [platform-core, rbac, persistence]
+files:
+  - source: templates/MenuType.java.ftl
+    target: src/main/java/{package}/common/security/MenuType.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/SysMenu.java.ftl
+    target: src/main/java/{package}/domain/entity/SysMenu.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/SysMenuMapper.java.ftl
+    target: src/main/java/{package}/infrastructure/persistence/mapper/SysMenuMapper.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/MenuPort.java.ftl
+    target: src/main/java/{package}/application/menu/MenuPort.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/MybatisMenuRepository.java.ftl
+    target: src/main/java/{package}/infrastructure/persistence/MybatisMenuRepository.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/MenuService.java.ftl
+    target: src/main/java/{package}/application/menu/MenuService.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/MenuController.java.ftl
+    target: src/main/java/{package}/api/menu/MenuController.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/MenuBeansConfig.java.ftl
+    target: src/main/java/{package}/infrastructure/persistence/MenuBeansConfig.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/V005__menu.sql.ftl
+    target: src/main/resources/db/migration/V005__menu.sql
+    ownership: GENERATED
+    mode: render
+  - source: templates/seed-zz-menu.sql.ftl
+    target: src/test/resources/db/seed/seed-zz-menu.sql
+    ownership: GENERATED
+    mode: render
+  - source: templates/MenuModelUnitTest.java.ftl
+    target: src/test/java/{package}/MenuModelUnitTest.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/MenuE2ETest.java.ftl
+    target: src/test/java/{package}/MenuE2ETest.java
+    ownership: GENERATED
+    mode: render
+conformance:
+  requiredFiles:
+    - src/main/java/{package}/common/security/MenuType.java
+    - src/main/java/{package}/domain/entity/SysMenu.java
+    - src/main/java/{package}/infrastructure/persistence/mapper/SysMenuMapper.java
+    - src/main/java/{package}/application/menu/MenuPort.java
+    - src/main/java/{package}/infrastructure/persistence/MybatisMenuRepository.java
+    - src/main/java/{package}/application/menu/MenuService.java
+    - src/main/java/{package}/api/menu/MenuController.java
+    - src/main/java/{package}/infrastructure/persistence/MenuBeansConfig.java
+    - src/main/resources/db/migration/V005__menu.sql
+    - src/test/resources/db/seed/seed-zz-menu.sql
+    - src/test/java/{package}/MenuModelUnitTest.java
+    - src/test/java/{package}/MenuE2ETest.java
+  requiredDependencies:
+    - com.h2database:h2
+  requiredConfig:
+    - spring.datasource.url
+  forbiddenImports:
+    - cn.dev33.satoken
+    - org.springframework.security.web
+    - org.springframework.security.config
+  forbiddenImportsExcludedPaths:
+    - src/main/java/{package}/infrastructure/
+documentation:
+  guide: docs/README.md

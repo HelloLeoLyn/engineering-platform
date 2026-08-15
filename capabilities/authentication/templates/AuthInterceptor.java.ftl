@@ -32,7 +32,10 @@ public class AuthInterceptor implements HandlerInterceptor {
         }
         String token = header.substring(BEARER_PREFIX.length()).trim();
         Long userId = tokenService.validate(token);
-        RequestContext.set(RequestContext.Context.of(null, null, String.valueOf(userId)));
+        // V04-WORK-004: fill requestId/correlationId so Operation Log can trace
+        // every authenticated request (minimal compatible RequestContext enhancement).
+        String requestId = java.util.UUID.randomUUID().toString();
+        RequestContext.set(RequestContext.Context.of(requestId, requestId, String.valueOf(userId)));
         return true;
     }
 

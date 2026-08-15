@@ -25,3 +25,9 @@ entries:
     description: 组织/部门基础能力（Department 树 + 用户部门关联）
   - id: data-permission
     description: 数据权限 V1（DataScope 四种范围 + 查询层 enforcement）
+  - id: menu
+    description: 菜单企业能力（DIRECTORY/MENU/ACTION 资源模型 + permissionCode 引用 RBAC + /api/menus/me 权限过滤）
+  - id: dictionary
+    description: 字典企业能力（DictionaryType + DictionaryItem + disabled 过滤 + 稳定排序 + DTO 边界）
+  - id: operation-log
+    description: 操作日志企业能力（@OperationLog 切面 enforcement + SUCCESS/FAILURE + 敏感数据安全 Gate）
