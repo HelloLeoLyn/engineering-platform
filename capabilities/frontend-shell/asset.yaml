@@ -1,0 +1,77 @@
+schemaVersion: 1
+id: frontend-shell
+type: CAPABILITY
+version: 0.1.0
+description: 前端 Shell 基础能力（Vue 3 + TypeScript + Vite + Vue Router + Pinia + Element Plus + Vitest 可运行骨架），消费 web + validation（后端无关，前端作为 additive output 与 backend 共存）。生成 frontend/ 目录，受现有 Resolver/EPM/Generator/Conformance/Ownership/PathSafety 管理。pnpm-lock.yaml 由 fresh generated project 的 pnpm install 生成（确定性安装，不渲染进模板）。
+dependencies:
+  - type: CAPABILITY
+    id: web
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: validation
+    version: 1.x
+    required: true
+compatibility:
+  java: "25"
+  springBoot: "3.x"
+  requiredCapabilities: [web, validation]
+files:
+  - source: templates/package.json.ftl
+    target: frontend/package.json
+    ownership: GENERATED
+    mode: render
+  - source: templates/tsconfig.json.ftl
+    target: frontend/tsconfig.json
+    ownership: GENERATED
+    mode: render
+  - source: templates/vite.config.ts.ftl
+    target: frontend/vite.config.ts
+    ownership: GENERATED
+    mode: render
+  - source: templates/index.html.ftl
+    target: frontend/index.html
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/main.ts.ftl
+    target: frontend/src/main.ts
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/App.vue.ftl
+    target: frontend/src/App.vue
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/env.d.ts.ftl
+    target: frontend/src/env.d.ts
+    ownership: GENERATED
+    mode: render
+  - source: templates/tests/smoke.spec.ts.ftl
+    target: frontend/tests/smoke.spec.ts
+    ownership: GENERATED
+    mode: render
+configuration:
+  - key: frontend.nodeVersion
+    description: 生成前端要求的 Node 主版本（文档性，不执行）
+    default: "24"
+  - key: frontend.packageManager
+    description: 生成前端包管理器（文档性，不执行）
+    default: pnpm
+conformance:
+  requiredFiles:
+    - frontend/package.json
+    - frontend/tsconfig.json
+    - frontend/vite.config.ts
+    - frontend/index.html
+    - frontend/src/main.ts
+    - frontend/src/App.vue
+    - frontend/tests/smoke.spec.ts
+  requiredDependencies: []
+  requiredConfig: []
+  forbiddenImports:
+    - cn.dev33.satoken
+    - org.springframework.security.web
+    - org.springframework.security.config
+  forbiddenImportsExcludedPaths:
+    - frontend/
+documentation:
+  guide: docs/README.md

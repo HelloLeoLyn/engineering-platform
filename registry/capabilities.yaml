@@ -33,3 +33,5 @@ entries:
     description: 操作日志企业能力（@OperationLog 切面 enforcement + SUCCESS/FAILURE + 敏感数据安全 Gate）
   - id: product-reference
     description: Reference Product CRUD（V0.4 验证宿主：真实消费全部企业能力的业务模块，非通用 CRUD Generator）
+  - id: frontend-shell
+    description: 前端 Shell 基础能力（Vue3+TS+Vite+Router+Pinia+Element Plus+Vitest 可运行骨架，frontend/ additive output）
