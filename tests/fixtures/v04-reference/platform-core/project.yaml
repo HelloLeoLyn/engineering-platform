@@ -20,5 +20,6 @@ capabilities:
   - id: menu
   - id: dictionary
   - id: operation-log
+  - id: product-reference
 quality:
   minimum: Q2

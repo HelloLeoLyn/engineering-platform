@@ -21,16 +21,15 @@ import org.junit.jupiter.api.io.TempDir;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * V04-WORK-003 — Organization + Data Permission V1.
+ * V04-WORK-005 — Enterprise Asset Integration + Reference Product CRUD.
  *
- * EP-side tests for spec points 1-6 + 21-28; spec points 7-20 (department tree,
- * self-parent/cycle reject, user-department, role data scope, multi-role merge,
- * ALL/DEPARTMENT/DEPARTMENT_AND_CHILDREN/SELF HTTP isolation, permission denied,
- * anonymous, fail-safe, disabled department) are covered by the generated
- * project's OrgModelUnitTest + DataScopeE2ETest, executed via the real mvn test
- * in generatedProjectTestsAndE2E().
+ * EP-side tests for spec points 1-15 + 20; spec points 16-19 (generated project
+ * tests, real CRUD HTTP E2E, real DataScope E2E, composition E2E) are covered by
+ * the generated project's ProductModelUnitTest + ProductHttpE2ETest +
+ * ProductDataScopeE2ETest + EnterpriseCompositionE2ETest + DataScopeE2ETest,
+ * executed via the real mvn test in generatedProjectTestsAndRealHttpE2E().
  */
-class PlatformOrgDataPermissionWork003Test {
+class PlatformProductWork005Test {
 
     private static final ManifestValidationPort ALWAYS_VALID = new ManifestValidationPort() {
         @Override public boolean isValid(String manifestType, Map<String, Object> manifest) { return true; }
@@ -83,88 +82,186 @@ class PlatformOrgDataPermissionWork003Test {
         return new AssetProjectGenerator().generate(epm, repo, options(), out);
     }
 
-    // 1. organization asset validation
+    // 1. product asset validation
     @Test
-    void organizationAssetValidation() throws Exception {
+    void productAssetValidation() throws Exception {
         AssetRepository repo = AssetRepository.load(repoRoot());
-        var asset = repo.capability("organization");
-        assertThat(asset).as("organization capability must load").isNotNull();
+        var asset = repo.capability("product-reference");
+        assertThat(asset).as("product-reference capability must load").isNotNull();
+        // enterprise foundation dependency closure declared on the asset
         assertThat(asset.dependencies())
+                .anyMatch(d -> d.id().equals("platform-core") && d.required())
+                .anyMatch(d -> d.id().equals("authentication") && d.required())
                 .anyMatch(d -> d.id().equals("rbac") && d.required())
-                .anyMatch(d -> d.id().equals("persistence") && d.required());
-        List<AssetRepository.AssetFileSpec> files = repo.assetFiles("organization");
-        assertThat(files).hasSize(8);
-        assertThat(files).anyMatch(f -> f.target().endsWith("domain/entity/SysDepartment.java"));
-        assertThat(files).anyMatch(f -> f.target().endsWith("db/migration/V003__organization.sql"));
-    }
-
-    // 2. data-permission asset validation
-    @Test
-    void dataPermissionAssetValidation() throws Exception {
-        AssetRepository repo = AssetRepository.load(repoRoot());
-        var asset = repo.capability("data-permission");
-        assertThat(asset).as("data-permission capability must load").isNotNull();
-        assertThat(asset.dependencies())
                 .anyMatch(d -> d.id().equals("organization") && d.required())
-                .anyMatch(d -> d.id().equals("rbac") && d.required());
-        List<AssetRepository.AssetFileSpec> files = repo.assetFiles("data-permission");
-        // V0.4 WORK-005: Product validation host moved to product-reference asset;
-        // data-permission keeps only the DataScope core (7 files).
-        assertThat(files).hasSize(7);
-        assertThat(files).anyMatch(f -> f.target().endsWith("common/security/DataScope.java"));
-        assertThat(files).anyMatch(f -> f.target().endsWith("application/datascope/DataScopeResolver.java"));
-        assertThat(files).anyMatch(f -> f.target().endsWith("db/migration/V004__data_permission.sql"));
+                .anyMatch(d -> d.id().equals("data-permission") && d.required())
+                .anyMatch(d -> d.id().equals("dictionary") && d.required())
+                .anyMatch(d -> d.id().equals("operation-log") && d.required())
+                .anyMatch(d -> d.id().equals("menu") && d.required())
+                .anyMatch(d -> d.id().equals("persistence") && d.required());
+        List<AssetRepository.AssetFileSpec> files = repo.assetFiles("product-reference");
+        assertThat(files).hasSize(17);
+        assertThat(files).anyMatch(f -> f.target().endsWith("domain/entity/Product.java"));
+        assertThat(files).anyMatch(f -> f.target().endsWith("application/product/ProductService.java"));
+        assertThat(files).anyMatch(f -> f.target().endsWith("api/product/ProductController.java"));
+        assertThat(files).anyMatch(f -> f.target().endsWith("db/migration/V008__product_reference.sql"));
+        assertThat(files).anyMatch(f -> f.target().endsWith("ProductHttpE2ETest.java"));
     }
 
-    // 3. registry consistency
+    // 2. registry consistency
     @Test
     void registryConsistency() throws Exception {
         AssetRepository repo = AssetRepository.load(repoRoot());
-        assertThat(repo.capabilities().keySet())
-                .contains("platform-core", "authentication", "rbac", "organization", "data-permission");
+        assertThat(repo.capabilities().keySet()).contains("product-reference");
     }
 
-    // 4. resolver dependency closure
+    // 3. resolver dependency closure (enterprise foundation auto-composed)
     @Test
     void resolverDependencyClosure() throws Exception {
         AssetRepository repo = AssetRepository.load(repoRoot());
         ResolutionResult resolution = resolve(repo);
         assertThat(resolution.status()).isEqualTo(ResolutionResult.Status.SUCCESS);
         List<String> ids = resolution.effectiveProject().capabilities().stream().map(c -> c.id()).toList();
-        assertThat(ids).contains("organization", "data-permission", "persistence");
+        assertThat(ids).contains("product-reference", "platform-core", "authentication", "rbac",
+                "organization", "data-permission", "menu", "dictionary", "operation-log", "persistence");
         assertThat(resolution.effectiveProject().providers())
                 .anyMatch(p -> p.id().equals("mybatis-plus"));
     }
 
-    // 5. EPM includes assets
+    // 3b. spec point 22: single-declaration manifest (capabilities: [product-reference])
+    // must auto-compose the whole enterprise foundation via the asset dependency closure.
+    @Test
+    void singleDeclarationAutoComposesFoundation() throws Exception {
+        AssetRepository repo = AssetRepository.load(repoRoot());
+        Map<String, Object> platform = realPlatform();
+        Map<String, Object> minimal = Map.of(
+                "schemaVersion", 1,
+                "project", Map.of(
+                        "id", "core-demo", "name", "Core Demo Service", "version", "1.0.0",
+                        "basePackage", "com.acme.core", "groupId", "com.acme", "artifactId", "core-demo"),
+                "platform", Map.of("id", "engineering-platform"),
+                "capabilities", List.of(Map.of("id", "product-reference")),
+                "quality", Map.of("minimum", "Q2"));
+        ResolutionResult resolution =
+                new AssetAwareResolver(ALWAYS_VALID).resolve(repo, platform, minimal);
+        assertThat(resolution.status()).isEqualTo(ResolutionResult.Status.SUCCESS);
+        List<String> ids = resolution.effectiveProject().capabilities().stream().map(c -> c.id()).toList();
+        // foundation auto-composed from product-reference's declared dependencies
+        assertThat(ids).contains("product-reference", "platform-core", "authentication", "rbac",
+                "organization", "data-permission", "menu", "dictionary", "operation-log", "persistence");
+    }
+
+    // 4. EPM includes assets
     @Test
     void epmIncludesAssets() throws Exception {
         AssetRepository repo = AssetRepository.load(repoRoot());
         EffectiveProjectModel epm = resolve(repo).effectiveProject();
-        assertThat(epm.capabilities()).anyMatch(c -> c.id().equals("organization"));
+        assertThat(epm.capabilities()).anyMatch(c -> c.id().equals("product-reference"));
         assertThat(epm.capabilities()).anyMatch(c -> c.id().equals("data-permission"));
     }
 
-    // 6. migrations generated
+    // 5. generated files
     @Test
-    void migrationsGenerated() throws Exception {
+    void generatedFiles() throws Exception {
+        AssetRepository repo = AssetRepository.load(repoRoot());
+        EffectiveProjectModel epm = resolve(repo).effectiveProject();
+        Path out = tempDir.resolve("files");
+        generate(repo, epm, out);
+
+        assertThat(Files.exists(out.resolve("src/main/java/com/acme/core/api/product/ProductController.java"))).isTrue();
+        assertThat(Files.exists(out.resolve("src/main/java/com/acme/core/application/product/ProductService.java"))).isTrue();
+        assertThat(Files.exists(out.resolve("src/main/java/com/acme/core/infrastructure/persistence/MybatisProductRepository.java"))).isTrue();
+        assertThat(Files.exists(out.resolve("src/main/java/com/acme/core/application/product/ProductCreateRequest.java"))).isTrue();
+        assertThat(Files.exists(out.resolve("src/main/java/com/acme/core/application/product/ProductUpdateRequest.java"))).isTrue();
+        assertThat(Files.exists(out.resolve("src/main/java/com/acme/core/application/product/ProductResponse.java"))).isTrue();
+    }
+
+    // 6. migration
+    @Test
+    void migrationGenerated() throws Exception {
         AssetRepository repo = AssetRepository.load(repoRoot());
         EffectiveProjectModel epm = resolve(repo).effectiveProject();
         Path out = tempDir.resolve("mig");
         generate(repo, epm, out);
 
-        String v3 = Files.readString(out.resolve("src/main/resources/db/migration/V003__organization.sql"),
+        String v8 = Files.readString(out.resolve("src/main/resources/db/migration/V008__product_reference.sql"),
                 StandardCharsets.UTF_8);
-        assertThat(v3).contains("CREATE TABLE IF NOT EXISTS sys_department");
-        assertThat(v3).contains("ALTER TABLE sys_user ADD COLUMN department_id");
-
-        String v4 = Files.readString(out.resolve("src/main/resources/db/migration/V004__data_permission.sql"),
-                StandardCharsets.UTF_8);
-        assertThat(v4).contains("ALTER TABLE sys_role ADD COLUMN data_scope");
-        assertThat(v4).contains("CREATE TABLE IF NOT EXISTS product");
+        assertThat(v8).contains("ALTER TABLE product");
+        assertThat(v8).contains("code");
+        assertThat(v8).contains("status");
+        assertThat(v8).contains("uk_product_code");
     }
 
-    // 21. MyBatis leakage scan on application/domain/api layers
+    // 7. permission codes
+    @Test
+    void permissionCodes() throws Exception {
+        AssetRepository repo = AssetRepository.load(repoRoot());
+        EffectiveProjectModel epm = resolve(repo).effectiveProject();
+        Path out = tempDir.resolve("perm");
+        generate(repo, epm, out);
+
+        String controller = Files.readString(
+                out.resolve("src/main/java/com/acme/core/api/product/ProductController.java"), StandardCharsets.UTF_8);
+        assertThat(controller).contains("product:item:create");
+        assertThat(controller).contains("product:item:read");
+        assertThat(controller).contains("product:item:update");
+        assertThat(controller).contains("product:item:disable");
+
+        String seed = Files.readString(
+                out.resolve("src/test/resources/db/seed/seed-zzz-product.sql"), StandardCharsets.UTF_8);
+        assertThat(seed).contains("product:item:create");
+        assertThat(seed).contains("product:item:update");
+        assertThat(seed).contains("product:item:disable");
+    }
+
+    // 8. menu integration
+    @Test
+    void menuIntegration() throws Exception {
+        AssetRepository repo = AssetRepository.load(repoRoot());
+        EffectiveProjectModel epm = resolve(repo).effectiveProject();
+        Path out = tempDir.resolve("menu");
+        generate(repo, epm, out);
+
+        String menuSeed = Files.readString(
+                out.resolve("src/test/resources/db/seed/seed-zz-menu.sql"), StandardCharsets.UTF_8);
+        assertThat(menuSeed).contains("product:item:read");
+    }
+
+    // 9. dictionary integration
+    @Test
+    void dictionaryIntegration() throws Exception {
+        AssetRepository repo = AssetRepository.load(repoRoot());
+        EffectiveProjectModel epm = resolve(repo).effectiveProject();
+        Path out = tempDir.resolve("dict");
+        generate(repo, epm, out);
+
+        String seed = Files.readString(
+                out.resolve("src/test/resources/db/seed/seed-zzz-product.sql"), StandardCharsets.UTF_8);
+        assertThat(seed).contains("product_status");
+
+        String service = Files.readString(
+                out.resolve("src/main/java/com/acme/core/application/product/ProductService.java"), StandardCharsets.UTF_8);
+        assertThat(service).contains("DictionaryPort");
+        assertThat(service).contains("product_status");
+    }
+
+    // 10. op-log integration
+    @Test
+    void operationLogIntegration() throws Exception {
+        AssetRepository repo = AssetRepository.load(repoRoot());
+        EffectiveProjectModel epm = resolve(repo).effectiveProject();
+        Path out = tempDir.resolve("oplog");
+        generate(repo, epm, out);
+
+        String controller = Files.readString(
+                out.resolve("src/main/java/com/acme/core/api/product/ProductController.java"), StandardCharsets.UTF_8);
+        assertThat(controller).contains("@OperationLog");
+        assertThat(controller).contains("PRODUCT_CREATE");
+        assertThat(controller).contains("PRODUCT_UPDATE");
+        assertThat(controller).contains("PRODUCT_DISABLE");
+    }
+
+    // 11. MyBatis leakage scan on application/domain/api layers
     @Test
     void mybatisLeakageScan() throws Exception {
         AssetRepository repo = AssetRepository.load(repoRoot());
@@ -176,12 +273,10 @@ class PlatformOrgDataPermissionWork003Test {
             for (Path f : stream.filter(Files::isRegularFile)
                     .filter(p -> p.toString().endsWith(".java")).toList()) {
                 String rel = out.relativize(f).toString().replace('\\', '/');
-                // infrastructure layer may use MyBatis; application/domain/api must not
                 if (rel.contains("/infrastructure/")) {
                     continue;
                 }
                 String text = Files.readString(f, StandardCharsets.UTF_8);
-                // line-based scan skipping comments: only code/imports count as leakage
                 for (String line : text.split("\n")) {
                     String t = line.trim();
                     if (t.startsWith("//") || t.startsWith("*") || t.startsWith("/*")) {
@@ -197,7 +292,7 @@ class PlatformOrgDataPermissionWork003Test {
         }
     }
 
-    // 22. conformance PASS
+    // 12. conformance PASS
     @Test
     void conformancePass() throws Exception {
         AssetRepository repo = AssetRepository.load(repoRoot());
@@ -209,7 +304,7 @@ class PlatformOrgDataPermissionWork003Test {
                 .isEqualTo(ConformanceResult.Status.PASS);
     }
 
-    // 23. broken enforcement conformance/test fail (delete DataScopeResolver -> FAIL)
+    // 13. broken enforcement conformance fail (delete ProductRepository enforcement -> FAIL)
     @Test
     void brokenEnforcementFails() throws Exception {
         AssetRepository repo = AssetRepository.load(repoRoot());
@@ -217,15 +312,14 @@ class PlatformOrgDataPermissionWork003Test {
         Path out = tempDir.resolve("broken");
         generate(repo, epm, out);
 
-        // delete the data-permission core enforcement -> conformance must FAIL
-        Files.delete(out.resolve("src/main/java/com/acme/core/application/datascope/DataScopeResolver.java"));
+        Files.delete(out.resolve("src/main/java/com/acme/core/infrastructure/persistence/MybatisProductRepository.java"));
         ConformanceResult result = new ConformanceValidator(repo).validate(epm, out);
         assertThat(result.status()).as("missing enforcement impl must FAIL conformance")
                 .isEqualTo(ConformanceResult.Status.FAIL);
         assertThat(result.errors()).anyMatch(f -> f.ruleId().equals("asset.required-file"));
     }
 
-    // 24. deterministic generation
+    // 14. deterministic generation
     @Test
     void deterministicGeneration() throws Exception {
         AssetRepository repo = AssetRepository.load(repoRoot());
@@ -248,7 +342,7 @@ class PlatformOrgDataPermissionWork003Test {
         }
     }
 
-    // 25. repeated generation no drift
+    // 15. repeated generation no drift
     @Test
     void repeatedGenerationNoDrift() throws Exception {
         AssetRepository repo = AssetRepository.load(repoRoot());
@@ -269,7 +363,7 @@ class PlatformOrgDataPermissionWork003Test {
         }
     }
 
-    // 26+27. generated project mvn test + real HTTP DataScope E2E
+    // 16-19. generated project mvn test + real CRUD/DataScope/Composition E2E
     @Test
     @Timeout(value = 20, unit = TimeUnit.MINUTES)
     void generatedProjectTestsAndRealHttpE2E() throws Exception {
@@ -296,12 +390,15 @@ class PlatformOrgDataPermissionWork003Test {
         assertThat(process.exitValue())
                 .as("generated project mvn test must pass:\n%s", output)
                 .isEqualTo(0);
-        // real HTTP DataScope E2E ran (spec points 7-20 covered by OrgModelUnitTest + DataScopeE2ETest)
-        assertThat(output).as("OrgModelUnitTest must have run").contains("OrgModelUnitTest");
+        // all product test classes ran (spec points 16-19)
+        assertThat(output).as("ProductModelUnitTest must have run").contains("ProductModelUnitTest");
+        assertThat(output).as("ProductHttpE2ETest must have run").contains("ProductHttpE2ETest");
+        assertThat(output).as("ProductDataScopeE2ETest must have run").contains("ProductDataScopeE2ETest");
+        assertThat(output).as("EnterpriseCompositionE2ETest must have run").contains("EnterpriseCompositionE2ETest");
         assertThat(output).as("DataScopeE2ETest must have run").contains("DataScopeE2ETest");
     }
 
-    // 28. V0.3 regression
+    // 20. V0.2/V0.3/WORK-001-004 regression
     @Test
     void v03ReferenceRegression() throws Exception {
         AssetRepository repo = AssetRepository.load(repoRoot());
@@ -312,6 +409,7 @@ class PlatformOrgDataPermissionWork003Test {
                 new AssetAwareResolver(ALWAYS_VALID).resolve(repo, realPlatform(), project);
         assertThat(resolution.status()).isEqualTo(ResolutionResult.Status.SUCCESS);
         EffectiveProjectModel epm = resolution.effectiveProject();
+        assertThat(epm.capabilities()).noneMatch(c -> c.id().equals("product-reference"));
         assertThat(epm.capabilities()).noneMatch(c -> c.id().equals("data-permission"));
 
         Path out = tempDir.resolve("v03");

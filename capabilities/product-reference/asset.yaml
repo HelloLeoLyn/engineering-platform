@@ -1,0 +1,150 @@
+schemaVersion: 1
+id: product-reference
+type: CAPABILITY
+version: 0.1.0
+description: Reference Product CRUD（V0.4 验证宿主：真实消费 Platform Core/Authentication/RBAC/Organization/Data Permission/Menu/Dictionary/Operation Log 全部企业能力，证明资产组合能支撑真实业务模块；非通用 CRUD Generator、非 ERP 商品中心）。
+dependencies:
+  - type: CAPABILITY
+    id: platform-core
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: web
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: validation
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: persistence
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: authentication
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: rbac
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: organization
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: data-permission
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: dictionary
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: operation-log
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: menu
+    version: 1.x
+    required: true
+compatibility:
+  java: "25"
+  springBoot: "3.x"
+  requiredCapabilities: [platform-core, web, validation, persistence, authentication, rbac, organization, data-permission, dictionary, operation-log, menu]
+files:
+  - source: templates/Product.java.ftl
+    target: src/main/java/{package}/domain/entity/Product.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/ProductMapper.java.ftl
+    target: src/main/java/{package}/infrastructure/persistence/mapper/ProductMapper.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/ProductPort.java.ftl
+    target: src/main/java/{package}/application/product/ProductPort.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/MybatisProductRepository.java.ftl
+    target: src/main/java/{package}/infrastructure/persistence/MybatisProductRepository.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/ProductService.java.ftl
+    target: src/main/java/{package}/application/product/ProductService.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/ProductController.java.ftl
+    target: src/main/java/{package}/api/product/ProductController.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/ProductCreateRequest.java.ftl
+    target: src/main/java/{package}/application/product/ProductCreateRequest.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/ProductUpdateRequest.java.ftl
+    target: src/main/java/{package}/application/product/ProductUpdateRequest.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/ProductResponse.java.ftl
+    target: src/main/java/{package}/application/product/ProductResponse.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/ProductBeansConfig.java.ftl
+    target: src/main/java/{package}/infrastructure/persistence/ProductBeansConfig.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/V008__product_reference.sql.ftl
+    target: src/main/resources/db/migration/V008__product_reference.sql
+    ownership: GENERATED
+    mode: render
+  - source: templates/seed-zzz-product.sql.ftl
+    target: src/test/resources/db/seed/seed-zzz-product.sql
+    ownership: GENERATED
+    mode: render
+  - source: templates/DataScopeE2ETest.java.ftl
+    target: src/test/java/{package}/DataScopeE2ETest.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/ProductModelUnitTest.java.ftl
+    target: src/test/java/{package}/ProductModelUnitTest.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/ProductHttpE2ETest.java.ftl
+    target: src/test/java/{package}/ProductHttpE2ETest.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/ProductDataScopeE2ETest.java.ftl
+    target: src/test/java/{package}/ProductDataScopeE2ETest.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/EnterpriseCompositionE2ETest.java.ftl
+    target: src/test/java/{package}/EnterpriseCompositionE2ETest.java
+    ownership: GENERATED
+    mode: render
+conformance:
+  requiredFiles:
+    - src/main/java/{package}/domain/entity/Product.java
+    - src/main/java/{package}/infrastructure/persistence/mapper/ProductMapper.java
+    - src/main/java/{package}/application/product/ProductPort.java
+    - src/main/java/{package}/infrastructure/persistence/MybatisProductRepository.java
+    - src/main/java/{package}/application/product/ProductService.java
+    - src/main/java/{package}/api/product/ProductController.java
+    - src/main/java/{package}/infrastructure/persistence/ProductBeansConfig.java
+    - src/main/resources/db/migration/V008__product_reference.sql
+    - src/test/resources/db/seed/seed-zzz-product.sql
+    - src/test/java/{package}/ProductModelUnitTest.java
+    - src/test/java/{package}/ProductHttpE2ETest.java
+    - src/test/java/{package}/ProductDataScopeE2ETest.java
+    - src/test/java/{package}/EnterpriseCompositionE2ETest.java
+  requiredDependencies:
+    - com.h2database:h2
+  requiredConfig:
+    - spring.datasource.url
+  forbiddenImports:
+    - cn.dev33.satoken
+    - org.springframework.security.web
+    - org.springframework.security.config
+  forbiddenImportsExcludedPaths:
+    - src/main/java/{package}/infrastructure/
+documentation:
+  guide: docs/README.md
