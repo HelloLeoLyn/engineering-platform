@@ -1,6 +1,7 @@
 package ${package}.infrastructure.persistence;
 
 import ${package}.application.operationlog.OperationLogPort;
+import ${package}.application.operationlog.OperationLogQueryService;
 import ${package}.infrastructure.persistence.mapper.SysOperationLogMapper;
 import ${package}.infrastructure.security.OperationLogAspect;
 import org.springframework.context.annotation.Bean;
@@ -15,6 +16,11 @@ public class OperationLogBeansConfig {
     @Bean
     public OperationLogPort operationLogPort(SysOperationLogMapper operationLogMapper) {
         return new MybatisOperationLogRepository(operationLogMapper);
+    }
+
+    @Bean
+    public OperationLogQueryService operationLogQueryService(OperationLogPort operationLogPort) {
+        return new OperationLogQueryService(operationLogPort);
     }
 
     @Bean

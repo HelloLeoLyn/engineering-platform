@@ -52,6 +52,15 @@ class OperationLogModelUnitTest {
         public List<SysOperationLog> findLatest(int limit) {
             return entries;
         }
+
+        @Override
+        public ${package}.common.core.PageResult<SysOperationLog> page(
+                ${package}.common.core.PageQuery query, String userId, String operation,
+                String resourceType, String result,
+                java.time.LocalDateTime from, java.time.LocalDateTime to) {
+            return ${package}.common.core.PageResult.of(entries, entries.size(),
+                    query.page(), query.size());
+        }
     }
 
     private static OperationLog opLog(String operation, String resourceType) {

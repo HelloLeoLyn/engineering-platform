@@ -97,12 +97,10 @@ class FrontendFoundationWork001Test {
         var asset = repo.capability("frontend-shell");
         assertThat(asset).as("frontend-shell capability must load").isNotNull();
         List<AssetRepository.AssetFileSpec> files = repo.assetFiles("frontend-shell");
-        assertThat(files).hasSize(8);
+        // V05-WORK-002: main.ts/App.vue/tests moved to frontend-auth; shell keeps config only.
+        assertThat(files).hasSize(5);
         assertThat(files).anyMatch(f -> f.target().equals("frontend/package.json"));
         assertThat(files).anyMatch(f -> f.target().equals("frontend/vite.config.ts"));
-        assertThat(files).anyMatch(f -> f.target().equals("frontend/src/main.ts"));
-        assertThat(files).anyMatch(f -> f.target().equals("frontend/src/App.vue"));
-        assertThat(files).anyMatch(f -> f.target().equals("frontend/tests/smoke.spec.ts"));
     }
 
     // 2. registry registration
@@ -138,9 +136,10 @@ class FrontendFoundationWork001Test {
         Path out = tempDir.resolve("gen");
         generate(repo, epm, out);
         assertThat(Files.exists(out.resolve("frontend/package.json"))).isTrue();
-        assertThat(Files.exists(out.resolve("frontend/src/main.ts"))).isTrue();
-        assertThat(Files.exists(out.resolve("frontend/src/App.vue"))).isTrue();
-        assertThat(Files.exists(out.resolve("frontend/tests/smoke.spec.ts"))).isTrue();
+        assertThat(Files.exists(out.resolve("frontend/tsconfig.json"))).isTrue();
+        assertThat(Files.exists(out.resolve("frontend/vite.config.ts"))).isTrue();
+        assertThat(Files.exists(out.resolve("frontend/index.html"))).isTrue();
+        assertThat(Files.exists(out.resolve("frontend/src/env.d.ts"))).isTrue();
         // backend files still at root
         assertThat(Files.exists(out.resolve("pom.xml"))).isTrue();
         assertThat(Files.exists(out.resolve("src/main/java/com/acme/core/CoreDemoApplication.java"))).isTrue();
@@ -168,8 +167,7 @@ class FrontendFoundationWork001Test {
         generate(repo, epm, out);
         for (String f : List.of("frontend/package.json", "frontend/tsconfig.json",
                 "frontend/vite.config.ts", "frontend/index.html",
-                "frontend/src/main.ts", "frontend/src/App.vue",
-                "frontend/tests/smoke.spec.ts")) {
+                "frontend/src/env.d.ts")) {
             assertThat(Files.exists(out.resolve(f))).as("required file: " + f).isTrue();
         }
     }
@@ -258,7 +256,7 @@ class FrontendFoundationWork001Test {
         // existing tests (GeneratorExecutorTest). We assert the happy-path generation is transactional.
         AssetProjectGenerator.GenerationResult ok = generate(repo, epm, out);
         assertThat(ok.execution().status()).isEqualTo(ExecutionResult.ExecutionStatus.SUCCESS);
-        assertThat(Files.exists(out.resolve("frontend/src/main.ts"))).isTrue();
+        assertThat(Files.exists(out.resolve("frontend/package.json"))).isTrue();
     }
 
     // 12. path safety rejects traversal in frontend targets
@@ -297,13 +295,16 @@ class FrontendFoundationWork001Test {
         EffectiveProjectModel epm = resolveV05(repo).effectiveProject();
         Path out = tempDir.resolve("neg");
         generate(repo, epm, out);
-        Files.delete(out.resolve("frontend/src/main.ts"));
+        Files.delete(out.resolve("frontend/package.json"));
         ConformanceResult result = new ConformanceValidator(repo).validate(epm, out);
         assertThat(result.status()).isEqualTo(ConformanceResult.Status.FAIL);
         assertThat(result.errors()).anyMatch(f -> f.ruleId().equals("asset.required-file"));
     }
 
-    // 15-17. real fresh E2E: generated frontend pnpm install/test/build + backend mvn test
+    // 15-17. real fresh E2E: generated frontend install/test/build + backend mvn test
+    // V05-WORK-002: frontend-shell alone is engineering config (no main.ts) — full
+    // runnable frontend requires frontend-auth (covered by FrontendAuthWork002Test).
+    // Here we verify shell generation + conformance + backend build + lockfile policy.
     @Test
     @Timeout(value = 20, unit = TimeUnit.MINUTES)
     void generatedFrontendInstallTestBuild() throws Exception {
@@ -316,21 +317,11 @@ class FrontendFoundationWork001Test {
         assertThat(conformance.status()).isEqualTo(ConformanceResult.Status.PASS);
 
         Path settings = Path.of("/tmp/m2-settings-proxy.xml");
-        // pnpm install --frozen-lockfile needs the lockfile; first run generates it, so we
-        // do install (creates lockfile) then test/build; on a second run frozen would hold.
-        // Spec: "pnpm install --frozen-lockfile" when lockfile present — here we generate once,
-        // install to create lockfile, then assert lockfile exists and build/test pass.
         Path frontend = out.resolve("frontend");
-        String[] install = {"pnpm", "install"};
-        String[] test = {"pnpm", "test"};
-        String[] build = {"pnpm", "build"};
-        assertThat(run(frontend, install)).as("pnpm install must pass").isEqualTo(0);
+        // shell config must be installable (lockfile generated deterministically)
+        assertThat(run(frontend, "pnpm", "install")).as("pnpm install must pass").isEqualTo(0);
         assertThat(Files.exists(frontend.resolve("pnpm-lock.yaml")))
                 .as("lockfile must exist after install").isTrue();
-        assertThat(run(frontend, test)).as("pnpm test must pass").isEqualTo(0);
-        assertThat(run(frontend, build)).as("pnpm build must pass").isEqualTo(0);
-        assertThat(Files.exists(frontend.resolve("dist/index.html")))
-                .as("build output must exist").isTrue();
 
         // backend still builds
         List<String> command = new ArrayList<>(List.of("mvn", "-B", "-f",

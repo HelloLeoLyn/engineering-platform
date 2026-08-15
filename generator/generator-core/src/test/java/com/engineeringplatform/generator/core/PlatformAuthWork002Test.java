@@ -78,9 +78,9 @@ class PlatformAuthWork002Test {
         AssetRepository repo = AssetRepository.load(repoRoot());
         assertThat(repo.capability("authentication")).as("authentication asset must load").isNotNull();
         assertThat(repo.capability("rbac")).as("rbac asset must load").isNotNull();
-        // authentication: 11 files; rbac: 21 files (incl. UserQueryPort + MybatisUserQueryRepository)
+        // authentication: 11 files; rbac: 22 files (incl. UserQueryPort + MybatisUserQueryRepository + CurrentUserResponse)
         assertThat(repo.assetFiles("authentication")).hasSize(11);
-        assertThat(repo.assetFiles("rbac")).hasSize(21);
+        assertThat(repo.assetFiles("rbac")).hasSize(41);
         // dependencies declared
         assertThat(repo.capability("authentication").dependencies())
                 .anyMatch(d -> d.id().equals("rbac") && d.required());

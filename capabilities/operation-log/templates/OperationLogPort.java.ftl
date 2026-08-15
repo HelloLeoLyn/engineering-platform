@@ -1,7 +1,10 @@
 package ${package}.application.operationlog;
 
+import ${package}.common.core.PageQuery;
+import ${package}.common.core.PageResult;
 import ${package}.domain.entity.SysOperationLog;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -18,4 +21,9 @@ public interface OperationLogPort {
 
     /** Most recent entries, newest first (verification/testing support). */
     List<SysOperationLog> findLatest(int limit);
+
+    /** Paged query with optional filters (management read API). */
+    PageResult<SysOperationLog> page(PageQuery query, String userId, String operation,
+                                     String resourceType, String result,
+                                     LocalDateTime from, LocalDateTime to);
 }

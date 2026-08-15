@@ -1,9 +1,13 @@
 package ${package}.infrastructure.persistence.mapper;
 
 import ${package}.domain.entity.DictionaryItem;
+import org.apache.ibatis.annotations.Delete;
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Options;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
@@ -20,4 +24,21 @@ public interface DictionaryItemMapper {
             + "FROM sys_dictionary_item WHERE type_id = #{typeId} "
             + "ORDER BY sort ASC, id ASC")
     List<DictionaryItem> findByTypeId(@Param("typeId") Long typeId);
+
+    @Select("SELECT id, type_id, `value`, label, enabled, sort, description, created_at, updated_at "
+            + "FROM sys_dictionary_item WHERE id = #{id}")
+    DictionaryItem findById(@Param("id") Long id);
+
+    @Select("SELECT COUNT(*) FROM sys_dictionary_item WHERE type_id = #{typeId} AND `value` = #{value}")
+    long countByTypeAndValue(@Param("typeId") Long typeId, @Param("value") String value);
+
+    @Insert("INSERT INTO sys_dictionary_item (type_id, `value`, label, enabled, sort, description, "
+            + "created_at, updated_at) VALUES (#{typeId}, #{value}, #{label}, #{enabled}, #{sort}, "
+            + "#{description}, #{createdAt}, #{updatedAt})")
+    @Options(useGeneratedKeys = true, keyProperty = "id")
+    int insert(DictionaryItem item);
+
+    @Update("UPDATE sys_dictionary_item SET label = #{label}, enabled = #{enabled}, sort = #{sort}, "
+            + "description = #{description}, updated_at = #{updatedAt} WHERE id = #{id}")
+    int update(DictionaryItem item);
 }

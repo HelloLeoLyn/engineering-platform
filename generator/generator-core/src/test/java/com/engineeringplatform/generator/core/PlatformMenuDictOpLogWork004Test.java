@@ -95,7 +95,7 @@ class PlatformMenuDictOpLogWork004Test {
                 .anyMatch(d -> d.id().equals("rbac") && d.required())
                 .anyMatch(d -> d.id().equals("persistence") && d.required());
         List<AssetRepository.AssetFileSpec> files = repo.assetFiles("menu");
-        assertThat(files).hasSize(12);
+        assertThat(files).hasSize(16);
         assertThat(files).anyMatch(f -> f.target().endsWith("domain/entity/SysMenu.java"));
         assertThat(files).anyMatch(f -> f.target().endsWith("common/security/MenuType.java"));
         assertThat(files).anyMatch(f -> f.target().endsWith("api/menu/MenuController.java"));
@@ -112,7 +112,7 @@ class PlatformMenuDictOpLogWork004Test {
                 .anyMatch(d -> d.id().equals("platform-core") && d.required())
                 .anyMatch(d -> d.id().equals("persistence") && d.required());
         List<AssetRepository.AssetFileSpec> files = repo.assetFiles("dictionary");
-        assertThat(files).hasSize(14);
+        assertThat(files).hasSize(17);
         assertThat(files).anyMatch(f -> f.target().endsWith("domain/entity/DictionaryType.java"));
         assertThat(files).anyMatch(f -> f.target().endsWith("domain/entity/DictionaryItem.java"));
         assertThat(files).anyMatch(f -> f.target().endsWith("application/dictionary/DictionaryItemDto.java"));
@@ -130,7 +130,7 @@ class PlatformMenuDictOpLogWork004Test {
                 .anyMatch(d -> d.id().equals("rbac") && d.required())
                 .anyMatch(d -> d.id().equals("persistence") && d.required());
         List<AssetRepository.AssetFileSpec> files = repo.assetFiles("operation-log");
-        assertThat(files).hasSize(12);
+        assertThat(files).hasSize(13);
         assertThat(files).anyMatch(f -> f.target().endsWith("common/security/OperationLog.java"));
         assertThat(files).anyMatch(f -> f.target().endsWith("infrastructure/security/OperationLogAspect.java"));
         assertThat(files).anyMatch(f -> f.target().endsWith("domain/entity/SysOperationLog.java"));

@@ -35,9 +35,4 @@ public class MenuController {
         Long userId = Long.valueOf(currentUserId);
         return ApiResponse.ofSuccess(menuService.treeForUser(userId));
     }
-
-    @GetMapping("/tree")
-    public ApiResponse<List<MenuService.MenuNode>> tree() {
-        return ApiResponse.ofSuccess(menuService.tree());
-    }
 }

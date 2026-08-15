@@ -34,4 +34,8 @@ entries:
   - id: product-reference
     description: Reference Product CRUD（V0.4 验证宿主：真实消费全部企业能力的业务模块，非通用 CRUD Generator）
   - id: frontend-shell
-    description: 前端 Shell 基础能力（Vue3+TS+Vite+Router+Pinia+Element Plus+Vitest 可运行骨架，frontend/ additive output）
+    description: 前端 Shell 基础能力（Vue3+TS+Vite+Router+Pinia+Element Plus+Vitest 工程配置，frontend/ additive output）
+  - id: frontend-auth
+    description: 前端认证与应用框架（Login + Auth Store + Request Client + Router + App Shell + 401 处理）
+  - id: frontend-permission
+    description: 前端权限 UI（PermissionGuard/v-permission/PermissionButton + UX 基础组件，仅可见性）

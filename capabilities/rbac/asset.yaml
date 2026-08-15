@@ -89,6 +89,82 @@ files:
     target: src/main/java/{package}/api/user/UserController.java
     ownership: GENERATED
     mode: render
+  - source: templates/UserManagementController.java.ftl
+    target: src/main/java/{package}/api/user/UserManagementController.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/RoleManagementController.java.ftl
+    target: src/main/java/{package}/api/role/RoleManagementController.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/PermissionController.java.ftl
+    target: src/main/java/{package}/api/permission/PermissionController.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/UserManagementService.java.ftl
+    target: src/main/java/{package}/application/rbac/UserManagementService.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/RoleManagementService.java.ftl
+    target: src/main/java/{package}/application/rbac/RoleManagementService.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/PermissionManagementService.java.ftl
+    target: src/main/java/{package}/application/rbac/PermissionManagementService.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/UserManagementPort.java.ftl
+    target: src/main/java/{package}/application/rbac/UserManagementPort.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/MybatisUserManagementRepository.java.ftl
+    target: src/main/java/{package}/infrastructure/persistence/MybatisUserManagementRepository.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/RoleManagementPort.java.ftl
+    target: src/main/java/{package}/application/rbac/RoleManagementPort.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/MybatisRoleManagementRepository.java.ftl
+    target: src/main/java/{package}/infrastructure/persistence/MybatisRoleManagementRepository.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/PermissionManagementPort.java.ftl
+    target: src/main/java/{package}/application/rbac/PermissionManagementPort.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/MybatisPermissionManagementRepository.java.ftl
+    target: src/main/java/{package}/infrastructure/persistence/MybatisPermissionManagementRepository.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/UserCreateRequest.java.ftl
+    target: src/main/java/{package}/application/rbac/UserCreateRequest.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/UserUpdateRequest.java.ftl
+    target: src/main/java/{package}/application/rbac/UserUpdateRequest.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/UserResponse.java.ftl
+    target: src/main/java/{package}/application/rbac/UserResponse.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/RoleCreateRequest.java.ftl
+    target: src/main/java/{package}/application/rbac/RoleCreateRequest.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/RoleUpdateRequest.java.ftl
+    target: src/main/java/{package}/application/rbac/RoleUpdateRequest.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/RoleResponse.java.ftl
+    target: src/main/java/{package}/application/rbac/RoleResponse.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/CurrentUserResponse.java.ftl
+    target: src/main/java/{package}/api/user/CurrentUserResponse.java
+    ownership: GENERATED
+    mode: render
   - source: templates/V002__rbac.sql.ftl
     target: src/main/resources/db/migration/V002__rbac.sql
     ownership: GENERATED
@@ -105,6 +181,10 @@ files:
     target: src/test/java/{package}/AuthRbacE2ETest.java
     ownership: GENERATED
     mode: render
+  - source: templates/ManagementE2ETest.java.ftl
+    target: src/test/java/{package}/ManagementE2ETest.java
+    ownership: GENERATED
+    mode: render
 conformance:
   requiredFiles:
     - src/main/java/{package}/domain/entity/SysUser.java
@@ -118,15 +198,26 @@ conformance:
     - src/main/java/{package}/infrastructure/persistence/mapper/SysUserRoleMapper.java
     - src/main/java/{package}/infrastructure/persistence/mapper/SysRolePermissionMapper.java
     - src/main/java/{package}/application/rbac/UserQueryService.java
+    - src/main/java/{package}/application/rbac/UserManagementService.java
+    - src/main/java/{package}/application/rbac/UserManagementPort.java
+    - src/main/java/{package}/infrastructure/persistence/MybatisUserManagementRepository.java
+    - src/main/java/{package}/application/rbac/RoleManagementService.java
+    - src/main/java/{package}/application/rbac/RoleManagementPort.java
+    - src/main/java/{package}/infrastructure/persistence/MybatisRoleManagementRepository.java
+    - src/main/java/{package}/application/rbac/PermissionManagementService.java
+    - src/main/java/{package}/application/rbac/PermissionManagementPort.java
+    - src/main/java/{package}/infrastructure/persistence/MybatisPermissionManagementRepository.java
     - src/main/java/{package}/application/rbac/UserQueryPort.java
     - src/main/java/{package}/infrastructure/persistence/MybatisUserQueryRepository.java
     - src/main/java/{package}/common/security/RequirePermission.java
     - src/main/java/{package}/infrastructure/security/PermissionAspect.java
     - src/main/java/{package}/infrastructure/persistence/RbacBeansConfig.java
     - src/main/java/{package}/api/user/UserController.java
+    - src/main/java/{package}/api/user/CurrentUserResponse.java
     - src/main/resources/db/migration/V002__rbac.sql
     - src/test/resources/application-test.yml
     - src/test/java/{package}/AuthRbacE2ETest.java
+    - src/test/java/{package}/ManagementE2ETest.java
   requiredDependencies:
     - org.springframework.boot:spring-boot-starter-aop
     - com.h2database:h2

@@ -1,0 +1,63 @@
+schemaVersion: 1
+id: frontend-permission
+type: CAPABILITY
+version: 0.1.0
+description: 前端权限 UI（PermissionGuard + v-permission 指令 + PermissionButton + UX 基础组件 PageContainer/PageHeader/Loading/Empty/Error），只控制可见性/体验，后端 RBAC 是最终安全边界。消费 frontend-auth + rbac。
+dependencies:
+  - type: CAPABILITY
+    id: frontend-auth
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: rbac
+    version: 1.x
+    required: true
+compatibility:
+  java: "25"
+  springBoot: "3.x"
+  requiredCapabilities: [frontend-auth, rbac]
+files:
+  - source: templates/src/permission/index.ts.ftl
+    target: frontend/src/permission/index.ts
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/permission/PermissionGuard.vue.ftl
+    target: frontend/src/permission/PermissionGuard.vue
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/permission/PermissionButton.vue.ftl
+    target: frontend/src/permission/PermissionButton.vue
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/components/PageContainer.vue.ftl
+    target: frontend/src/components/PageContainer.vue
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/components/PageHeader.vue.ftl
+    target: frontend/src/components/PageHeader.vue
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/components/StateViews.vue.ftl
+    target: frontend/src/components/StateViews.vue
+    ownership: GENERATED
+    mode: render
+  - source: templates/tests/permission.spec.ts.ftl
+    target: frontend/tests/permission.spec.ts
+    ownership: GENERATED
+    mode: render
+conformance:
+  requiredFiles:
+    - frontend/src/permission/index.ts
+    - frontend/src/permission/PermissionGuard.vue
+    - frontend/src/permission/PermissionButton.vue
+    - frontend/tests/permission.spec.ts
+  requiredDependencies: []
+  requiredConfig: []
+  forbiddenImports:
+    - cn.dev33.satoken
+    - org.springframework.security.web
+    - org.springframework.security.config
+  forbiddenImportsExcludedPaths:
+    - frontend/
+documentation:
+  guide: docs/README.md

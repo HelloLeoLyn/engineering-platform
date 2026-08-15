@@ -93,7 +93,7 @@ class PlatformOrgDataPermissionWork003Test {
                 .anyMatch(d -> d.id().equals("rbac") && d.required())
                 .anyMatch(d -> d.id().equals("persistence") && d.required());
         List<AssetRepository.AssetFileSpec> files = repo.assetFiles("organization");
-        assertThat(files).hasSize(8);
+        assertThat(files).hasSize(11);
         assertThat(files).anyMatch(f -> f.target().endsWith("domain/entity/SysDepartment.java"));
         assertThat(files).anyMatch(f -> f.target().endsWith("db/migration/V003__organization.sql"));
     }

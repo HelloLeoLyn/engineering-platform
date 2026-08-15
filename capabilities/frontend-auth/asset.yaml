@@ -1,0 +1,130 @@
+schemaVersion: 1
+id: frontend-auth
+type: CAPABILITY
+version: 0.1.0
+description: 前端认证与应用框架（Login Page + Pinia auth store + token 持久化 + Platform Request Client + Vue Router + App Shell Layout + 401 处理），消费 frontend-shell + authentication + rbac + menu。生成 frontend/src 应用框架文件，与后端真实认证接口集成。
+dependencies:
+  - type: CAPABILITY
+    id: frontend-shell
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: authentication
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: rbac
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: menu
+    version: 1.x
+    required: true
+compatibility:
+  java: "25"
+  springBoot: "3.x"
+  requiredCapabilities: [frontend-shell, authentication, rbac, menu]
+files:
+  - source: templates/src/main.ts.ftl
+    target: frontend/src/main.ts
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/App.vue.ftl
+    target: frontend/src/App.vue
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/api/request.ts.ftl
+    target: frontend/src/api/request.ts
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/api/auth.ts.ftl
+    target: frontend/src/api/auth.ts
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/api/menu.ts.ftl
+    target: frontend/src/api/menu.ts
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/stores/auth.ts.ftl
+    target: frontend/src/stores/auth.ts
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/router/index.ts.ftl
+    target: frontend/src/router/index.ts
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/router/guard.ts.ftl
+    target: frontend/src/router/guard.ts
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/layouts/AppLayout.vue.ftl
+    target: frontend/src/layouts/AppLayout.vue
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/views/LoginView.vue.ftl
+    target: frontend/src/views/LoginView.vue
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/views/HomeView.vue.ftl
+    target: frontend/src/views/HomeView.vue
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/views/ForbiddenView.vue.ftl
+    target: frontend/src/views/ForbiddenView.vue
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/views/NotFoundView.vue.ftl
+    target: frontend/src/views/NotFoundView.vue
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/types/auth.ts.ftl
+    target: frontend/src/types/auth.ts
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/styles/tokens.css.ftl
+    target: frontend/src/styles/tokens.css
+    ownership: GENERATED
+    mode: render
+  - source: templates/tests/auth.spec.ts.ftl
+    target: frontend/tests/auth.spec.ts
+    ownership: GENERATED
+    mode: render
+  - source: templates/tests/request.spec.ts.ftl
+    target: frontend/tests/request.spec.ts
+    ownership: GENERATED
+    mode: render
+  - source: templates/tests/smoke.spec.ts.ftl
+    target: frontend/tests/smoke.spec.ts
+    ownership: GENERATED
+    mode: render
+configuration:
+  - key: frontend.authTokenStorage
+    description: token 持久化策略（V1 localStorage）
+    default: localStorage
+  - key: frontend.apiBaseUrl
+    description: 后端 API base URL
+    default: /api
+conformance:
+  requiredFiles:
+    - frontend/src/main.ts
+    - frontend/src/App.vue
+    - frontend/src/api/request.ts
+    - frontend/src/api/auth.ts
+    - frontend/src/stores/auth.ts
+    - frontend/src/router/index.ts
+    - frontend/src/router/guard.ts
+    - frontend/src/layouts/AppLayout.vue
+    - frontend/src/views/LoginView.vue
+    - frontend/tests/auth.spec.ts
+    - frontend/tests/request.spec.ts
+    - frontend/tests/smoke.spec.ts
+  requiredDependencies: []
+  requiredConfig: []
+  forbiddenImports:
+    - cn.dev33.satoken
+    - org.springframework.security.web
+    - org.springframework.security.config
+  forbiddenImportsExcludedPaths:
+    - frontend/
+documentation:
+  guide: docs/README.md

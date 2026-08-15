@@ -1,10 +1,13 @@
 package ${package}.infrastructure.persistence;
 
 import ${package}.application.operationlog.OperationLogPort;
+import ${package}.common.core.PageQuery;
+import ${package}.common.core.PageResult;
 import ${package}.domain.entity.SysOperationLog;
 import ${package}.infrastructure.persistence.mapper.SysOperationLogMapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -29,5 +32,43 @@ public class MybatisOperationLogRepository implements OperationLogPort {
         return operationLogMapper.selectList(new QueryWrapper<SysOperationLog>()
                 .orderByDesc("id")
                 .last("LIMIT " + Math.max(1, limit)));
+    }
+
+    @Override
+    public PageResult<SysOperationLog> page(PageQuery query, String userId, String operation,
+                                            String resourceType, String result,
+                                            LocalDateTime from, LocalDateTime to) {
+        QueryWrapper<SysOperationLog> countWrapper = new QueryWrapper<>();
+        applyFilters(countWrapper, userId, operation, resourceType, result, from, to);
+        long total = operationLogMapper.selectCount(countWrapper);
+        QueryWrapper<SysOperationLog> wrapper = new QueryWrapper<>();
+        applyFilters(wrapper, userId, operation, resourceType, result, from, to);
+        wrapper.orderByDesc("id");
+        wrapper.last("LIMIT " + query.size() + " OFFSET " + query.offset());
+        List<SysOperationLog> items = operationLogMapper.selectList(wrapper);
+        return PageResult.of(items, total, query.page(), query.size());
+    }
+
+    private void applyFilters(QueryWrapper<SysOperationLog> wrapper, String userId, String operation,
+                              String resourceType, String result,
+                              LocalDateTime from, LocalDateTime to) {
+        if (userId != null && !userId.isBlank()) {
+            wrapper.eq("user_id", userId);
+        }
+        if (operation != null && !operation.isBlank()) {
+            wrapper.eq("operation", operation);
+        }
+        if (resourceType != null && !resourceType.isBlank()) {
+            wrapper.eq("resource_type", resourceType);
+        }
+        if (result != null && !result.isBlank()) {
+            wrapper.eq("result", result);
+        }
+        if (from != null) {
+            wrapper.ge("occurred_at", from);
+        }
+        if (to != null) {
+            wrapper.le("occurred_at", to);
+        }
     }
 }

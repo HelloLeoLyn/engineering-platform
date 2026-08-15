@@ -53,6 +53,10 @@ files:
     target: src/main/java/{package}/infrastructure/persistence/OperationLogBeansConfig.java
     ownership: GENERATED
     mode: render
+  - source: templates/OperationLogQueryService.java.ftl
+    target: src/main/java/{package}/application/operationlog/OperationLogQueryService.java
+    ownership: GENERATED
+    mode: render
   - source: templates/OperationLogReferenceController.java.ftl
     target: src/main/java/{package}/api/operationlog/OperationLogReferenceController.java
     ownership: GENERATED
@@ -76,6 +80,7 @@ conformance:
     - src/main/java/{package}/domain/entity/SysOperationLog.java
     - src/main/java/{package}/infrastructure/persistence/mapper/SysOperationLogMapper.java
     - src/main/java/{package}/application/operationlog/OperationLogPort.java
+    - src/main/java/{package}/application/operationlog/OperationLogQueryService.java
     - src/main/java/{package}/infrastructure/persistence/MybatisOperationLogRepository.java
     - src/main/java/{package}/infrastructure/security/OperationLogAspect.java
     - src/main/java/{package}/infrastructure/persistence/OperationLogBeansConfig.java

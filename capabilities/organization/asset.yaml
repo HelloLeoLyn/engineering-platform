@@ -41,8 +41,20 @@ files:
     target: src/main/java/{package}/application/organization/DepartmentService.java
     ownership: GENERATED
     mode: render
-  - source: templates/DepartmentController.java.ftl
-    target: src/main/java/{package}/api/organization/DepartmentController.java
+  - source: templates/DepartmentManagementPort.java.ftl
+    target: src/main/java/{package}/application/organization/DepartmentManagementPort.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/MybatisDepartmentManagementRepository.java.ftl
+    target: src/main/java/{package}/infrastructure/persistence/MybatisDepartmentManagementRepository.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/DepartmentManagementController.java.ftl
+    target: src/main/java/{package}/api/organization/DepartmentManagementController.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/DepartmentManagementService.java.ftl
+    target: src/main/java/{package}/application/organization/DepartmentManagementService.java
     ownership: GENERATED
     mode: render
   - source: templates/OrganizationBeansConfig.java.ftl
@@ -60,7 +72,11 @@ conformance:
     - src/main/java/{package}/application/organization/DepartmentPort.java
     - src/main/java/{package}/infrastructure/persistence/MybatisDepartmentRepository.java
     - src/main/java/{package}/application/organization/DepartmentService.java
-    - src/main/java/{package}/api/organization/DepartmentController.java
+    - src/main/java/{package}/application/organization/DepartmentManagementService.java
+    - src/main/java/{package}/application/organization/DepartmentManagementPort.java
+    - src/main/java/{package}/infrastructure/persistence/MybatisDepartmentManagementRepository.java
+    - src/main/java/{package}/api/organization/DepartmentManagementController.java
+    - src/main/java/{package}/application/organization/DepartmentManagementService.java
     - src/main/java/{package}/infrastructure/persistence/OrganizationBeansConfig.java
     - src/main/resources/db/migration/V003__organization.sql
   requiredDependencies:

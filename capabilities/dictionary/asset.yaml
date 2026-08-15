@@ -49,8 +49,20 @@ files:
     target: src/main/java/{package}/application/dictionary/DictionaryService.java
     ownership: GENERATED
     mode: render
-  - source: templates/DictionaryController.java.ftl
-    target: src/main/java/{package}/api/dictionary/DictionaryController.java
+  - source: templates/DictionaryManagementPort.java.ftl
+    target: src/main/java/{package}/application/dictionary/DictionaryManagementPort.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/MybatisDictionaryManagementRepository.java.ftl
+    target: src/main/java/{package}/infrastructure/persistence/MybatisDictionaryManagementRepository.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/DictionaryManagementController.java.ftl
+    target: src/main/java/{package}/api/dictionary/DictionaryManagementController.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/DictionaryManagementService.java.ftl
+    target: src/main/java/{package}/application/dictionary/DictionaryManagementService.java
     ownership: GENERATED
     mode: render
   - source: templates/DictionaryBeansConfig.java.ftl
@@ -83,7 +95,11 @@ conformance:
     - src/main/java/{package}/infrastructure/persistence/MybatisDictionaryRepository.java
     - src/main/java/{package}/application/dictionary/DictionaryItemDto.java
     - src/main/java/{package}/application/dictionary/DictionaryService.java
-    - src/main/java/{package}/api/dictionary/DictionaryController.java
+    - src/main/java/{package}/application/dictionary/DictionaryManagementService.java
+    - src/main/java/{package}/application/dictionary/DictionaryManagementPort.java
+    - src/main/java/{package}/infrastructure/persistence/MybatisDictionaryManagementRepository.java
+    - src/main/java/{package}/api/dictionary/DictionaryManagementController.java
+    - src/main/java/{package}/application/dictionary/DictionaryManagementService.java
     - src/main/java/{package}/infrastructure/persistence/DictionaryBeansConfig.java
     - src/main/resources/db/migration/V006__dictionary.sql
     - src/test/resources/db/seed/seed-zz-dictionary.sql

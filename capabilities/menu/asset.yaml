@@ -49,6 +49,22 @@ files:
     target: src/main/java/{package}/api/menu/MenuController.java
     ownership: GENERATED
     mode: render
+  - source: templates/MenuManagementPort.java.ftl
+    target: src/main/java/{package}/application/menu/MenuManagementPort.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/MybatisMenuManagementRepository.java.ftl
+    target: src/main/java/{package}/infrastructure/persistence/MybatisMenuManagementRepository.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/MenuManagementController.java.ftl
+    target: src/main/java/{package}/api/menu/MenuManagementController.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/MenuManagementService.java.ftl
+    target: src/main/java/{package}/application/menu/MenuManagementService.java
+    ownership: GENERATED
+    mode: render
   - source: templates/MenuBeansConfig.java.ftl
     target: src/main/java/{package}/infrastructure/persistence/MenuBeansConfig.java
     ownership: GENERATED
@@ -77,6 +93,9 @@ conformance:
     - src/main/java/{package}/application/menu/MenuPort.java
     - src/main/java/{package}/infrastructure/persistence/MybatisMenuRepository.java
     - src/main/java/{package}/application/menu/MenuService.java
+    - src/main/java/{package}/application/menu/MenuManagementService.java
+    - src/main/java/{package}/application/menu/MenuManagementPort.java
+    - src/main/java/{package}/infrastructure/persistence/MybatisMenuManagementRepository.java
     - src/main/java/{package}/api/menu/MenuController.java
     - src/main/java/{package}/infrastructure/persistence/MenuBeansConfig.java
     - src/main/resources/db/migration/V005__menu.sql
