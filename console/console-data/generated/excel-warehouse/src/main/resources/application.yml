@@ -1,7 +1,0 @@
-spring.application.name: ExcelWarehouse
-server.port: 8080
-auth.token.expiration-seconds: 3600
-auth.token.secret: ${AUTH_TOKEN_SECRET}
-spring.datasource.url: ${SPRING_DATASOURCE_URL}
-spring.datasource.username: ${SPRING_DATASOURCE_USERNAME}
-mybatis-plus.mapper-locations: classpath*:mapper/**/*.xml

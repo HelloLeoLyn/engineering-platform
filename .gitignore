@@ -33,3 +33,8 @@ Thumbs.db
 tmp/
 temp/
 *.tmp
+
+# Console generated projects (regenerated on demand, never commit)
+console/console-data/generated/
+console/console-data/final-accept/
+.generator/

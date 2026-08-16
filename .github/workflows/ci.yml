@@ -9,7 +9,7 @@ jobs:
     name: Contract Validation (Python)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -34,25 +34,39 @@ jobs:
     name: Java 25 Build + Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "25"
+      - name: Environment diagnostics
+        run: |
+          java -version
+          mvn -version
+          node --version
+          df -h
+          free -h
       - name: Maven compile + test (generator)
         run: mvn -f generator/pom.xml test
 
-  v04-enterprise-e2e:
-    name: V0.4 Real Enterprise E2E (fresh generate + generated build)
+  enterprise-generation-e2e:
+    name: Enterprise Generation E2E (fresh generate + generated build)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "25"
+      - name: Environment diagnostics
+        run: |
+          java -version
+          mvn -version
+          node --version
+          df -h
+          free -h
       - name: Compile generator (CLI dependency)
-        run: mvn -q -f generator/pom.xml compile -pl generator-core -am
+        run: mvn -B -f generator/pom.xml compile -pl generator-core -am
       - name: ep validate (single-declaration product-reference manifest)
         run: |
           mkdir -p /tmp/v04-e2e
