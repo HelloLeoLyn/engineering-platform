@@ -39,8 +39,8 @@ files:
     ownership: GENERATED
     mode: render
   # ---- router (controlled /products registry, loaded via glob by frontend-auth) ----
-  - source: templates/src/router/product.ts.ftl
-    target: frontend/src/router/product.ts
+  - source: templates/src/router/business/product.ts.ftl
+    target: frontend/src/router/business/product.ts
     ownership: GENERATED
     mode: render
   # ---- feature views ----
@@ -81,7 +81,7 @@ conformance:
   requiredFiles:
     - frontend/src/types/product.ts
     - frontend/src/api/product.ts
-    - frontend/src/router/product.ts
+    - frontend/src/router/business/product.ts
     - frontend/src/views/product/ProductListView.vue
     - frontend/src/views/product/ProductDetailView.vue
     - frontend/src/views/product/ProductEditView.vue

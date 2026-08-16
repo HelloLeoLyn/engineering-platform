@@ -49,6 +49,10 @@ files:
     target: src/test/resources/db/seed/seed-z-data-permission.sql
     ownership: GENERATED
     mode: render
+  - source: templates/seed-z-data-permission.sql.ftl
+    target: src/main/resources/db/seed-e2e/seed-z-data-permission.sql
+    ownership: GENERATED
+    mode: render
   - source: templates/OrgModelUnitTest.java.ftl
     target: src/test/java/{package}/OrgModelUnitTest.java
     ownership: GENERATED

@@ -106,7 +106,7 @@ class ManagementUiWork004Test {
             assertThat(files).as("asset file: " + target)
                     .anyMatch(f -> f.target().equals(target));
         }
-        assertThat(repo.assetFiles("frontend-enterprise-management")).hasSize(28);
+        assertThat(repo.assetFiles("frontend-enterprise-management")).hasSize(29);
     }
 
     // 2. routes: /system/* registered in frontend-auth router via enterprise routes

@@ -1,0 +1,101 @@
+schemaVersion: 1
+id: frontend-supplier-reference
+type: CAPABILITY
+version: 0.1.0
+description: 前端 Supplier Reference Business Module（V0.6 Generic Module Proof：List/Search/Filter/Create/Edit/Detail/Disable + Dictionary 驱动 status/category + DataScope 行集展示），与后端 supplier-reference 资产构成前后端 Reference Module。复用 WORK-004 全部可复用 UI（AppTable/AppForm/SearchForm/DictionarySelect/StatusTag/ConfirmAction/PermissionButton），经 Platform Request Client，权限 UI 仅可见性（后端 RBAC/DataScope 是最终边界）。V06-WORK-002。
+dependencies:
+  - type: CAPABILITY
+    id: frontend-enterprise-management
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: frontend-permission
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: supplier-reference
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: dictionary
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: menu
+    version: 1.x
+    required: true
+compatibility:
+  java: "25"
+  springBoot: "3.x"
+  requiredCapabilities: [frontend-enterprise-management, frontend-permission, supplier-reference, dictionary, menu]
+files:
+  # ---- types & api (platform request client only) ----
+  - source: templates/src/types/supplier.ts.ftl
+    target: frontend/src/types/supplier.ts
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/api/supplier.ts.ftl
+    target: frontend/src/api/supplier.ts
+    ownership: GENERATED
+    mode: render
+  # ---- router (controlled /suppliers registry, loaded via glob by frontend-auth) ----
+  - source: templates/src/router/business/supplier.ts.ftl
+    target: frontend/src/router/business/supplier.ts
+    ownership: GENERATED
+    mode: render
+  # ---- feature views ----
+  - source: templates/src/views/supplier/SupplierListView.vue.ftl
+    target: frontend/src/views/supplier/SupplierListView.vue
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/views/supplier/SupplierDetailView.vue.ftl
+    target: frontend/src/views/supplier/SupplierDetailView.vue
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/views/supplier/SupplierEditView.vue.ftl
+    target: frontend/src/views/supplier/SupplierEditView.vue
+    ownership: GENERATED
+    mode: render
+  # ---- tests ----
+  - source: templates/tests/supplier-api.spec.ts.ftl
+    target: frontend/tests/supplier-api.spec.ts
+    ownership: GENERATED
+    mode: render
+  - source: templates/tests/supplier-list.spec.ts.ftl
+    target: frontend/tests/supplier-list.spec.ts
+    ownership: GENERATED
+    mode: render
+  - source: templates/tests/supplier-detail.spec.ts.ftl
+    target: frontend/tests/supplier-detail.spec.ts
+    ownership: GENERATED
+    mode: render
+  - source: templates/tests/supplier-route.spec.ts.ftl
+    target: frontend/tests/supplier-route.spec.ts
+    ownership: GENERATED
+    mode: render
+configuration:
+  - key: frontend.supplierRoute
+    description: Supplier 路由前缀（与后端 menu.path 对齐）
+    default: /suppliers
+conformance:
+  requiredFiles:
+    - frontend/src/types/supplier.ts
+    - frontend/src/api/supplier.ts
+    - frontend/src/router/business/supplier.ts
+    - frontend/src/views/supplier/SupplierListView.vue
+    - frontend/src/views/supplier/SupplierDetailView.vue
+    - frontend/src/views/supplier/SupplierEditView.vue
+    - frontend/tests/supplier-api.spec.ts
+    - frontend/tests/supplier-list.spec.ts
+    - frontend/tests/supplier-detail.spec.ts
+    - frontend/tests/supplier-route.spec.ts
+  requiredDependencies: []
+  requiredConfig: []
+  forbiddenImports:
+    - cn.dev33.satoken
+    - org.springframework.security.web
+    - org.springframework.security.config
+  forbiddenImportsExcludedPaths:
+    - frontend/
+documentation:
+  guide: docs/README.md

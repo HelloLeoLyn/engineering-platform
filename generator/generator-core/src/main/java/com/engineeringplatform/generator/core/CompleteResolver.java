@@ -50,6 +50,8 @@ public final class CompleteResolver {
     private final ResolutionReportAssembler reportAssembler;
     private final SummaryRenderer summaryRenderer;
     private final AssetContext assetContext;
+    private final V06ContractProfileResolver v06ProfileResolver;
+    private final BusinessModuleResolver businessModuleResolver;
 
     public CompleteResolver(ManifestValidationPort validationPort) {
         this(validationPort, SnapshotFactory.RESOLVER_VERSION, null);
@@ -85,6 +87,8 @@ public final class CompleteResolver {
         this.reportAssembler = new ResolutionReportAssembler();
         this.summaryRenderer = new SummaryRenderer();
         this.assetContext = assetContext;
+        this.v06ProfileResolver = new V06ContractProfileResolver();
+        this.businessModuleResolver = new BusinessModuleResolver();
     }
 
     public ResolutionResult resolve(ResolverInput input) {
@@ -117,6 +121,12 @@ public final class CompleteResolver {
 
         // Step 7 — Dependency Resolution
         List<ResolvedModule> modules = dependencyResolver.resolve(input, state);
+
+        // V06-WORK-001 — Contract & Profile Foundation (application/stack/frontends)
+        v06ProfileResolver.resolve(input, state);
+
+        // V06-WORK-001 — Generic Business Module Resolution (module business sections)
+        businessModuleResolver.resolve(input, state);
 
         // Step 8 — Capability Resolution
         List<ResolvedCapability> capabilities = capabilityResolver.resolve(input, modules, state);

@@ -43,7 +43,12 @@ public record EffectiveProjectModel(
         Map<String, Object> delivery,
         Map<String, Object> registries,
         Map<String, Provenance> provenance,
-        List<String> warnings) {
+        List<String> warnings,
+        // V06-WORK-001: Contract & Profile Foundation
+        String applicationProfile,
+        String stackProfile,
+        List<ResolvedFrontend> frontends,
+        List<ResolvedBusinessModule> businessModules) {
 
     public EffectiveProjectModel {
         technology = technology == null ? Map.of() : Map.copyOf(technology);
@@ -53,6 +58,8 @@ public record EffectiveProjectModel(
         environments = environments == null ? List.of() : List.copyOf(environments);
         provenance = provenance == null ? Map.of() : Map.copyOf(provenance);
         warnings = warnings == null ? List.of() : List.copyOf(warnings);
+        frontends = frontends == null ? List.of() : List.copyOf(frontends);
+        businessModules = businessModules == null ? List.of() : List.copyOf(businessModules);
     }
 
     public static final int SCHEMA_VERSION = 1;

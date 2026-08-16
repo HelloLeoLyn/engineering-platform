@@ -196,6 +196,30 @@ properties:
     items:
       type: string
 
+  # V06-WORK-001: Application Profile（enterprise certified in V0.6；预留值解析时明确拒绝）
+  applicationProfile:
+    description: Resolved Application Profile id（如 enterprise）。
+    type: string
+
+  # V06-WORK-001: Certified Stack Profile（如 enterprise-java25；技术基线已合并进 technology）
+  stackProfile:
+    description: Resolved Certified Stack Profile id。
+    type: string
+
+  # V06-WORK-001: Frontend Template Profile 列表（V0.6 仅 enterprise-admin certified）
+  frontends:
+    type: array
+    uniqueItems: true
+    items:
+      $ref: '#/$defs/resolvedFrontend'
+
+  # V06-WORK-001: Generic Business Module 结构化定义（后续 Generator 的结构化输入）
+  businessModules:
+    type: array
+    uniqueItems: true
+    items:
+      $ref: '#/$defs/resolvedBusinessModule'
+
 $defs:
   # ---- Resolution Metadata ----
   resolutionMetadata:
@@ -368,3 +392,92 @@ $defs:
         type: string
       description:
         type: string
+
+  # ---- Resolved Frontend (V06-WORK-001) ----
+  resolvedFrontend:
+    type: object
+    additionalProperties: false
+    required: [id, template]
+    properties:
+      id:
+        type: string
+        pattern: ^[a-z0-9]+(-[a-z0-9]+)*$
+      template:
+        type: string
+      status:
+        type: string
+        enum: [certified, reserved]
+
+  # ---- Resolved Business Module (V06-WORK-001) ----
+  resolvedBusinessModule:
+    type: object
+    additionalProperties: false
+    required: [id, name, table]
+    properties:
+      id:
+        type: string
+        pattern: ^[a-z0-9]+(-[a-z0-9]+)*$
+      name:
+        type: string
+      version:
+        type: string
+      table:
+        type: string
+      entity:
+        type: object
+        additionalProperties: false
+        required: [name]
+        properties:
+          name:
+            type: string
+          fields:
+            type: array
+            items:
+              $ref: '#/$defs/businessEntityField'
+      features:
+        type: array
+        uniqueItems: true
+        items:
+          type: string
+      enterprise:
+        type: object
+        additionalProperties:
+          type: boolean
+      frontend:
+        type: object
+        additionalProperties: true
+
+  # ---- Business Entity Field (V06-WORK-001) ----
+  businessEntityField:
+    type: object
+    additionalProperties: false
+    required: [name, type]
+    properties:
+      name:
+        type: string
+      type:
+        type: string
+      required:
+        type: boolean
+      unique:
+        type: boolean
+      length:
+        type: integer
+      precision:
+        type: integer
+      scale:
+        type: integer
+      default:
+        type: [string, number, boolean]
+      primaryKey:
+        type: boolean
+      comment:
+        type: string
+      semantic:
+        type: string
+        enum: [none, dictionary, department, ownership, currentUser, system]
+      dictionary:
+        type: string
+      frontend:
+        type: object
+        additionalProperties: true

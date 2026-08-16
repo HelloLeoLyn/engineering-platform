@@ -38,6 +38,10 @@ class GenerationPlannerTest {
                 Map.of(),
                 Map.of(),
                 Map.of(),
+                List.of(),
+                null,
+                null,
+                List.of(),
                 List.of());
     }
 

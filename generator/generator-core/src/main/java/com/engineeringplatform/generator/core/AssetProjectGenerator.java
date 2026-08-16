@@ -140,6 +140,7 @@ public final class AssetProjectGenerator {
         Map<String, ProjectFile> files = new LinkedHashMap<>();
         addBaseFiles(files, vars, dependencies, groupId, artifactId, projectVersion, repo, epm, options);
         addAssetFiles(files, repo, epm, options, vars);
+        addGenericModuleFiles(files, epm, vars);
 
         // 3. operations (plan stage: path safety checked; failure stops before any write)
         List<GenerationOperation> operations = new ArrayList<>();
@@ -171,6 +172,25 @@ public final class AssetProjectGenerator {
     }
 
     // ---- base project files ----
+
+    /**
+     * V06-WORK-002B — Contract-driven Generic Module Generation.
+     *
+     * Adds dynamically generated backend + frontend files for every resolved
+     * Business Module Contract (EPM.businessModules[]). No per-entity *-reference
+     * capability is required. Files flow through the SAME addFile → GenerationPlanner
+     * → GeneratorExecutor pipeline (Ownership/PathSafety/Conformance all active).
+     */
+    private void addGenericModuleFiles(Map<String, ProjectFile> files, EffectiveProjectModel epm,
+                                       Map<String, String> vars) {
+        if (epm.businessModules() == null || epm.businessModules().isEmpty()) {
+            return;
+        }
+        for (GenericModuleGenerator.GeneratedFile gf : new GenericModuleGenerator().generate(epm, vars)) {
+            addFile(files, gf.target(), gf.content(), Ownership.GENERATED,
+                    "generic-module", false);
+        }
+    }
 
     private void addBaseFiles(Map<String, ProjectFile> files, Map<String, String> vars,
                               List<AssetRepository.MavenDependency> dependencies,
@@ -324,6 +344,21 @@ public final class AssetProjectGenerator {
                             <scope>test</scope>
                         </dependency>
                     </dependencies>
+                    <build>
+                        <plugins>
+                            <plugin>
+                                <groupId>org.springframework.boot</groupId>
+                                <artifactId>spring-boot-maven-plugin</artifactId>
+                                <executions>
+                                    <execution>
+                                        <goals>
+                                            <goal>repackage</goal>
+                                        </goals>
+                                    </execution>
+                                </executions>
+                            </plugin>
+                        </plugins>
+                    </build>
                 </project>
                 """.formatted(SPRING_BOOT_VERSION, groupId, artifactId, version, deps);
     }

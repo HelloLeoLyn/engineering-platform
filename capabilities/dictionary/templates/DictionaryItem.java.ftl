@@ -1,5 +1,8 @@
 package ${package}.domain.entity;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+
 import java.time.LocalDateTime;
 
 /**
@@ -9,7 +12,10 @@ import java.time.LocalDateTime;
  */
 public class DictionaryItem {
 
+    @JsonSerialize(using = ToStringSerializer.class)
+
     private Long id;
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long typeId;
     private String value;
     private String label;

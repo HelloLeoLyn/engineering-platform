@@ -1,9 +1,13 @@
-# module.schema.yaml — Module Contract Schema V1
+# module.schema.yaml — Module Contract Schema V1（V0.6 兼容扩展 business 小节）
 # 依据: Engineering Platform 设计决策记录 V0.7 第 17 节
 # 描述: 模块契约，承载 Identity / Compatibility / Required·Optional
 #       Module & Capability Dependencies / Provides / Resources /
 #       State Machine Metadata / Configuration·Policy Definitions /
 #       Quality Minimum / Migration / Extension Points / Guides / Metadata。
+# V0.6 (V06-WORK-001) 兼容扩展:
+#   - business 小节（可选）: Generic Business Module Contract
+#     table / entity.fields / features / enterprise / frontend metadata
+#     旧 module manifest 不带 business 仍通过（向后兼容）。
 # 约束: 仅声明式 Contract/Metadata；禁止 Secret / 客户 Runtime Values /
 #       业务数据 / 任意可执行代码。
 $schema: https://json-schema.org/draft/2020-12/schema
@@ -252,6 +256,116 @@ properties:
         type: array
         items:
           type: string
+
+  # V06-WORK-001: Generic Business Module Contract（可选）
+  business:
+    type: object
+    additionalProperties: false
+    properties:
+      table:
+        description: 数据库表名（单表模型；V0.6 不做主从/多对多/复杂关系）。
+        type: string
+        pattern: ^[a-z][a-z0-9_]*$
+      entity:
+        type: object
+        additionalProperties: false
+        required: [name, fields]
+        properties:
+          name:
+            type: string
+            minLength: 1
+            maxLength: 200
+          fields:
+            type: array
+            minItems: 1
+            uniqueItems: true
+            items:
+              type: object
+              additionalProperties: false
+              required: [name, type]
+              properties:
+                name:
+                  type: string
+                  pattern: ^[a-z][a-z0-9]*$
+                type:
+                  type: string
+                  enum: [string, number, integer, decimal, boolean, date, datetime, text]
+                required:
+                  type: boolean
+                unique:
+                  type: boolean
+                length:
+                  type: integer
+                  minimum: 1
+                precision:
+                  type: integer
+                  minimum: 1
+                scale:
+                  type: integer
+                  minimum: 0
+                default:
+                  type: [string, number, boolean]
+                primaryKey:
+                  type: boolean
+                comment:
+                  type: string
+                # Semantic mapping: dictionary / department / ownership/currentUser / system
+                semantic:
+                  type: string
+                  enum: [none, dictionary, department, ownership, currentUser, system]
+                dictionary:
+                  description: semantic=dictionary 时引用的字典类型 key。
+                  type: string
+                frontend:
+                  type: object
+                  additionalProperties: false
+                  properties:
+                    label:
+                      type: string
+                    listVisible:
+                      type: boolean
+                    searchVisible:
+                      type: boolean
+                    formVisible:
+                      type: boolean
+                    detailVisible:
+                      type: boolean
+                    component:
+                      type: string
+                    order:
+                      type: integer
+      features:
+        description: 支持的 CRUD 能力。
+        type: array
+        uniqueItems: true
+        items:
+          type: string
+          enum: [list, search, create, edit, detail, enable, disable]
+      enterprise:
+        type: object
+        additionalProperties: false
+        properties:
+          permissions:
+            type: boolean
+          dataScope:
+            type: boolean
+          menu:
+            type: boolean
+          dictionary:
+            type: boolean
+          operationLog:
+            type: boolean
+      frontend:
+        description: 模块级前端元数据（可选；字段级元数据在 entity.fields[].frontend）。
+        type: object
+        additionalProperties: false
+        properties:
+          label:
+            type: string
+          route:
+            type: string
+          menuIcon:
+            type: string
 
   # 明确禁止的敏感/运行时内容 (V0.7 第 17 节)
   secrets: false

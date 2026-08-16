@@ -1,0 +1,70 @@
+schemaVersion: 1
+module:
+  id: customer-lite
+  name: CustomerLite
+  version: 1.0.0
+  type: business
+  description: 'V06-WORK-005 Manual builder proof (no dedicated capability)'
+compatibility:
+  platformVersion: 0.6
+business:
+  table: customer_lite
+  entity:
+    name: CustomerLite
+    fields:
+      - name: code
+        type: string
+        required: true
+        unique: true
+        length: 50
+        comment: 'customer code'
+        frontend:
+          label: Code
+          order: 0
+          searchable: true
+      - name: name
+        type: string
+        required: true
+        length: 100
+        frontend:
+          label: Name
+          order: 1
+          searchable: true
+      - name: phone
+        type: string
+        length: 30
+        comment: 'contact phone'
+        frontend:
+          label: Phone
+          order: 2
+          searchable: true
+      - name: status
+        type: string
+        semantic: dictionary
+        dictionary: customer_status
+        frontend:
+          label: Status
+          order: 3
+      - name: level
+        type: string
+        semantic: dictionary
+        dictionary: customer_level
+        frontend:
+          label: Level
+          order: 4
+  features:
+    - list
+    - search
+    - create
+    - edit
+    - detail
+    - disable
+  enterprise:
+    permissions: true
+    dataScope: true
+    menu: true
+    dictionary: true
+    operationLog: true
+  frontend:
+    route: '/customer-lite'
+    label: CustomerLite

@@ -20,6 +20,20 @@ AI 研发控制（Requirement/WorkItem/Agent Runtime/Tool Control/Approval/任�
 - AI Engineering Control Plane：WorkItem / EngineeringPlan / ImplementationTasks / Agent Execution /
   Tool Guard / VerificationReport（Agent-neutral，不依赖任何具体 Agent Runtime）
 
+## V0.6 能做什么（Console-Driven Full-Stack Generation + Developer Loop）
+
+从 Console 可视化创建/导入业务模块，生成完整全栈 CRUD 应用，并直接在 Console 完成 Build / Run / 日志 / Stop / Restart（V0.6 Certified Stack：`enterprise` + `enterprise-java25` + `enterprise-admin`）。
+
+- **Project Contract V2**：Project / Application / Stack / Frontend Profile 统一契约
+- **Generic Business Module Contract**：业务模块即 Contract（字段/features/enterprise 元数据），零专用 capability
+- **Generic Full-stack CRUD Generation**：任意业务域（如 Customer / Warehouse）→ 完整前后端 CRUD，无业务名硬编码
+- **Enterprise Admin UI 2.0**：EP Design Tokens / AppLayout / 组件体系
+- **Engineering Platform Console**：Project Builder（6 步向导） / Business Module Builder / MySQL Schema Import / Excel Import / Build & Run / Logs / Runtime
+- **Generate → Environment Preflight → Build → Start → Status → Logs → Open → Stop/Restart**：全部复用 Runtime Recipe，项目级 Java 25 隔离
+- **Real MySQL + Browser Golden Path**：真实 MySQL 导入 → 生成 → 运行 → 浏览器 CRUD 全链路验收
+
+报告：[V06-ARCHITECTURE-PLAN](V06-ARCHITECTURE-PLAN.md) ｜ [V06-WORK-005](V06-WORK-005-IMPLEMENTATION-REPORT.md) ｜ [V06-WORK-006](V06-WORK-006-IMPLEMENTATION-REPORT.md) ｜ [V06-FINAL-ACCEPTANCE](V06-FINAL-ACCEPTANCE-REPORT.md)（V0.6 RELEASE DECISION = GO）
+
 ## Getting Started（V0.3）
 
 新用户从这里开始：[Getting Started Guide](docs/guides/getting-started.md) —— 只需一份 `project.yaml` + `./ep` 命令，即可生成真实可编译的 Spring Boot 项目：
@@ -136,3 +150,13 @@ python3 generator/scripts/validate-agent-execution-contracts.py   # Agent 9/9
 详见 `docs/release/V0.1-LIMITATIONS.md` 与 `docs/release/V0.1-RELEASE-CHECKLIST.md`。
 要点：无真实 Agent Adapter；Browser capability 未实现；Shell Guard 是 Policy Guard 非 OS sandbox；
 Approval 无 UI；JDK25 本地 Build Gate 未执行；部分 Operation 类型为 Contract-only（SKIPPED）。
+
+## V0.7 Backlog（记录，不实施）
+
+- Enterprise Admin UI refinement
+- richer Excel import
+- dictionary / business semantic improvements
+- persistent build/runtime history
+- stronger datasource preflight
+- additional frontend templates
+- Portal / E-commerce 后续方向

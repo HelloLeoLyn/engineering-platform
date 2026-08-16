@@ -4,4 +4,10 @@ registry:
   version: 1
 entries:
   - id: sample-customer
-    description: Sample customer CRUD module (backend/modules/sample-customer)
+    description: Sample customer CRUD module (reference module)
+  - id: supplier
+    description: Supplier business module (V0.6 generic module proof; business contract in module manifest)
+  - id: customer-lite
+    description: V06-WORK-002B genericity proof domain (Contract-only, no dedicated capability)
+  - id: warehouse-lite
+    description: V06-WORK-002B genericity proof domain (Contract-only, no dedicated capability)

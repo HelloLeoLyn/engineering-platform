@@ -86,7 +86,7 @@ class ProductDataScopeE2ETest {
         ResponseEntity<Map> own = get(token, "/api/products/5");
         assertThat(own.getStatusCode()).isEqualTo(HttpStatus.OK);
         ResponseEntity<Map> other = get(token, "/api/products/2");
-        assertThat(other.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(other.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         Map error = (Map) other.getBody().get("error");
         assertThat(String.valueOf(error.get("code"))).isEqualTo("PRODUCT_NOT_FOUND");
     }
@@ -98,7 +98,7 @@ class ProductDataScopeE2ETest {
         ResponseEntity<Map> own = get(token, "/api/products/6");
         assertThat(own.getStatusCode()).isEqualTo(HttpStatus.OK);
         ResponseEntity<Map> other = get(token, "/api/products/1");
-        assertThat(other.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(other.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         Map error = (Map) other.getBody().get("error");
         assertThat(String.valueOf(error.get("code"))).isEqualTo("PRODUCT_NOT_FOUND");
     }
@@ -111,7 +111,7 @@ class ProductDataScopeE2ETest {
         String token = token("sales-manager", "admin123");
         ResponseEntity<Map> update = rest.exchange(url("/api/products/5"),
                 HttpMethod.PUT, json(token, "{\"code\":\"PRD-005\",\"name\":\"Hacked\"}"), Map.class);
-        assertThat(update.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(update.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         Map error = (Map) update.getBody().get("error");
         assertThat(String.valueOf(error.get("code"))).isEqualTo("PRODUCT_NOT_FOUND");
         // product 5 unchanged
@@ -127,7 +127,7 @@ class ProductDataScopeE2ETest {
         String token = token("finance-user", "admin123");
         ResponseEntity<Map> disable = rest.exchange(url("/api/products/2/disable"),
                 HttpMethod.POST, json(token, "{}"), Map.class);
-        assertThat(disable.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(disable.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         Map error = (Map) disable.getBody().get("error");
         assertThat(String.valueOf(error.get("code"))).isEqualTo("PRODUCT_NOT_FOUND");
     }

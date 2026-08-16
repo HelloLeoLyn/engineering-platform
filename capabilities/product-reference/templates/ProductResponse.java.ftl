@@ -1,5 +1,8 @@
 package ${package}.application.product;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+
 import java.time.LocalDateTime;
 
 /**
@@ -7,6 +10,7 @@ import java.time.LocalDateTime;
  * Stable API payload — never exposes the persistence entity or MyBatis types.
  */
 public record ProductResponse(
+        @JsonSerialize(using = ToStringSerializer.class)
         Long id,
         String code,
         String name,

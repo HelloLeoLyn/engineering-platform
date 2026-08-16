@@ -1,9 +1,14 @@
-# project.schema.yaml — Project Composition Contract Schema V1
+# project.schema.yaml — Project Composition Contract Schema V2
 # 依据: Engineering Platform 设计决策记录 V0.7 第 17 节
 # 描述: 项目组合契约，承载项目身份 / 平台约束 / 多维 Profile /
 #       Technology Choice / Modules / Capabilities / Providers /
 #       Quality / Environment Declaration / Delivery Policy /
 #       Metadata / Customer Constraints。
+# V0.6 (V06-WORK-001) 兼容扩展:
+#   - application.profile  Application Profile（enterprise certified；corporate-portal/ecommerce/custom 预留）
+#   - stack.profile       Certified Stack Profile（enterprise-java25）
+#   - frontends           Frontend Template Profile 列表（enterprise-admin certified；其余预留 unsupported）
+#   - modules             支持字符串简写（"- supplier"）与对象形式（旧 manifest 兼容）
 # 约束: 仅声明式 Contract/Metadata；禁止 Secret / 客户 Runtime Values /
 #       业务数据 / 任意可执行代码。
 $schema: https://json-schema.org/draft/2020-12/schema
@@ -121,25 +126,64 @@ properties:
       vite:
         type: string
 
+  # V06-WORK-001: modules 支持字符串简写（"- supplier"）与对象形式（旧 manifest 兼容）
   modules:
     type: array
     minItems: 0
     uniqueItems: true
     items:
+      oneOf:
+        - type: string
+        - type: object
+          additionalProperties: false
+          required: [id]
+          properties:
+            id:
+              type: string
+              pattern: ^[a-z0-9]+(-[a-z0-9]+)*$
+            version:
+              type: string
+              pattern: ^\d+\.\d+\.\d+$
+            required:
+              type: boolean
+            enabled:
+              type: boolean
+
+  # V06-WORK-001: Application Profile（与 Frontend Template 解耦；V0.6 仅 enterprise certified）
+  application:
+    type: object
+    additionalProperties: false
+    properties:
+      profile:
+        type: string
+        enum: [enterprise, corporate-portal, ecommerce, custom]
+        description: Application Profile id（enterprise certified in V0.6；corporate-portal/ecommerce/custom 预留）
+
+  # V06-WORK-001: Certified Stack Profile 引用（定义见 platform.yaml technology.stackProfiles）
+  stack:
+    type: object
+    additionalProperties: false
+    properties:
+      profile:
+        type: string
+        pattern: ^[a-z0-9]+(-[a-z0-9]+)*$
+        description: Certified Stack Profile id（如 enterprise-java25）
+
+  # V06-WORK-001: Frontend Template Profile 列表（V0.6 仅 enterprise-admin certified）
+  frontends:
+    type: array
+    uniqueItems: true
+    items:
       type: object
       additionalProperties: false
-      required: [id]
+      required: [id, template]
       properties:
         id:
           type: string
           pattern: ^[a-z0-9]+(-[a-z0-9]+)*$
-        version:
+        template:
           type: string
-          pattern: ^\d+\.\d+\.\d+$
-        required:
-          type: boolean
-        enabled:
-          type: boolean
+          enum: [enterprise-admin, modern-console, simple-admin, corporate-website, commerce-storefront, custom]
 
   capabilities:
     type: array

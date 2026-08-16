@@ -109,8 +109,8 @@ class PlatformOrgDataPermissionWork003Test {
                 .anyMatch(d -> d.id().equals("rbac") && d.required());
         List<AssetRepository.AssetFileSpec> files = repo.assetFiles("data-permission");
         // V0.4 WORK-005: Product validation host moved to product-reference asset;
-        // data-permission keeps only the DataScope core (7 files).
-        assertThat(files).hasSize(7);
+        // data-permission keeps the DataScope core (8 files).
+        assertThat(files).hasSize(8);
         assertThat(files).anyMatch(f -> f.target().endsWith("common/security/DataScope.java"));
         assertThat(files).anyMatch(f -> f.target().endsWith("application/datascope/DataScopeResolver.java"));
         assertThat(files).anyMatch(f -> f.target().endsWith("db/migration/V004__data_permission.sql"));

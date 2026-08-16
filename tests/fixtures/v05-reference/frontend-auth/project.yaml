@@ -26,5 +26,7 @@ capabilities:
   - id: frontend-permission
   - id: frontend-enterprise-management
   - id: frontend-product-reference
+  - id: runtime-recipe
+  - id: playwright-e2e
 quality:
   minimum: Q2

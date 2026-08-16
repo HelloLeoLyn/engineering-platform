@@ -15,6 +15,31 @@ technology:
   # surfaced via EPM.technology and enforced by Engineering Conformance.
   java: "25"
   springBoot: "3.x"
+  # V06-WORK-001: Certified Stack Profile（技术栈由 Profile 管理，不散落 Generator if/else）
+  stackProfiles:
+    enterprise-java25:
+      status: certified
+      description: Enterprise Java 25 reference stack (V0.6 certified)
+      backend:
+        java: "25"
+        springBoot: "3.x"
+        build: maven
+        persistence: mybatis-plus
+        migration: flyway
+        database: mysql
+        api: rest
+        validation: jakarta-validation
+      frontend:
+        framework: vue3
+        language: typescript
+        build: vite
+        state: pinia
+        ui: element-plus
+        uiSystem: ep-ui
+      testing:
+        unit: junit
+        frontendUnit: vitest
+        browserE2E: playwright-golden-path
 
 profiles:
   presets:
@@ -78,6 +103,43 @@ guides:
   architecture: { path: docs/architecture }
   standards: { path: docs/standards }
   ai: { path: docs/ai }
+
+# V06-WORK-001: Application Profiles（与 Frontend Template 解耦；V0.6 仅 enterprise certified）
+applicationProfiles:
+  enterprise:
+    status: certified
+    description: Enterprise admin application (V0.6 certified)
+  corporate-portal:
+    status: reserved
+    description: Corporate portal (reserved, not implemented in V0.6)
+  ecommerce:
+    status: reserved
+    description: Independent e-commerce (reserved, not implemented in V0.6)
+  custom:
+    status: reserved
+    description: Custom application profile (reserved)
+
+# V06-WORK-001: Frontend Templates（V0.6 仅 enterprise-admin certified，其余预留 unsupported）
+frontendTemplates:
+  enterprise-admin:
+    status: certified
+    description: Enterprise admin template (V0.6 certified)
+    assets: [frontend-shell, frontend-auth, frontend-permission, frontend-enterprise-management]
+  modern-console:
+    status: reserved
+    description: Modern console template (reserved, not implemented in V0.6)
+  simple-admin:
+    status: reserved
+    description: Simple admin template (reserved, not implemented in V0.6)
+  corporate-website:
+    status: reserved
+    description: Corporate website template (reserved, not implemented in V0.6)
+  commerce-storefront:
+    status: reserved
+    description: Commerce storefront template (reserved, not implemented in V0.6)
+  custom:
+    status: reserved
+    description: Custom frontend template (reserved)
 
 metadata:
   ownerTeam: platform-team

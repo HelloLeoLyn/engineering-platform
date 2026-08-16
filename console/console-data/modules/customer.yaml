@@ -1,0 +1,75 @@
+schemaVersion: 1
+module:
+  id: customer
+  name: Customer
+  version: 1.0.0
+  type: business
+  description: 'V06-FINAL Manual module proof (Contract-only, no dedicated capability)'
+compatibility:
+  platformVersion: 0.6
+business:
+  table: customer
+  entity:
+    name: Customer
+    fields:
+      - name: code
+        type: string
+        required: true
+        unique: true
+        length: 50
+        comment: 'customer code'
+        frontend:
+          label: Code
+          order: 0
+          searchable: true
+          listVisible: true
+      - name: name
+        type: string
+        required: true
+        length: 100
+        comment: 'customer name'
+        frontend:
+          label: Name
+          order: 1
+          searchable: true
+          listVisible: true
+      - name: phone
+        type: string
+        length: 30
+        comment: 'contact phone'
+        frontend:
+          label: Phone
+          order: 2
+          listVisible: true
+      - name: status
+        type: string
+        semantic: dictionary
+        dictionary: customer_status
+        frontend:
+          label: Status
+          order: 3
+          listVisible: true
+      - name: level
+        type: string
+        semantic: dictionary
+        dictionary: customer_level
+        frontend:
+          label: Level
+          order: 4
+          listVisible: true
+  features:
+    - list
+    - search
+    - create
+    - edit
+    - detail
+    - disable
+  enterprise:
+    permissions: true
+    dataScope: true
+    menu: true
+    dictionary: true
+    operationLog: true
+  frontend:
+    route: '/customer'
+    label: Customer

@@ -1,0 +1,37 @@
+schemaVersion: 1
+project:
+  basePackage: com.acme.core
+  name: MySqlCustomer
+  groupId: com.acme
+  id: mysql-customer
+  version: 1.0.0
+  artifactId: mysql-customer
+platform:
+  id: engineering-platform
+application:
+  profile: enterprise
+stack:
+  profile: enterprise-java25
+frontends:
+  - template: enterprise-admin
+    id: admin
+modules:
+  - mysql-customer
+capabilities:
+  - id: web
+  - id: validation
+  - id: exception-handling
+  - id: platform-core
+  - id: authentication
+  - id: rbac
+  - id: organization
+  - id: data-permission
+  - id: menu
+  - id: dictionary
+  - id: operation-log
+  - id: frontend-shell
+  - id: frontend-auth
+  - id: frontend-permission
+  - id: frontend-enterprise-management
+quality:
+  minimum: Q2

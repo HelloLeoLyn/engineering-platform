@@ -1,0 +1,93 @@
+schemaVersion: 1
+id: playwright-e2e
+type: CAPABILITY
+version: 0.1.0
+description: 生成应用 Browser E2E（Playwright）：login/menu/user/role/department/menu mgmt/dictionary/operation-log/product/security/datascope。URL 从 Runtime Recipe state（.runtime/*.url）读取，不硬编码。V05-WORK-006 唯一正式 Browser Acceptance。
+dependencies:
+  - type: CAPABILITY
+    id: runtime-recipe
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: frontend-product-reference
+    version: 1.x
+    required: true
+compatibility:
+  java: "25"
+  springBoot: "3.x"
+  requiredCapabilities: [runtime-recipe, frontend-product-reference]
+files:
+  - source: templates/playwright.config.ts.ftl
+    target: e2e/playwright.config.ts
+    ownership: GENERATED
+    mode: render
+  - source: templates/package.json.ftl
+    target: e2e/package.json
+    ownership: GENERATED
+    mode: render
+  - source: templates/specs/fixtures.ts.ftl
+    target: e2e/specs/fixtures.ts
+    ownership: GENERATED
+    mode: render
+  - source: templates/specs/login-menu.spec.ts.ftl
+    target: e2e/specs/login-menu.spec.ts
+    ownership: GENERATED
+    mode: render
+  - source: templates/specs/crud/user.spec.ts.ftl
+    target: e2e/specs/crud/user.spec.ts
+    ownership: GENERATED
+    mode: render
+  - source: templates/specs/crud/role.spec.ts.ftl
+    target: e2e/specs/crud/role.spec.ts
+    ownership: GENERATED
+    mode: render
+  - source: templates/specs/crud/department.spec.ts.ftl
+    target: e2e/specs/crud/department.spec.ts
+    ownership: GENERATED
+    mode: render
+  - source: templates/specs/crud/menu.spec.ts.ftl
+    target: e2e/specs/crud/menu.spec.ts
+    ownership: GENERATED
+    mode: render
+  - source: templates/specs/crud/dictionary.spec.ts.ftl
+    target: e2e/specs/crud/dictionary.spec.ts
+    ownership: GENERATED
+    mode: render
+  - source: templates/specs/operation-log.spec.ts.ftl
+    target: e2e/specs/operation-log.spec.ts
+    ownership: GENERATED
+    mode: render
+  - source: templates/specs/product.spec.ts.ftl
+    target: e2e/specs/product.spec.ts
+    ownership: GENERATED
+    mode: render
+  - source: templates/specs/security-datascope.spec.ts.ftl
+    target: e2e/specs/security-datascope.spec.ts
+    ownership: GENERATED
+    mode: render
+  - source: templates/README.e2e.md.ftl
+    target: e2e/README.md
+    ownership: GENERATED
+    mode: render
+configuration:
+  - key: e2e.workers
+    description: Playwright workers（默认 1，避免共享 H2 状态竞争）
+    default: "1"
+conformance:
+  requiredFiles:
+    - e2e/playwright.config.ts
+    - e2e/package.json
+    - e2e/specs/fixtures.ts
+    - e2e/specs/login-menu.spec.ts
+    - e2e/specs/product.spec.ts
+    - e2e/specs/security-datascope.spec.ts
+  requiredDependencies: []
+  requiredConfig: []
+  forbiddenImports:
+    - cn.dev33.satoken
+    - org.springframework.security.web
+    - org.springframework.security.config
+  forbiddenImportsExcludedPaths:
+    - frontend/
+documentation:
+  guide: docs/README.md

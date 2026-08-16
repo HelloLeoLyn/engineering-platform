@@ -1,0 +1,154 @@
+schemaVersion: 1
+id: supplier-reference
+type: CAPABILITY
+version: 0.1.0
+description: Supplier Reference Business Module（V0.6 Generic Module Proof：第二个业务域，证明 Generic Generation 非 Copy-Paste。与 product-reference 同构——List/Search/Create/Edit/Detail/Disable + RBAC/DataScope/Menu/Dictionary/OperationLog 全链路，复用同一资产组合）。
+dependencies:
+  - type: CAPABILITY
+    id: platform-core
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: exception-handling
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: web
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: validation
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: persistence
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: authentication
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: rbac
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: organization
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: data-permission
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: dictionary
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: operation-log
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: menu
+    version: 1.x
+    required: true
+compatibility:
+  java: "25"
+  springBoot: "3.x"
+  requiredCapabilities: [platform-core, exception-handling, web, validation, persistence, authentication, rbac, organization, data-permission, dictionary, operation-log, menu]
+files:
+  - source: templates/Supplier.java.ftl
+    target: src/main/java/{package}/domain/entity/Supplier.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/SupplierMapper.java.ftl
+    target: src/main/java/{package}/infrastructure/persistence/mapper/SupplierMapper.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/SupplierPort.java.ftl
+    target: src/main/java/{package}/application/supplier/SupplierPort.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/MybatisSupplierRepository.java.ftl
+    target: src/main/java/{package}/infrastructure/persistence/MybatisSupplierRepository.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/SupplierService.java.ftl
+    target: src/main/java/{package}/application/supplier/SupplierService.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/SupplierController.java.ftl
+    target: src/main/java/{package}/api/supplier/SupplierController.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/SupplierCreateRequest.java.ftl
+    target: src/main/java/{package}/application/supplier/SupplierCreateRequest.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/SupplierUpdateRequest.java.ftl
+    target: src/main/java/{package}/application/supplier/SupplierUpdateRequest.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/SupplierResponse.java.ftl
+    target: src/main/java/{package}/application/supplier/SupplierResponse.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/SupplierBeansConfig.java.ftl
+    target: src/main/java/{package}/infrastructure/persistence/SupplierBeansConfig.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/V009__supplier_reference.sql.ftl
+    target: src/main/resources/db/migration/V009__supplier_reference.sql
+    ownership: GENERATED
+    mode: render
+  - source: templates/seed-zzz-supplier.sql.ftl
+    target: src/test/resources/db/seed/seed-zzz-supplier.sql
+    ownership: GENERATED
+    mode: render
+  - source: templates/seed-zzz-supplier.sql.ftl
+    target: src/main/resources/db/seed-e2e/seed-zzz-supplier.sql
+    ownership: GENERATED
+    mode: render
+  - source: templates/SupplierDataScopeE2ETest.java.ftl
+    target: src/test/java/{package}/SupplierDataScopeE2ETest.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/SupplierModelUnitTest.java.ftl
+    target: src/test/java/{package}/SupplierModelUnitTest.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/SupplierHttpE2ETest.java.ftl
+    target: src/test/java/{package}/SupplierHttpE2ETest.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/EnterpriseCompositionE2ETest.java.ftl
+    target: src/test/java/{package}/EnterpriseCompositionE2ETest.java
+    ownership: GENERATED
+    mode: render
+conformance:
+  requiredFiles:
+    - src/main/java/{package}/domain/entity/Supplier.java
+    - src/main/java/{package}/infrastructure/persistence/mapper/SupplierMapper.java
+    - src/main/java/{package}/application/supplier/SupplierPort.java
+    - src/main/java/{package}/infrastructure/persistence/MybatisSupplierRepository.java
+    - src/main/java/{package}/application/supplier/SupplierService.java
+    - src/main/java/{package}/api/supplier/SupplierController.java
+    - src/main/java/{package}/infrastructure/persistence/SupplierBeansConfig.java
+    - src/main/resources/db/migration/V009__supplier_reference.sql
+    - src/test/resources/db/seed/seed-zzz-supplier.sql
+    - src/test/java/{package}/SupplierModelUnitTest.java
+    - src/test/java/{package}/SupplierHttpE2ETest.java
+    - src/test/java/{package}/SupplierDataScopeE2ETest.java
+    - src/test/java/{package}/EnterpriseCompositionE2ETest.java
+  requiredDependencies:
+    - com.h2database:h2
+  requiredConfig:
+    - spring.datasource.url
+  forbiddenImports:
+    - cn.dev33.satoken
+    - org.springframework.security.web
+    - org.springframework.security.config
+  forbiddenImportsExcludedPaths:
+    - src/main/java/{package}/infrastructure/
+documentation:
+  guide: docs/README.md

@@ -33,6 +33,8 @@ entries:
     description: 操作日志企业能力（@OperationLog 切面 enforcement + SUCCESS/FAILURE + 敏感数据安全 Gate）
   - id: product-reference
     description: Reference Product CRUD（V0.4 验证宿主：真实消费全部企业能力的业务模块，非通用 CRUD Generator）
+  - id: supplier-reference
+    description: Supplier Reference Business Module（V06-WORK-002 Generic Module Proof：第二业务域，证明 Generic Generation 非 Copy-Paste）
   - id: frontend-shell
     description: 前端 Shell 基础能力（Vue3+TS+Vite+Router+Pinia+Element Plus+Vitest 工程配置，frontend/ additive output）
   - id: frontend-auth
@@ -43,3 +45,9 @@ entries:
     description: 前端企业管理 UI（User/Role+Permission/Department/Menu/Dictionary/OperationLog 页面 + AppTable/AppForm/DepartmentTree/DictionarySelect 可复用组件 + /system/* 受控路由，V05-WORK-004）
   - id: frontend-product-reference
     description: 前端 Product Reference Business Module（List/Search/Create/Edit/Detail/Disable + Dictionary 驱动 + DataScope 行集，V05-WORK-005）
+  - id: frontend-supplier-reference
+    description: 前端 Supplier Reference Business Module（V06-WORK-002 Generic Module Proof：List/Search/Create/Edit/Detail/Disable + Dictionary 驱动 + DataScope 行集）
+  - id: runtime-recipe
+    description: 生成应用标准 Runtime Recipe（dev-start/stop/status + e2e profile + runnable boot jar 契约，V05-WORK-006）
+  - id: playwright-e2e
+    description: 生成应用 Browser E2E（Playwright，URL 从 runtime state 读取，V05-WORK-006）

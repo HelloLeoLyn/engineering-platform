@@ -1,0 +1,94 @@
+schemaVersion: 1
+module:
+  id: excel-warehouse
+  name: ExcelWarehouse
+  version: 1.0.0
+  type: business
+  description: 'V06-WORK-005 Excel Import proof (template-driven)'
+compatibility:
+  platformVersion: 0.6
+business:
+  table: excel_warehouse
+  entity:
+    name: ExcelWarehouse
+    fields:
+      - name: code
+        type: string
+        required: true
+        unique: true
+        length: 50
+        comment: 'customer code'
+        frontend:
+          label: Code
+          order: 0
+          searchable: true
+          listVisible: true
+          formVisible: true
+          detailVisible: true
+      - name: name
+        type: string
+        required: true
+        unique: false
+        length: 100
+        frontend:
+          label: Name
+          order: 1
+          searchable: true
+          listVisible: true
+          formVisible: true
+          detailVisible: true
+      - name: address
+        type: string
+        required: false
+        unique: false
+        length: 200
+        comment: 'warehouse address'
+        frontend:
+          label: Address
+          order: 2
+          searchable: true
+          listVisible: true
+          formVisible: true
+          detailVisible: true
+      - name: manager
+        type: string
+        required: false
+        unique: false
+        length: 50
+        frontend:
+          label: Manager
+          order: 3
+          searchable: true
+          listVisible: true
+          formVisible: true
+          detailVisible: true
+      - name: status
+        type: string
+        required: true
+        unique: false
+        length: 20
+        semantic: dictionary
+        dictionary: warehouse_status
+        frontend:
+          label: Status
+          order: 4
+          searchable: false
+          listVisible: true
+          formVisible: true
+          detailVisible: true
+  features:
+    - list
+    - search
+    - create
+    - edit
+    - detail
+    - disable
+  enterprise:
+    permissions: true
+    dataScope: true
+    menu: true
+    dictionary: true
+    operationLog: true
+  frontend:
+    route: '/excel-warehouse'
+    label: ExcelWarehouse

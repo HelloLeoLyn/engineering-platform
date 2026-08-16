@@ -1,0 +1,50 @@
+schemaVersion: 1
+module:
+  id: mysql-customer
+  name: MySqlCustomer
+  version: 1.0.0
+  type: business
+  description: 'MySQL import proof'
+compatibility:
+  platformVersion: 0.6
+business:
+  table: demo_customer
+  entity:
+    name: MySqlCustomer
+    fields:
+      - name: code
+        type: string
+        required: true
+        unique: true
+        length: 50
+      - name: name
+        type: string
+        required: true
+        length: 100
+      - name: phone
+        type: string
+        length: 30
+      - name: status
+        type: string
+        required: true
+        length: 20
+        defaultValue: ENABLED
+      - name: level
+        type: string
+        length: 20
+  features:
+    - list
+    - search
+    - create
+    - edit
+    - detail
+    - disable
+  enterprise:
+    permissions: true
+    dataScope: true
+    menu: true
+    dictionary: true
+    operationLog: true
+  frontend:
+    route: '/mysql-customer'
+    label: MySqlCustomer

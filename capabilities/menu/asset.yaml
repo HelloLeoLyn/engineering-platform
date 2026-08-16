@@ -77,6 +77,10 @@ files:
     target: src/test/resources/db/seed/seed-zz-menu.sql
     ownership: GENERATED
     mode: render
+  - source: templates/seed-zz-menu.sql.ftl
+    target: src/main/resources/db/seed-e2e/seed-zz-menu.sql
+    ownership: GENERATED
+    mode: render
   - source: templates/MenuModelUnitTest.java.ftl
     target: src/test/java/{package}/MenuModelUnitTest.java
     ownership: GENERATED

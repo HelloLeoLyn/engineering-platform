@@ -1,5 +1,8 @@
 package ${package}.api.user;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+
 import java.util.List;
 
 /**
@@ -8,6 +11,7 @@ import java.util.List;
  * UX (menu/button visibility). Authorization always stays backend-side.
  */
 public record CurrentUserResponse(
+        @JsonSerialize(using = ToStringSerializer.class)
         Long id,
         String username,
         Long departmentId,

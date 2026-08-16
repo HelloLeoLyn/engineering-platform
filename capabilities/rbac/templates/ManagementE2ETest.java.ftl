@@ -111,14 +111,14 @@ class ManagementE2ETest {
         // invalid department rejected
         ResponseEntity<Map> badDept = post(t, "/api/users",
                 "{\"username\":\"mgmt-user-2\",\"departmentId\":999}");
-        assertThat(badDept.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(badDept.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(((Map) badDept.getBody().get("error")).get("code")).isEqualTo("DEPARTMENT_NOT_FOUND");
 
         // transaction boundary: invalid role reference rolls back the whole create
         // (no partial user row survives the failed unit of work)
         ResponseEntity<Map> badRole = post(t, "/api/users",
                 "{\"username\":\"mgmt-rollback-probe\",\"roleIds\":[999999]}");
-        assertThat(badRole.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(badRole.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(((Map) badRole.getBody().get("error")).get("code")).isEqualTo("ROLE_NOT_FOUND");
         ResponseEntity<Map> probeList = get(t, "/api/users?page=1&size=20&username=mgmt-rollback-probe");
         Map probeData = (Map) probeList.getBody().get("data");
@@ -227,7 +227,7 @@ class ManagementE2ETest {
         // invalid permission rejected
         ResponseEntity<Map> badPerm = post(t, "/api/menus",
                 "{\"parentId\":4,\"code\":\"mgmt-menu-2\",\"name\":\"Bad\",\"type\":\"MENU\",\"permissionCode\":\"no:such:perm\"}");
-        assertThat(badPerm.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(badPerm.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(((Map) badPerm.getBody().get("error")).get("code")).isEqualTo("MENU_PERMISSION_NOT_FOUND");
     }
 

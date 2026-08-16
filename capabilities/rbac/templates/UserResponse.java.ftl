@@ -1,5 +1,8 @@
 package ${package}.application.rbac;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -8,10 +11,12 @@ import java.util.List;
  * Never exposes passwordHash or any password material.
  */
 public record UserResponse(
+        @JsonSerialize(using = ToStringSerializer.class)
         Long id,
         String username,
         Boolean enabled,
         Long departmentId,
+        @JsonSerialize(contentUsing = ToStringSerializer.class)
         List<Long> roleIds,
         LocalDateTime createdAt) {
 

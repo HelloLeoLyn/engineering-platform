@@ -1,0 +1,68 @@
+schemaVersion: 1
+module:
+  id: warehouse-lite
+  name: WarehouseLite
+  version: 1.0.0
+  type: business
+  description: 'V06-WORK-005 generic proof domain (no dedicated capability)'
+compatibility:
+  platformVersion: 0.6
+business:
+  table: warehouse_lite
+  entity:
+    name: WarehouseLite
+    fields:
+      - name: code
+        type: string
+        required: true
+        unique: true
+        length: 50
+        frontend:
+          label: Code
+          order: 0
+          searchable: true
+      - name: name
+        type: string
+        required: true
+        length: 100
+        frontend:
+          label: Name
+          order: 1
+          searchable: true
+      - name: address
+        type: string
+        length: 200
+        comment: 'warehouse address'
+        frontend:
+          label: Address
+          order: 2
+      - name: manager
+        type: string
+        length: 50
+        comment: 'warehouse manager'
+        frontend:
+          label: Manager
+          order: 3
+      - name: status
+        type: string
+        semantic: dictionary
+        dictionary: warehouse_status
+        frontend:
+          label: Status
+          order: 4
+  features:
+    - list
+    - search
+    - create
+    - edit
+    - detail
+    - disable
+  enterprise:
+    permissions: true
+    dataScope: true
+    menu: true
+    dictionary: true
+    operationLog: true
+  frontend:
+    route: '/warehouse-lite'
+    label: WarehouseLite

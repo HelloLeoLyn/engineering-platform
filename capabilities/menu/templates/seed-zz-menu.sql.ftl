@@ -2,25 +2,32 @@
 -- Loaded only by the test profile. Extends rbac seed (users/roles/permissions).
 -- Filename keeps alphabetical order AFTER seed-z-data-permission.sql.
 
--- Permissions: rbac seed has 1=system:user:read; data-permission seed has 2=product:item:read
-INSERT INTO sys_permission (id, code, name, created_at, updated_at) VALUES
-  (3, 'system:menu:manage', 'Manage menus', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
--- Menus: tree with DIRECTORY containers, MENU/ACTION leaves, one disabled node.
--- 1  System (DIRECTORY)
---  2    User management (MENU, needs system:user:read)
---  3    Menu management (ACTION, needs system:menu:manage)
--- 4  Products (DIRECTORY)
---  5    Product list (MENU, needs product:item:read)
--- 6  Disabled node (MENU, enabled=0 — must never appear)
+-- Menus: DIRECTORY containers with MENU leaves aligned to V0.5 management routes.
+-- permission_code references the V05-WORK-003 permission registry (rbac seed 7-30).
+-- 1  System (DIRECTORY, /system)
+--  2    User management       (MENU,   /system/users,        system:user:read)
+--  3    Role & Permission     (MENU,   /system/roles,        system:role:read)
+--  4    Permission registry   (MENU,   /system/permissions,  system:permission:read)
+--  5    Department management (MENU,   /system/departments,  system:department:read)
+--  6    Menu management       (MENU,   /system/menus,        system:menu:read)
+--  7    Dictionary management (MENU,   /system/dictionaries, system:dictionary:read)
+--  8    Operation log         (MENU,   /system/operation-logs, system:operation-log:read)
+-- 9  Products (DIRECTORY, /product)
+--  10   Product list          (MENU,   /product/list,        product:item:read)
+-- 11 Disabled node (MENU, enabled=0 — must never appear)
 INSERT INTO sys_menu (id, parent_id, code, name, type, path, permission_code, enabled, sort, created_at, updated_at) VALUES
   (1, NULL, 'system', 'System', 'DIRECTORY', '/system', NULL, 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (2, 1, 'system-user', 'User management', 'MENU', '/system/user', 'system:user:read', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (3, 1, 'system-menu', 'Menu management', 'ACTION', '/system/menu', 'system:menu:manage', 1, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (4, NULL, 'product', 'Products', 'DIRECTORY', '/product', NULL, 1, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (5, 4, 'product-list', 'Product list', 'MENU', '/product/list', 'product:item:read', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (6, 4, 'product-disabled', 'Disabled', 'MENU', '/product/disabled', 'product:item:read', 0, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  (2, 1, 'system-user', 'User management', 'MENU', '/system/users', 'system:user:read', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (3, 1, 'system-role', 'Role & Permission', 'MENU', '/system/roles', 'system:role:read', 1, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (4, 1, 'system-permission', 'Permission registry', 'MENU', '/system/permissions', 'system:permission:read', 1, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (5, 1, 'system-department', 'Department management', 'MENU', '/system/departments', 'system:department:read', 1, 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (6, 1, 'system-menu', 'Menu management', 'MENU', '/system/menus', 'system:menu:read', 1, 5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (7, 1, 'system-dictionary', 'Dictionary management', 'MENU', '/system/dictionaries', 'system:dictionary:read', 1, 6, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (8, 1, 'system-operation-log', 'Operation log', 'MENU', '/system/operation-logs', 'system:operation-log:read', 1, 7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (9, NULL, 'product', 'Products', 'DIRECTORY', '/product', NULL, 1, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (10, 9, 'product-list', 'Product list', 'MENU', '/products', 'product:item:read', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (11, 9, 'product-disabled', 'Disabled', 'MENU', '/product/disabled', 'product:item:read', 0, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
--- Grant menu:manage to admin role (rbac seed: role 1=admin, role_permission 1=system:user:read; data-permission seed: 2..6 used)
-INSERT INTO sys_role_permission (id, role_id, permission_id, created_at) VALUES
-  (7, 1, 3, CURRENT_TIMESTAMP);
+-- Menu visibility relies on role_permission grants: admin already holds 7-30
+-- (rbac seed ids 100-123), so admin sees all management menus; viewer (role 2)
+-- has only system:user:read (id 1) and sees just the User menu.

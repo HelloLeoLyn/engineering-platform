@@ -1,0 +1,37 @@
+schemaVersion: 1
+project:
+  name: ExcelWarehouse
+  basePackage: com.acme.core
+  artifactId: excel-warehouse
+  version: 1.0.0
+  id: excel-warehouse
+  groupId: com.acme
+platform:
+  id: engineering-platform
+application:
+  profile: enterprise
+stack:
+  profile: enterprise-java25
+frontends:
+  - id: admin
+    template: enterprise-admin
+modules:
+  - excel-warehouse
+capabilities:
+  - id: web
+  - id: validation
+  - id: exception-handling
+  - id: platform-core
+  - id: authentication
+  - id: rbac
+  - id: organization
+  - id: data-permission
+  - id: menu
+  - id: dictionary
+  - id: operation-log
+  - id: frontend-shell
+  - id: frontend-auth
+  - id: frontend-permission
+  - id: frontend-enterprise-management
+quality:
+  minimum: Q2

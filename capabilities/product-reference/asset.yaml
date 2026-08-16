@@ -105,6 +105,10 @@ files:
     target: src/test/resources/db/seed/seed-zzz-product.sql
     ownership: GENERATED
     mode: render
+  - source: templates/seed-zzz-product.sql.ftl
+    target: src/main/resources/db/seed-e2e/seed-zzz-product.sql
+    ownership: GENERATED
+    mode: render
   - source: templates/DataScopeE2ETest.java.ftl
     target: src/test/java/{package}/DataScopeE2ETest.java
     ownership: GENERATED

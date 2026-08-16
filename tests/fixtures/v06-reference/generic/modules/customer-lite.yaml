@@ -1,0 +1,46 @@
+schemaVersion: 1
+module:
+  id: customer-lite
+  name: CustomerLite
+  version: 1.0.0
+  type: business
+  description: V06-WORK-005 generic proof domain (Contract-only, no dedicated capability)
+compatibility:
+  platformVersion: "0.6"
+business:
+  table: customer_lite
+  entity:
+    name: CustomerLite
+    fields:
+      - name: code
+        type: string
+        required: true
+        unique: true
+        length: 50
+        comment: customer code
+      - name: name
+        type: string
+        required: true
+        length: 100
+      - name: phone
+        type: string
+        length: 30
+        comment: contact phone
+      - name: status
+        type: string
+        semantic: dictionary
+        dictionary: customer_status
+      - name: level
+        type: string
+        semantic: dictionary
+        dictionary: customer_level
+  features: [list, search, create, edit, detail, disable]
+  enterprise:
+    permissions: true
+    dataScope: true
+    menu: true
+    dictionary: true
+    operationLog: true
+  frontend:
+    route: /customer-lite
+    label: CustomerLite

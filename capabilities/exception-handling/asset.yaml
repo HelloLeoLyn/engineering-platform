@@ -8,6 +8,22 @@ dependencies:
     id: web
     version: 1.x
     required: true
+  # V06-FINAL: GlobalExceptionHandler maps PlatformException (platform-core)
+  # to stable HTTP semantics — declare the dependency so backend-only projects
+  # that enable exception-handling also resolve platform-core (was an implicit
+  # dependency that broke `mvn test` on v03 backend-only fixtures).
+  - type: CAPABILITY
+    id: platform-core
+    version: 1.x
+    required: true
+  # V06-FINAL: GlobalExceptionHandler maps PlatformException (platform-core)
+  # to stable HTTP semantics — declare the dependency so backend-only projects
+  # that enable exception-handling also resolve platform-core (was an implicit
+  # dependency that broke `mvn test` on v03 backend-only fixtures).
+  - type: CAPABILITY
+    id: platform-core
+    version: 1.x
+    required: true
 compatibility:
   java: "25"
   springBoot: "3.x"

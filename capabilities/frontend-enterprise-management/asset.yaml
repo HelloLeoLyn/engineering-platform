@@ -96,6 +96,10 @@ files:
     target: frontend/src/components/DictionarySelect.vue
     ownership: GENERATED
     mode: render
+  - source: templates/src/components/StatCard.vue.ftl
+    target: frontend/src/components/StatCard.vue
+    ownership: GENERATED
+    mode: render
   # ---- router (controlled /system/* registry) ----
   - source: templates/src/router/enterprise.ts.ftl
     target: frontend/src/router/enterprise.ts
@@ -167,6 +171,7 @@ conformance:
     - frontend/src/components/AppForm.vue
     - frontend/src/components/DepartmentTree.vue
     - frontend/src/components/DictionarySelect.vue
+    - frontend/src/components/StatCard.vue
     - frontend/src/router/enterprise.ts
     - frontend/src/views/system/UserManagementView.vue
     - frontend/src/views/system/RoleManagementView.vue

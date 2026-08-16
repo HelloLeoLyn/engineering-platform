@@ -39,7 +39,11 @@ public final class EffectiveProjectModelAssembler {
                 delivery(input),
                 registries(input),
                 state.provenance(),
-                state.warnings());
+                state.warnings(),
+                state.applicationProfile(),
+                state.stackProfile(),
+                state.frontends(),
+                state.businessModules());
     }
 
     private static Map<String, Object> identity(ResolverInput input) {

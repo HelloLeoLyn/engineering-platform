@@ -76,6 +76,58 @@ properties:
         description: Reference Spring Boot baseline constraint (V02-WORK-006), e.g. "3.x".
         type: string
         maxLength: 50
+      # V06-WORK-001: Certified Stack Profiles（技术栈由 Profile 管理，不散落 Generator if/else）
+      stackProfiles:
+        type: object
+        additionalProperties:
+          type: object
+          additionalProperties: false
+          required: [status]
+          properties:
+            status:
+              type: string
+              enum: [certified, reserved]
+            description:
+              type: string
+              maxLength: 2000
+            backend:
+              type: object
+              additionalProperties:
+                type: [string, number, boolean]
+            frontend:
+              type: object
+              additionalProperties:
+                type: [string, number, boolean]
+            testing:
+              type: object
+              additionalProperties:
+                type: [string, number, boolean]
+      # V06-WORK-001: Certified Stack Profiles（技术栈由 Profile 管理，不散落 Generator if/else）
+      stackProfiles:
+        type: object
+        additionalProperties:
+          type: object
+          additionalProperties: false
+          required: [status]
+          properties:
+            status:
+              type: string
+              enum: [certified, reserved]
+            description:
+              type: string
+              maxLength: 2000
+            backend:
+              type: object
+              additionalProperties:
+                type: [string, number, boolean]
+            frontend:
+              type: object
+              additionalProperties:
+                type: [string, number, boolean]
+            testing:
+              type: object
+              additionalProperties:
+                type: [string, number, boolean]
 
   profiles:
     type: object
@@ -230,6 +282,76 @@ properties:
       properties:
         path:
           type: string
+
+  # V06-WORK-001: Application Profiles（与 Frontend Template 解耦；V0.6 仅 enterprise certified）
+  applicationProfiles:
+    type: object
+    additionalProperties:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [certified, reserved]
+        description:
+          type: string
+          maxLength: 2000
+
+  # V06-WORK-001: Frontend Templates（V0.6 仅 enterprise-admin certified，其余预留 unsupported）
+  frontendTemplates:
+    type: object
+    additionalProperties:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [certified, reserved]
+        description:
+          type: string
+          maxLength: 2000
+        assets:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+
+  # V06-WORK-001: Application Profiles（与 Frontend Template 解耦；V0.6 仅 enterprise certified）
+  applicationProfiles:
+    type: object
+    additionalProperties:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [certified, reserved]
+        description:
+          type: string
+          maxLength: 2000
+
+  # V06-WORK-001: Frontend Templates（V0.6 仅 enterprise-admin certified，其余预留 unsupported）
+  frontendTemplates:
+    type: object
+    additionalProperties:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [certified, reserved]
+        description:
+          type: string
+          maxLength: 2000
+        assets:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
 
   metadata:
     type: object

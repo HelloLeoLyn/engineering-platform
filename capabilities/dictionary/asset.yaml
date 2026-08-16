@@ -77,6 +77,10 @@ files:
     target: src/test/resources/db/seed/seed-zz-dictionary.sql
     ownership: GENERATED
     mode: render
+  - source: templates/seed-zz-dictionary.sql.ftl
+    target: src/main/resources/db/seed-e2e/seed-zz-dictionary.sql
+    ownership: GENERATED
+    mode: render
   - source: templates/DictionaryModelUnitTest.java.ftl
     target: src/test/java/{package}/DictionaryModelUnitTest.java
     ownership: GENERATED

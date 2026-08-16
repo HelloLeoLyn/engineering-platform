@@ -15,11 +15,13 @@
   },
   "dependencies": {
     "element-plus": "^2.9.0",
+    "@element-plus/icons-vue": "^2.3.1",
     "pinia": "^2.3.0",
     "vue": "^3.5.0",
     "vue-router": "^4.4.0"
   },
   "devDependencies": {
+    "@types/node": "^22.0.0",
     "@vitejs/plugin-vue": "^5.2.0",
     "@vue/test-utils": "^2.4.6",
     "jsdom": "^25.0.0",

@@ -1,5 +1,8 @@
 package ${package}.domain.entity;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+
 import java.time.LocalDateTime;
 
 /**
@@ -8,6 +11,8 @@ import java.time.LocalDateTime;
  * Pure domain POJO — no persistence annotations (infrastructure owns mapping).
  */
 public class DictionaryType {
+
+    @JsonSerialize(using = ToStringSerializer.class)
 
     private Long id;
     private String code;

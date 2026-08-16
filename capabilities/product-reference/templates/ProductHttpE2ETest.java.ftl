@@ -103,6 +103,12 @@ class ProductHttpE2ETest {
         Map data = (Map) created.getBody().get("data");
         Object id = data.get("id");
         assertThat(id).isNotNull();
+        // API Boundary ID String Contract: Snowflake id must be a JSON string
+        // (exceeds JS Number.MAX_SAFE_INTEGER — a number would lose precision)
+        assertThat(id).isInstanceOf(String.class);
+        assertThat(Long.parseLong(String.valueOf(id)))
+                .as("snowflake id exceeds Number.MAX_SAFE_INTEGER")
+                .isGreaterThan(9007199254740991L);
         assertThat(String.valueOf(data.get("createdBy"))).isEqualTo("1"); // admin, server-side
 
         ResponseEntity<Map> detail = get(token, "/api/products/" + id);
@@ -158,7 +164,7 @@ class ProductHttpE2ETest {
     void missingDetailFails() {
         String token = token("admin", "admin123");
         ResponseEntity<Map> detail = get(token, "/api/products/999999");
-        assertThat(detail.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(detail.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         Map error = (Map) detail.getBody().get("error");
         assertThat(String.valueOf(error.get("code"))).isEqualTo("PRODUCT_NOT_FOUND");
     }

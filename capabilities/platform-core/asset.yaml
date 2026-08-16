@@ -39,6 +39,14 @@ files:
     target: src/main/java/{package}/common/core/IdGenerator.java
     ownership: GENERATED
     mode: render
+  - source: templates/HealthController.java.ftl
+    target: src/main/java/{package}/api/health/HealthController.java
+    ownership: GENERATED
+    mode: render
+  - source: templates/LongIdDeserializer.java.ftl
+    target: src/main/java/{package}/common/core/LongIdDeserializer.java
+    ownership: GENERATED
+    mode: render
   - source: templates/PlatformCoreConsumptionTest.java.ftl
     target: src/test/java/{package}/common/core/PlatformCoreConsumptionTest.java
     ownership: GENERATED
@@ -46,6 +54,7 @@ files:
 conformance:
   requiredFiles:
     - src/main/java/{package}/common/core/ApiResponse.java
+    - src/main/java/{package}/api/health/HealthController.java
     - src/main/java/{package}/common/core/ErrorCode.java
     - src/main/java/{package}/common/core/PlatformException.java
     - src/main/java/{package}/common/core/PageQuery.java

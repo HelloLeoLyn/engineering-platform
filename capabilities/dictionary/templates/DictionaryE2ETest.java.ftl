@@ -78,7 +78,7 @@ class DictionaryE2ETest {
     @Test
     void missingTypeRejected() {
         ResponseEntity<Map> response = rest.getForEntity(url("/api/dictionaries/missing/items"), Map.class);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         Map body = response.getBody();
         Map error = (Map) body.get("error");
         assertThat(String.valueOf(error.get("code"))).isEqualTo("DICTIONARY_TYPE_NOT_FOUND");

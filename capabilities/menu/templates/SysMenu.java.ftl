@@ -1,5 +1,8 @@
 package ${package}.domain.entity;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+
 import java.time.LocalDateTime;
 
 /**
@@ -11,7 +14,10 @@ import java.time.LocalDateTime;
  */
 public class SysMenu {
 
+    @JsonSerialize(using = ToStringSerializer.class)
+
     private Long id;
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long parentId;
     private String code;
     private String name;

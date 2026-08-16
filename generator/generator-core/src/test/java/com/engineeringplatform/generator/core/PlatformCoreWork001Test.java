@@ -98,9 +98,9 @@ class PlatformCoreWork001Test {
         assertThat(asset).as("platform-core capability asset must load").isNotNull();
         assertThat(asset.id()).isEqualTo("platform-core");
         assertThat(asset.type().name()).isEqualTo("CAPABILITY");
-        // 8 core templates + 1 consumption test template
+        // 9 core templates + 1 consumption test template + HealthController + LongIdDeserializer
         List<AssetRepository.AssetFileSpec> files = repo.assetFiles("platform-core");
-        assertThat(files).hasSize(9);
+        assertThat(files).hasSize(11);
         assertThat(files).anyMatch(f -> f.target().endsWith("common/core/ApiResponse.java"));
         assertThat(files).anyMatch(f -> f.target().endsWith("common/core/IdGenerator.java"));
     }

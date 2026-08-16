@@ -35,6 +35,12 @@ public final class IntermediateResolutionState {
     private final List<ResolutionReport.SecurityFinding> securityFindings;
     private final List<String> deprecatedExperimentalAssets;
 
+    // ---- V06-WORK-001: Contract & Profile Foundation ----
+    private final String applicationProfile;
+    private final String stackProfile;
+    private final List<ResolvedFrontend> frontends;
+    private final List<ResolvedBusinessModule> businessModules;
+
     private IntermediateResolutionState(Builder b) {
         this.resolvedValues = Map.copyOf(b.resolvedValues);
         this.provenance = Map.copyOf(b.provenance);
@@ -51,6 +57,10 @@ public final class IntermediateResolutionState {
         this.compatibilityFindings = List.copyOf(b.compatibilityFindings);
         this.securityFindings = List.copyOf(b.securityFindings);
         this.deprecatedExperimentalAssets = List.copyOf(b.deprecatedExperimentalAssets);
+        this.applicationProfile = b.applicationProfile;
+        this.stackProfile = b.stackProfile;
+        this.frontends = List.copyOf(b.frontends);
+        this.businessModules = List.copyOf(b.businessModules);
     }
 
     // ---- 004B getters ----
@@ -71,6 +81,12 @@ public final class IntermediateResolutionState {
     public List<ResolutionReport.CompatibilityFinding> compatibilityFindings() { return compatibilityFindings; }
     public List<ResolutionReport.SecurityFinding> securityFindings() { return securityFindings; }
     public List<String> deprecatedExperimentalAssets() { return deprecatedExperimentalAssets; }
+
+    // ---- V06-WORK-001 getters ----
+    public String applicationProfile() { return applicationProfile; }
+    public String stackProfile() { return stackProfile; }
+    public List<ResolvedFrontend> frontends() { return frontends; }
+    public List<ResolvedBusinessModule> businessModules() { return businessModules; }
 
     public boolean hasErrors() { return !errors.isEmpty(); }
     public boolean hasFatalErrors() {
@@ -95,6 +111,10 @@ public final class IntermediateResolutionState {
         private final List<ResolutionReport.CompatibilityFinding> compatibilityFindings = new ArrayList<>();
         private final List<ResolutionReport.SecurityFinding> securityFindings = new ArrayList<>();
         private final List<String> deprecatedExperimentalAssets = new ArrayList<>();
+        private String applicationProfile;
+        private String stackProfile;
+        private final List<ResolvedFrontend> frontends = new ArrayList<>();
+        private final List<ResolvedBusinessModule> businessModules = new ArrayList<>();
 
         // ---- 004B builders ----
         public Builder value(String key, Object value) { resolvedValues.put(key, value); return this; }
@@ -119,6 +139,12 @@ public final class IntermediateResolutionState {
         public Builder compatibilityFinding(ResolutionReport.CompatibilityFinding cf) { compatibilityFindings.add(cf); return this; }
         public Builder securityFinding(ResolutionReport.SecurityFinding sf) { securityFindings.add(sf); return this; }
         public Builder deprecatedAsset(String asset) { deprecatedExperimentalAssets.add(asset); return this; }
+
+        // ---- V06-WORK-001 builders ----
+        public Builder applicationProfile(String profile) { this.applicationProfile = profile; return this; }
+        public Builder stackProfile(String profile) { this.stackProfile = profile; return this; }
+        public Builder frontend(ResolvedFrontend f) { frontends.add(f); return this; }
+        public Builder businessModule(ResolvedBusinessModule m) { businessModules.add(m); return this; }
 
         public IntermediateResolutionState build() {
             return new IntermediateResolutionState(this);

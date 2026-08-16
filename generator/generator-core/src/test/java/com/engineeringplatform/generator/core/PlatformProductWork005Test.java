@@ -100,7 +100,7 @@ class PlatformProductWork005Test {
                 .anyMatch(d -> d.id().equals("menu") && d.required())
                 .anyMatch(d -> d.id().equals("persistence") && d.required());
         List<AssetRepository.AssetFileSpec> files = repo.assetFiles("product-reference");
-        assertThat(files).hasSize(17);
+        assertThat(files).hasSize(18);
         assertThat(files).anyMatch(f -> f.target().endsWith("domain/entity/Product.java"));
         assertThat(files).anyMatch(f -> f.target().endsWith("application/product/ProductService.java"));
         assertThat(files).anyMatch(f -> f.target().endsWith("api/product/ProductController.java"));

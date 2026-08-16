@@ -79,7 +79,7 @@ class MenuE2ETest {
         List<Map> tree = myMenuTree(token);
         assertThat(tree).hasSize(2); // System + Products containers
         List<Map> systemChildren = (List<Map>) tree.get(0).get("children");
-        assertThat(systemChildren).hasSize(2); // User management + Menu management
+        assertThat(systemChildren).hasSize(7); // V0.5 management menus: user/role/permission/department/menu/dictionary/op-log
         List<Map> productChildren = (List<Map>) tree.get(1).get("children");
         assertThat(productChildren).hasSize(1); // Product list only (disabled excluded)
     }

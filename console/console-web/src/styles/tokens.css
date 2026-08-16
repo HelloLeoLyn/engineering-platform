@@ -1,0 +1,113 @@
+/* ============================================================
+ * EP Console Design Tokens (V06-WORK-004)
+ * Engineering Platform Console — its own identity, same visual
+ * language family as the platform Design System (lavender canvas,
+ * tinted surfaces, soft layered shadows, metric typography).
+ * ============================================================ */
+:root {
+  --ep-color-canvas: #f4f5fa;
+  --ep-color-canvas-deep: #eceef6;
+  --ep-color-surface: #ffffff;
+  --ep-color-surface-muted: #f8f9fc;
+  --ep-color-surface-tinted: #f1f3fa;
+  --ep-color-surface-hover: #f3f4fa;
+  --ep-color-surface-active: #e9ecf7;
+  --ep-color-surface-glass: rgba(255, 255, 255, 0.7);
+
+  --ep-color-text: #1b2137;
+  --ep-color-text-secondary: #57607d;
+  --ep-color-text-muted: #8a93ab;
+  --ep-color-text-inverse: #ffffff;
+
+  --ep-color-border: #e6e9f2;
+  --ep-color-border-strong: #d6dae8;
+
+  --ep-color-primary: #6366f1;
+  --ep-color-primary-hover: #4f52e8;
+  --ep-color-primary-soft: #eef0fe;
+  --ep-color-primary-soft-strong: #e0e3fd;
+
+  --ep-accent-indigo: #6366f1;
+  --ep-accent-violet: #8b5cf6;
+  --ep-accent-cyan: #06b6d4;
+  --ep-accent-sky: #0ea5e9;
+  --ep-accent-emerald: #10b981;
+  --ep-accent-amber: #f59e0b;
+  --ep-accent-rose: #f43f5e;
+  --ep-accent-orange: #f97316;
+
+  --ep-accent-indigo-soft: #eef0fe;
+  --ep-accent-violet-soft: #f5f0ff;
+  --ep-accent-cyan-soft: #e8f9fc;
+  --ep-accent-sky-soft: #eaf5fe;
+  --ep-accent-emerald-soft: #e9faf3;
+  --ep-accent-amber-soft: #fdf3e2;
+  --ep-accent-rose-soft: #fdeef1;
+  --ep-accent-orange-soft: #fef0e7;
+
+  --ep-color-success: #10b981;
+  --ep-color-warning: #f59e0b;
+  --ep-color-danger: #f43f5e;
+  --ep-color-info: #64748b;
+
+  --ep-font-family: 'Inter', 'Segoe UI', 'PingFang SC', 'Microsoft YaHei',
+    system-ui, -apple-system, sans-serif;
+  --ep-font-size-display: 28px;
+  --ep-font-size-page: 22px;
+  --ep-font-size-section: 16px;
+  --ep-font-size-base: 14px;
+  --ep-font-size-sm: 13px;
+  --ep-font-size-xs: 12px;
+  --ep-font-size-metric: 30px;
+  --ep-font-weight-medium: 500;
+  --ep-font-weight-semibold: 600;
+  --ep-font-weight-bold: 700;
+  --ep-line-height-tight: 1.25;
+
+  --ep-space-1: 4px;
+  --ep-space-2: 8px;
+  --ep-space-3: 12px;
+  --ep-space-4: 16px;
+  --ep-space-5: 24px;
+  --ep-space-6: 32px;
+
+  --ep-radius-sm: 8px;
+  --ep-radius-base: 10px;
+  --ep-radius-lg: 14px;
+  --ep-radius-xl: 18px;
+  --ep-radius-pill: 999px;
+
+  --ep-shadow-xs: 0 1px 2px rgba(24, 29, 56, 0.04);
+  --ep-shadow-sm: 0 1px 2px rgba(24, 29, 56, 0.05), 0 2px 8px rgba(24, 29, 56, 0.04);
+  --ep-shadow-base: 0 2px 4px rgba(24, 29, 56, 0.04), 0 6px 18px rgba(24, 29, 56, 0.05);
+  --ep-shadow-lg: 0 6px 14px rgba(24, 29, 56, 0.06), 0 14px 32px rgba(24, 29, 56, 0.07);
+
+  --ep-transition-fast: 120ms ease;
+  --ep-transition-base: 200ms ease;
+
+  --ep-sidebar-width: 240px;
+  --ep-header-height: 60px;
+  --ep-content-max-width: 1280px;
+}
+
+body {
+  font-family: var(--ep-font-family);
+  font-size: var(--ep-font-size-base);
+  line-height: 1.55;
+  color: var(--ep-color-text);
+  background: var(--ep-color-canvas);
+  -webkit-font-smoothing: antialiased;
+  margin: 0;
+}
+
+:root {
+  --el-color-primary: var(--ep-color-primary);
+  --el-color-primary-light-9: var(--ep-color-primary-soft);
+  --el-color-success: var(--ep-color-success);
+  --el-color-warning: var(--ep-color-warning);
+  --el-color-danger: var(--ep-color-danger);
+  --el-color-error: var(--ep-color-danger);
+  --el-color-info: var(--ep-color-info);
+  --el-border-radius-base: var(--ep-radius-sm);
+  --el-font-family: var(--ep-font-family);
+}

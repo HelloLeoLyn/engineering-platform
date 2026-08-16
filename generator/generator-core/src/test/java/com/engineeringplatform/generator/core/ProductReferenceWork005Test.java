@@ -88,7 +88,7 @@ class ProductReferenceWork005Test {
         for (String target : List.of(
                 "frontend/src/types/product.ts",
                 "frontend/src/api/product.ts",
-                "frontend/src/router/product.ts",
+                "frontend/src/router/business/product.ts",
                 "frontend/src/views/product/ProductListView.vue",
                 "frontend/src/views/product/ProductDetailView.vue",
                 "frontend/src/views/product/ProductEditView.vue",
@@ -102,7 +102,7 @@ class ProductReferenceWork005Test {
         assertThat(repo.assetFiles("frontend-product-reference")).hasSize(10);
     }
 
-    // 2. product routes registered (loaded via glob by frontend-auth router)
+    // 2. product routes registered (aggregated via business/*.ts glob by frontend-auth router, V06-WORK-002B)
     @Test
     void productRoutesRegistered() throws Exception {
         AssetRepository repo = AssetRepository.load(repoRoot());
@@ -111,10 +111,12 @@ class ProductReferenceWork005Test {
         generate(repo, epm, out);
 
         String router = Files.readString(out.resolve("frontend/src/router/index.ts"), StandardCharsets.UTF_8);
-        assertThat(router).contains("import.meta.glob('../router/product.ts', { eager: true })")
-                .contains("...productRoutes");
+        assertThat(router).contains("import.meta.glob('../router/business/*.ts', { eager: true })")
+                .contains("...businessRoutes")
+                .doesNotContain("../router/product.ts");
 
-        String product = Files.readString(out.resolve("frontend/src/router/product.ts"), StandardCharsets.UTF_8);
+        String product = Files.readString(out.resolve("frontend/src/router/business/product.ts"), StandardCharsets.UTF_8);
+        assertThat(product).contains("export const businessRoutes");
         for (String route : List.of("/products", "/products/:id", "/products/:id/edit")) {
             assertThat(product).as("route " + route).contains(route);
         }

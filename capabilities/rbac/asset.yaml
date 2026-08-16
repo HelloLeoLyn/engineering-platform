@@ -173,8 +173,16 @@ files:
     target: src/test/resources/db/seed/seed-test-data.sql
     ownership: GENERATED
     mode: render
+  - source: templates/seed-test-data.sql.ftl
+    target: src/main/resources/db/seed-e2e/seed-test-data.sql
+    ownership: GENERATED
+    mode: render
   - source: templates/application-test.yml.ftl
     target: src/test/resources/application-test.yml
+    ownership: GENERATED
+    mode: render
+  - source: templates/application-e2e.yml.ftl
+    target: src/main/resources/application-e2e.yml
     ownership: GENERATED
     mode: render
   - source: templates/AuthRbacE2ETest.java.ftl

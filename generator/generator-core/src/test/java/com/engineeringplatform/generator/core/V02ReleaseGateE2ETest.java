@@ -113,8 +113,9 @@ class V02ReleaseGateE2ETest {
         assertThat(resolution.status()).isEqualTo(ResolutionResult.Status.SUCCESS);
         EffectiveProjectModel epm = resolution.effectiveProject();
 
-        // 2. EPM capabilities = 6
-        assertThat(epm.capabilities()).hasSize(6);
+        // 2. EPM capabilities = 7 (web/validation/exception-handling/audit + platform-core
+        //    via exception-handling's declared dependency, V06-FINAL)
+        assertThat(epm.capabilities()).hasSize(7);
 
         // 3. persistence provider = mybatis-plus
         assertThat(epm.providers()).anyMatch(p -> p.id().equals("mybatis-plus")

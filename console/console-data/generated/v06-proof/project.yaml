@@ -1,0 +1,39 @@
+schemaVersion: 1
+project:
+  id: v06-proof
+  name: V06Proof
+  version: 1.0.0
+  basePackage: com.acme.core
+  groupId: com.acme
+  artifactId: v06-proof
+platform:
+  id: engineering-platform
+application:
+  profile: enterprise
+stack:
+  profile: enterprise-java25
+frontends:
+  - id: admin
+    template: enterprise-admin
+modules:
+  - supplier
+  - customer-lite
+capabilities:
+  - id: web
+  - id: validation
+  - id: exception-handling
+  - id: platform-core
+  - id: authentication
+  - id: rbac
+  - id: organization
+  - id: data-permission
+  - id: menu
+  - id: dictionary
+  - id: operation-log
+  - id: frontend-shell
+  - id: frontend-auth
+  - id: frontend-permission
+  - id: frontend-enterprise-management
+  - id: runtime-recipe
+quality:
+  minimum: Q2

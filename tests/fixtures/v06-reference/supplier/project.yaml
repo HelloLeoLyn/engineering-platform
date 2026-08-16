@@ -1,0 +1,30 @@
+schemaVersion: 1
+project:
+  id: core-demo
+  name: Core Demo Service
+  version: 1.0.0
+  basePackage: com.acme.core
+  groupId: com.acme
+  artifactId: core-demo
+platform:
+  id: engineering-platform
+capabilities:
+  - id: web
+  - id: validation
+  - id: exception-handling
+  - id: platform-core
+  - id: authentication
+  - id: rbac
+  - id: organization
+  - id: data-permission
+  - id: menu
+  - id: dictionary
+  - id: operation-log
+  - id: supplier-reference
+  - id: frontend-shell
+  - id: frontend-auth
+  - id: frontend-permission
+  - id: frontend-enterprise-management
+  - id: frontend-supplier-reference
+quality:
+  minimum: Q2

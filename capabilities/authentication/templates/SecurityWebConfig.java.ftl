@@ -17,6 +17,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class SecurityWebConfig implements WebMvcConfigurer {
 
     // Secret comes from environment reference (never committed).
+    // Resolution order: AUTH_TOKEN_SECRET env var -> auth.token.secret config.
     // SpEL form avoids dollar-brace collision with the template renderer.
     @Value("#{environment['auth.token.secret']}")
     private String tokenSecret;
@@ -24,9 +25,21 @@ public class SecurityWebConfig implements WebMvcConfigurer {
     @Value("#{environment['auth.token.expiration-seconds'] ?: 3600}")
     private long expirationSeconds;
 
+    private String resolveSecret() {
+        if (tokenSecret != null && !tokenSecret.isBlank()) {
+            return tokenSecret;
+        }
+        String env = System.getenv("AUTH_TOKEN_SECRET");
+        if (env != null && !env.isBlank()) {
+            return env;
+        }
+        throw new IllegalStateException(
+                "auth.token.secret is not configured; set AUTH_TOKEN_SECRET environment variable");
+    }
+
     @Bean
     public TokenService tokenService() {
-        return new TokenService(tokenSecret, expirationSeconds, CurrentClock.system(), IdGenerator.uuid());
+        return new TokenService(resolveSecret(), expirationSeconds, CurrentClock.system(), IdGenerator.uuid());
     }
 
     @Bean
@@ -38,6 +51,6 @@ public class SecurityWebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(authInterceptor(tokenService()))
                 .addPathPatterns("/api/**")
-                .excludePathPatterns("/api/auth/login");
+                .excludePathPatterns("/api/auth/login", "/api/health");
     }
 }

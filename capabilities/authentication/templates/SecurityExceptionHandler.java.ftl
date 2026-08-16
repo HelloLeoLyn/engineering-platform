@@ -34,7 +34,12 @@ public class SecurityExceptionHandler {
         if (code == null) {
             return HttpStatus.INTERNAL_SERVER_ERROR;
         }
-        switch (code.code()) {
+        String c = code.code();
+        // business "not found" semantics -> 404 (Product/User/Role/Dept/Menu/Dictionary/Permission...)
+        if (c.endsWith("NOT_FOUND")) {
+            return HttpStatus.NOT_FOUND;
+        }
+        switch (c) {
             case "UNAUTHENTICATED":
             case "INVALID_CREDENTIALS":
             case "TOKEN_INVALID":
