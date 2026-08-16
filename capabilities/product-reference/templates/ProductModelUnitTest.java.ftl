@@ -61,6 +61,20 @@ class ProductModelUnitTest {
                     query.page(), query.size());
         }
 
+        @Override
+        public PageResult<Product> findPageByScopeFiltered(
+                DataPermissionContext context, PageQuery query,
+                String keyword, String status, String category) {
+            List<Product> scoped = findByScope(context).stream()
+                    .filter(p -> keyword == null || keyword.isBlank()
+                            || p.getCode().contains(keyword) || p.getName().contains(keyword))
+                    .filter(p -> status == null || status.isBlank() || status.equals(p.getStatus()))
+                    .filter(p -> category == null || category.isBlank() || category.equals(p.getCategory()))
+                    .toList();
+            return PageResult.of(scoped, scoped.size(),
+                    query.page(), query.size());
+        }
+
         private boolean visible(Product p, DataPermissionContext context) {
             if (context == null || context.scope() == null || context.scope() == DataScope.ALL) {
                 return true;

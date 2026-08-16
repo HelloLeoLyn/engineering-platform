@@ -1,0 +1,101 @@
+schemaVersion: 1
+id: frontend-product-reference
+type: CAPABILITY
+version: 0.1.0
+description: 前端 Product Reference Business Module（List/Search/Filter/Create/Edit/Detail/Disable + Dictionary 驱动 status/category + DataScope 行集展示），与后端 product-reference 资产构成前后端 Reference Module。复用 WORK-004 全部可复用 UI，经 Platform Request Client，权限 UI 仅可见性（后端 RBAC/DataScope 是最终边界）。V05-WORK-005。
+dependencies:
+  - type: CAPABILITY
+    id: frontend-enterprise-management
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: frontend-permission
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: product-reference
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: dictionary
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: menu
+    version: 1.x
+    required: true
+compatibility:
+  java: "25"
+  springBoot: "3.x"
+  requiredCapabilities: [frontend-enterprise-management, frontend-permission, product-reference, dictionary, menu]
+files:
+  # ---- types & api (platform request client only) ----
+  - source: templates/src/types/product.ts.ftl
+    target: frontend/src/types/product.ts
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/api/product.ts.ftl
+    target: frontend/src/api/product.ts
+    ownership: GENERATED
+    mode: render
+  # ---- router (controlled /products registry, loaded via glob by frontend-auth) ----
+  - source: templates/src/router/product.ts.ftl
+    target: frontend/src/router/product.ts
+    ownership: GENERATED
+    mode: render
+  # ---- feature views ----
+  - source: templates/src/views/product/ProductListView.vue.ftl
+    target: frontend/src/views/product/ProductListView.vue
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/views/product/ProductDetailView.vue.ftl
+    target: frontend/src/views/product/ProductDetailView.vue
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/views/product/ProductEditView.vue.ftl
+    target: frontend/src/views/product/ProductEditView.vue
+    ownership: GENERATED
+    mode: render
+  # ---- tests ----
+  - source: templates/tests/product-api.spec.ts.ftl
+    target: frontend/tests/product-api.spec.ts
+    ownership: GENERATED
+    mode: render
+  - source: templates/tests/product-list.spec.ts.ftl
+    target: frontend/tests/product-list.spec.ts
+    ownership: GENERATED
+    mode: render
+  - source: templates/tests/product-detail.spec.ts.ftl
+    target: frontend/tests/product-detail.spec.ts
+    ownership: GENERATED
+    mode: render
+  - source: templates/tests/product-route.spec.ts.ftl
+    target: frontend/tests/product-route.spec.ts
+    ownership: GENERATED
+    mode: render
+configuration:
+  - key: frontend.productRoute
+    description: Product 路由前缀（与后端 menu.path 对齐）
+    default: /products
+conformance:
+  requiredFiles:
+    - frontend/src/types/product.ts
+    - frontend/src/api/product.ts
+    - frontend/src/router/product.ts
+    - frontend/src/views/product/ProductListView.vue
+    - frontend/src/views/product/ProductDetailView.vue
+    - frontend/src/views/product/ProductEditView.vue
+    - frontend/tests/product-api.spec.ts
+    - frontend/tests/product-list.spec.ts
+    - frontend/tests/product-detail.spec.ts
+    - frontend/tests/product-route.spec.ts
+  requiredDependencies: []
+  requiredConfig: []
+  forbiddenImports:
+    - cn.dev33.satoken
+    - org.springframework.security.web
+    - org.springframework.security.config
+  forbiddenImportsExcludedPaths:
+    - frontend/
+documentation:
+  guide: docs/README.md

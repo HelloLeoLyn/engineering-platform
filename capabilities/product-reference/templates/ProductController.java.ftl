@@ -76,8 +76,15 @@ public class ProductController {
     @RequirePermission("product:item:read")
     public ApiResponse<PageResult<ProductResponse>> list(
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "20") int size) {
-        return ApiResponse.ofSuccess(productService.page(PageQuery.of(page, size), scope()));
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String category) {
+        if (keyword == null && status == null && category == null) {
+            return ApiResponse.ofSuccess(productService.page(PageQuery.of(page, size), scope()));
+        }
+        return ApiResponse.ofSuccess(productService.pageFiltered(PageQuery.of(page, size), scope(),
+                keyword, status, category));
     }
 
     @PutMapping("/{id}")

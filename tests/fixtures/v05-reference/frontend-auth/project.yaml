@@ -24,5 +24,7 @@ capabilities:
   - id: frontend-shell
   - id: frontend-auth
   - id: frontend-permission
+  - id: frontend-enterprise-management
+  - id: frontend-product-reference
 quality:
   minimum: Q2

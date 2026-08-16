@@ -29,6 +29,10 @@ public interface ProductPort {
     /** Paged products visible under the given data permission context. */
     PageResult<Product> findPageByScope(DataPermissionContext context, PageQuery query);
 
+    /** Paged products visible under the given data permission context, with keyword/status/category filters (V05-WORK-005). */
+    PageResult<Product> findPageByScopeFiltered(DataPermissionContext context, PageQuery query,
+                                               String keyword, String status, String category);
+
     /** True when a product with the code exists (excluding the given id for update). */
     boolean existsByCode(String code, Long excludeId);
 

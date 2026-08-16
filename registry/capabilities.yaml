@@ -39,3 +39,7 @@ entries:
     description: 前端认证与应用框架（Login + Auth Store + Request Client + Router + App Shell + 401 处理）
   - id: frontend-permission
     description: 前端权限 UI（PermissionGuard/v-permission/PermissionButton + UX 基础组件，仅可见性）
+  - id: frontend-enterprise-management
+    description: 前端企业管理 UI（User/Role+Permission/Department/Menu/Dictionary/OperationLog 页面 + AppTable/AppForm/DepartmentTree/DictionarySelect 可复用组件 + /system/* 受控路由，V05-WORK-004）
+  - id: frontend-product-reference
+    description: 前端 Product Reference Business Module（List/Search/Create/Edit/Detail/Disable + Dictionary 驱动 + DataScope 行集，V05-WORK-005）

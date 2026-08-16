@@ -1,0 +1,62 @@
+schemaVersion: 1
+id: runtime-recipe
+type: CAPABILITY
+version: 0.1.0
+description: 生成应用标准 Runtime Recipe（dev-start/dev-stop/dev-status + e2e profile 说明 + runnable boot jar 契约）。解决 WORK-004/005 记录的 runtime recipe 缺失：Agent 可用统一脚本启动/停止/查询生成 app，不再猜测 classpath/datasource/进程。V05-WORK-006。
+dependencies:
+  - type: CAPABILITY
+    id: platform-core
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: authentication
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: web
+    version: 1.x
+    required: true
+compatibility:
+  java: "25"
+  springBoot: "3.x"
+  requiredCapabilities: [platform-core, authentication, web]
+files:
+  - source: templates/scripts/dev-start.sh.ftl
+    target: scripts/dev-start.sh
+    ownership: GENERATED
+    mode: render
+  - source: templates/scripts/dev-stop.sh.ftl
+    target: scripts/dev-stop.sh
+    ownership: GENERATED
+    mode: render
+  - source: templates/scripts/dev-status.sh.ftl
+    target: scripts/dev-status.sh
+    ownership: GENERATED
+    mode: render
+  - source: templates/README.runtime.md.ftl
+    target: RUNTIME.md
+    ownership: GENERATED
+    mode: render
+configuration:
+  - key: runtime.backendPort
+    description: 后端默认端口（dev-start 使用）
+    default: "8080"
+  - key: runtime.frontendPort
+    description: 前端默认端口（dev-start 使用）
+    default: "5173"
+conformance:
+  requiredFiles:
+    - scripts/dev-start.sh
+    - scripts/dev-stop.sh
+    - scripts/dev-status.sh
+    - RUNTIME.md
+  requiredDependencies: []
+  requiredConfig: []
+  forbiddenImports:
+    - cn.dev33.satoken
+    - org.springframework.security.web
+    - org.springframework.security.config
+  forbiddenImportsExcludedPaths:
+    - frontend/
+documentation:
+  guide: docs/README.md

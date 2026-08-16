@@ -82,6 +82,14 @@ public class ProductService {
         return PageResult.of(items, result.total(), result.page(), result.size());
     }
 
+    /** Paged query with keyword/status/category filters (V05-WORK-005 frontend search/filter). */
+    public PageResult<ProductResponse> pageFiltered(PageQuery query, DataPermissionContext context,
+                                                    String keyword, String status, String category) {
+        PageResult<Product> result = productPort.findPageByScopeFiltered(context, query, keyword, status, category);
+        List<ProductResponse> items = result.items().stream().map(this::toResponse).toList();
+        return PageResult.of(items, result.total(), result.page(), result.size());
+    }
+
     // ---- update ----------------------------------------------------------
 
     public ProductResponse update(Long id, ProductUpdateRequest request, DataPermissionContext context) {

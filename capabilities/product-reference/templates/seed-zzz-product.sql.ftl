@@ -35,3 +35,10 @@ INSERT INTO sys_dictionary_type (id, code, name, enabled, description, created_a
 INSERT INTO sys_dictionary_item (id, type_id, `value`, label, enabled, sort, description, created_at, updated_at) VALUES
   (9, 4, 'ENABLED', 'Enabled', 1, 1, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (10, 4, 'DISABLED', 'Disabled', 1, 2, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+INSERT INTO sys_dictionary_type (id, code, name, enabled, description, created_at, updated_at) VALUES
+  (5, 'product_category', 'Product category', 1, 'Product categories', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO sys_dictionary_item (id, type_id, `value`, label, enabled, sort, description, created_at, updated_at) VALUES
+  (11, 5, 'ELECTRONIC', 'Electronic', 1, 1, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (12, 5, 'MECHANICAL', 'Mechanical', 1, 2, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (13, 5, 'PACKAGING', 'Packaging', 1, 3, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);

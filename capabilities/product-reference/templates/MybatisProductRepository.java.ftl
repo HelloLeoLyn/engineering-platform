@@ -65,6 +65,32 @@ public class MybatisProductRepository implements ProductPort {
         return PageResult.of(items, total, query.page(), query.size());
     }
 
+    @Override
+    public PageResult<Product> findPageByScopeFiltered(DataPermissionContext context, PageQuery query,
+                                                       String keyword, String status, String category) {
+        QueryWrapper<Product> countWrapper = scopeWrapper(context);
+        applyFilters(countWrapper, keyword, status, category);
+        long total = productMapper.selectCount(countWrapper);
+        QueryWrapper<Product> pageWrapper = scopeWrapper(context);
+        applyFilters(pageWrapper, keyword, status, category);
+        pageWrapper.orderByAsc("id");
+        pageWrapper.last("LIMIT " + query.size() + " OFFSET " + query.offset());
+        List<Product> items = productMapper.selectList(pageWrapper);
+        return PageResult.of(items, total, query.page(), query.size());
+    }
+
+    private void applyFilters(QueryWrapper<Product> wrapper, String keyword, String status, String category) {
+        if (keyword != null && !keyword.isBlank()) {
+            wrapper.and(w -> w.like("code", keyword).or().like("name", keyword));
+        }
+        if (status != null && !status.isBlank()) {
+            wrapper.eq("status", status);
+        }
+        if (category != null && !category.isBlank()) {
+            wrapper.eq("category", category);
+        }
+    }
+
     private QueryWrapper<Product> scopeWrapper(DataPermissionContext context) {
         QueryWrapper<Product> wrapper = new QueryWrapper<>();
         DataScope scope = context.scope() == null ? DataScope.SELF : context.scope();

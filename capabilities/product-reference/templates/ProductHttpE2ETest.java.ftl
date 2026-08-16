@@ -110,6 +110,38 @@ class ProductHttpE2ETest {
         assertThat(((Map) detail.getBody().get("data")).get("code")).isEqualTo("E2E-001");
     }
 
+    // B2. search/filter (V05-WORK-005): keyword/status/category narrow the page
+    @Test
+    void listWithFilters() {
+        String token = token("admin", "admin123");
+        // keyword narrows by code/name
+        ResponseEntity<Map> byKeyword = get(token, "/api/products?keyword=PRD-00");
+        assertThat(byKeyword.getStatusCode()).isEqualTo(HttpStatus.OK);
+        Map keywordData = (Map) byKeyword.getBody().get("data");
+        assertThat(((Number) keywordData.get("total")).longValue()).isGreaterThanOrEqualTo(5);
+        // status filter narrows to disabled only (seed: 1 of 6 disabled)
+        ResponseEntity<Map> byStatus = get(token, "/api/products?status=DISABLED");
+        assertThat(byStatus.getStatusCode()).isEqualTo(HttpStatus.OK);
+        Map statusData = (Map) byStatus.getBody().get("data");
+        assertThat(((Number) statusData.get("total")).longValue()).isGreaterThanOrEqualTo(1);
+        for (Object item : (java.util.List<?>) statusData.get("items")) {
+            assertThat(((Map) item).get("status")).isEqualTo("DISABLED");
+        }
+        // category filter
+        ResponseEntity<Map> byCategory = get(token, "/api/products?category=PACKAGING");
+        assertThat(byCategory.getStatusCode()).isEqualTo(HttpStatus.OK);
+        Map categoryData = (Map) byCategory.getBody().get("data");
+        assertThat(((Number) categoryData.get("total")).longValue()).isGreaterThanOrEqualTo(1);
+        // combined filter
+        ResponseEntity<Map> combined = get(token, "/api/products?keyword=PRD&status=ENABLED&category=ELECTRONIC");
+        assertThat(combined.getStatusCode()).isEqualTo(HttpStatus.OK);
+        for (Object item : (java.util.List<?>) ((Map) combined.getBody().get("data")).get("items")) {
+            Map p = (Map) item;
+            assertThat(p.get("status")).isEqualTo("ENABLED");
+            assertThat(p.get("category")).isEqualTo("ELECTRONIC");
+        }
+    }
+
     // C. duplicate code -> stable failure
     @Test
     void duplicateCodeFails() {

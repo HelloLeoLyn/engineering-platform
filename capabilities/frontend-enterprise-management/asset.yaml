@@ -1,0 +1,190 @@
+schemaVersion: 1
+id: frontend-enterprise-management
+type: CAPABILITY
+version: 0.1.0
+description: 前端企业管理 UI（User/Role+Permission/Department/Menu/Dictionary/Operation Log 全量管理页面 + 可复用 UI 组件 AppTable/AppForm/SearchForm/StatusTag/ConfirmAction/FormDrawer/DepartmentTree/DictionarySelect + /system/* 受控路由）。统一遵守 frontend-ux-baseline，全部经 Platform Request Client，权限 UI 仅控制可见性（后端 RBAC 是最终边界）。V05-WORK-004。
+dependencies:
+  - type: CAPABILITY
+    id: frontend-auth
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: frontend-permission
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: rbac
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: organization
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: menu
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: dictionary
+    version: 1.x
+    required: true
+  - type: CAPABILITY
+    id: operation-log
+    version: 1.x
+    required: true
+compatibility:
+  java: "25"
+  springBoot: "3.x"
+  requiredCapabilities: [frontend-auth, frontend-permission, rbac, organization, menu, dictionary, operation-log]
+files:
+  # ---- types & api (platform request client only) ----
+  - source: templates/src/types/enterprise.ts.ftl
+    target: frontend/src/types/enterprise.ts
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/api/enterprise.ts.ftl
+    target: frontend/src/api/enterprise.ts
+    ownership: GENERATED
+    mode: render
+  # ---- utils ----
+  - source: templates/src/utils/table.ts.ftl
+    target: frontend/src/utils/table.ts
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/utils/tree.ts.ftl
+    target: frontend/src/utils/tree.ts
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/utils/feedback.ts.ftl
+    target: frontend/src/utils/feedback.ts
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/utils/permissionMatrix.ts.ftl
+    target: frontend/src/utils/permissionMatrix.ts
+    ownership: GENERATED
+    mode: render
+  # ---- reusable UI ----
+  - source: templates/src/components/AppTable.vue.ftl
+    target: frontend/src/components/AppTable.vue
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/components/AppForm.vue.ftl
+    target: frontend/src/components/AppForm.vue
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/components/SearchForm.vue.ftl
+    target: frontend/src/components/SearchForm.vue
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/components/StatusTag.vue.ftl
+    target: frontend/src/components/StatusTag.vue
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/components/ConfirmAction.vue.ftl
+    target: frontend/src/components/ConfirmAction.vue
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/components/FormDrawer.vue.ftl
+    target: frontend/src/components/FormDrawer.vue
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/components/DepartmentTree.vue.ftl
+    target: frontend/src/components/DepartmentTree.vue
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/components/DictionarySelect.vue.ftl
+    target: frontend/src/components/DictionarySelect.vue
+    ownership: GENERATED
+    mode: render
+  # ---- router (controlled /system/* registry) ----
+  - source: templates/src/router/enterprise.ts.ftl
+    target: frontend/src/router/enterprise.ts
+    ownership: GENERATED
+    mode: render
+  # ---- feature views ----
+  - source: templates/src/views/system/UserManagementView.vue.ftl
+    target: frontend/src/views/system/UserManagementView.vue
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/views/system/RoleManagementView.vue.ftl
+    target: frontend/src/views/system/RoleManagementView.vue
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/views/system/PermissionRegistryView.vue.ftl
+    target: frontend/src/views/system/PermissionRegistryView.vue
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/views/system/DepartmentManagementView.vue.ftl
+    target: frontend/src/views/system/DepartmentManagementView.vue
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/views/system/MenuManagementView.vue.ftl
+    target: frontend/src/views/system/MenuManagementView.vue
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/views/system/DictionaryManagementView.vue.ftl
+    target: frontend/src/views/system/DictionaryManagementView.vue
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/views/system/OperationLogView.vue.ftl
+    target: frontend/src/views/system/OperationLogView.vue
+    ownership: GENERATED
+    mode: render
+  # ---- tests ----
+  - source: templates/tests/stubs.ts.ftl
+    target: frontend/tests/stubs.ts
+    ownership: GENERATED
+    mode: render
+  - source: templates/tests/reusable-ui.spec.ts.ftl
+    target: frontend/tests/reusable-ui.spec.ts
+    ownership: GENERATED
+    mode: render
+  - source: templates/tests/tree-and-select.spec.ts.ftl
+    target: frontend/tests/tree-and-select.spec.ts
+    ownership: GENERATED
+    mode: render
+  - source: templates/tests/permission-matrix.spec.ts.ftl
+    target: frontend/tests/permission-matrix.spec.ts
+    ownership: GENERATED
+    mode: render
+  - source: templates/tests/user-view.spec.ts.ftl
+    target: frontend/tests/user-view.spec.ts
+    ownership: GENERATED
+    mode: render
+  - source: templates/tests/feature-views.spec.ts.ftl
+    target: frontend/tests/feature-views.spec.ts
+    ownership: GENERATED
+    mode: render
+configuration:
+  - key: frontend.managementRoutes
+    description: 管理路由前缀（与后端 menu.path 对齐）
+    default: /system
+conformance:
+  requiredFiles:
+    - frontend/src/types/enterprise.ts
+    - frontend/src/api/enterprise.ts
+    - frontend/src/components/AppTable.vue
+    - frontend/src/components/AppForm.vue
+    - frontend/src/components/DepartmentTree.vue
+    - frontend/src/components/DictionarySelect.vue
+    - frontend/src/router/enterprise.ts
+    - frontend/src/views/system/UserManagementView.vue
+    - frontend/src/views/system/RoleManagementView.vue
+    - frontend/src/views/system/PermissionRegistryView.vue
+    - frontend/src/views/system/DepartmentManagementView.vue
+    - frontend/src/views/system/MenuManagementView.vue
+    - frontend/src/views/system/DictionaryManagementView.vue
+    - frontend/src/views/system/OperationLogView.vue
+    - frontend/tests/reusable-ui.spec.ts
+    - frontend/tests/user-view.spec.ts
+    - frontend/tests/feature-views.spec.ts
+  requiredDependencies: []
+  requiredConfig: []
+  forbiddenImports:
+    - cn.dev33.satoken
+    - org.springframework.security.web
+    - org.springframework.security.config
+  forbiddenImportsExcludedPaths:
+    - frontend/
+documentation:
+  guide: docs/README.md
