@@ -1,0 +1,59 @@
+schemaVersion: 1
+module:
+  id: purchase-order-item
+  name: PurchaseOrderItem
+  version: 1.0.0
+  type: business
+  description: V0.7 reference scenario detail module (MANY_TO_ONE -> purchase-order, reference -> product)
+compatibility:
+  platformVersion: "0.6"
+business:
+  table: purchase_order_item
+  entity:
+    name: PurchaseOrderItem
+    fields:
+      - name: purchaseOrderId
+        type: integer
+        required: true
+      - name: productId
+        type: integer
+        required: true
+        semantic: reference
+        reference:
+          target: product
+          valueField: id
+          labelField: name
+          searchFields: [code, name]
+      - name: quantity
+        type: integer
+        required: true
+      - name: unitPrice
+        type: money
+        precision: 12
+        scale: 2
+        required: true
+      - name: amount
+        type: money
+        precision: 14
+        scale: 2
+      - name: remark
+        type: string
+        length: 200
+  relations:
+    - name: purchaseOrder
+      type: MANY_TO_ONE
+      target: purchase-order
+      localField: purchaseOrderId
+      targetField: id
+      required: true
+      composition: true
+  features: [list, detail]
+  enterprise:
+    permissions: false
+    dataScope: false
+    menu: false
+    dictionary: false
+    operationLog: false
+  frontend:
+    route: /purchase-order-items
+    label: Purchase Order Items

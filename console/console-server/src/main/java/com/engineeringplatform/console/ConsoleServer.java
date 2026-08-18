@@ -15,6 +15,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
+import java.util.stream.Stream;
 
 /**
  * V06-WORK-004 — Engineering Platform Console Server.
@@ -39,6 +40,7 @@ public final class ConsoleServer {
     private final ProjectStore projects;
     private final ModuleStore modules;
     private final MySqlImportService mysql;
+    private final ImportCandidateService candidates;
 
     public ConsoleServer(Path platformRoot, Path dataDir) {
         this.platformRoot = platformRoot;
@@ -47,6 +49,7 @@ public final class ConsoleServer {
         this.projects = new ProjectStore(dataDir.resolve("projects.json"));
         this.modules = new ModuleStore(dataDir.resolve("modules"));
         this.mysql = new MySqlImportService();
+        this.candidates = new ImportCandidateService();
     }
 
     public void start(int port) throws IOException {
@@ -372,6 +375,10 @@ public final class ConsoleServer {
                 handleExcelImport(ex, path, method);
                 return;
             }
+            if (path.startsWith("/api/modules/import/review")) {
+                handleReviewResolve(ex);
+                return;
+            }
 
             if ("/api/modules".equals(path)) {
                 if ("GET".equals(method)) {
@@ -388,6 +395,45 @@ public final class ConsoleServer {
                 } else {
                     respond(ex, 405, Json.write(Map.of("error", "method not allowed")));
                 }
+                return;
+            }
+
+            // V07-WORK-004: reference target catalog (id + fields) for the
+            // Reference Designer — targets come from the SAME contract sources
+            // the pipeline consumes (console modules → platform modules → fixtures).
+            if ("/api/modules/targets".equals(path) && "GET".equals(method)) {
+                respond(ex, 200, Json.write(moduleTargetCatalog()));
+                return;
+            }
+
+            // V07-WORK-004: module contract validation (lightweight, Builder feedback)
+            if ("/api/modules/validate".equals(path) && "POST".equals(method)) {
+                Map<String, Object> body = Json.parseObject(readBody(ex));
+                @SuppressWarnings("unchecked")
+                Map<String, Object> manifest = (Map<String, Object>) body.get("manifest");
+                List<Map<String, Object>> errors = ModuleContractValidator.validate(manifest);
+                Map<String, Object> out = new LinkedHashMap<>();
+                out.put("valid", errors.isEmpty());
+                out.put("errors", errors);
+                respond(ex, 200, Json.write(out));
+                return;
+            }
+
+            // V07-WORK-004: full contract round-trip (YAML → parsed manifest JSON)
+            if (path.startsWith("/api/modules/") && path.endsWith("/contract") && "GET".equals(method)) {
+                String id = path.substring("/api/modules/".length(), path.length() - "/contract".length());
+                Map<String, Object> module = modules.get(id);
+                if (module == null) {
+                    respond(ex, 404, Json.write(Map.of("error", "module not found: " + id)));
+                    return;
+                }
+                @SuppressWarnings("unchecked")
+                Map<String, Object> manifest = (Map<String, Object>) AssetYamlReader.parse(
+                        String.valueOf(module.get("yaml")));
+                Map<String, Object> out = new LinkedHashMap<>();
+                out.put("id", id);
+                out.put("manifest", manifest);
+                respond(ex, 200, Json.write(out));
                 return;
             }
 
@@ -431,6 +477,20 @@ public final class ConsoleServer {
                 respond(ex, 200, Json.write(Map.of("ok", mysql.testConnection(info))));
             } else if (path.endsWith("/tables")) {
                 respond(ex, 200, Json.write(Map.of("tables", mysql.loadTables(info))));
+            } else if (path.endsWith("/discover")) {
+                // V07-WORK-005: multi-table metadata discovery → module drafts + candidates.
+                // Password is used ONLY for the JDBC connection; never returned/persisted.
+                @SuppressWarnings("unchecked")
+                List<String> tables = (List<String>) body.getOrDefault("tables", List.of());
+                if (tables.isEmpty()) {
+                    respond(ex, 400, Json.write(Map.of("error", "tables required")));
+                    return;
+                }
+                @SuppressWarnings("unchecked")
+                Map<String, Map<String, String>> mapping =
+                        (Map<String, Map<String, String>>) body.get("mapping");
+                List<Map<String, Object>> drafts = candidates.discoverMysql(info, tables, mapping);
+                respond(ex, 200, Json.write(Map.of("drafts", drafts)));
             } else if (path.endsWith("/import")) {
                 String table = String.valueOf(body.getOrDefault("table", ""));
                 respond(ex, 200, Json.write(Map.of("fields", mysql.importTable(info, table))));
@@ -458,13 +518,68 @@ public final class ConsoleServer {
                 }
                 return;
             }
+            if (path.endsWith("/template-v2") && "GET".equals(method)) {
+                // V07-WORK-005: extended template with optional reference/relation columns
+                byte[] template = XlsxSupport.writeTemplate(new String[]{
+                        "column", "field", "type", "label", "required", "primaryKey",
+                        "unique", "length", "comment", "searchable", "listVisible",
+                        "formVisible", "detailVisible", "dictionary",
+                        "referenceTarget", "referenceValueField", "referenceLabelField",
+                        "relationType", "relationTarget", "mappedBy", "composition"}, null);
+                ex.getResponseHeaders().set("Content-Type",
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+                ex.getResponseHeaders().set("Content-Disposition", "attachment; filename=module-fields-template-v2.xlsx");
+                ex.sendResponseHeaders(200, template.length);
+                try (OutputStream os = ex.getResponseBody()) {
+                    os.write(template);
+                }
+                return;
+            }
             if (path.endsWith("/import") && "POST".equals(method)) {
                 byte[] xlsx = ex.getRequestBody().readAllBytes();
                 List<List<String>> rows = XlsxSupport.parseRows(xlsx);
                 respond(ex, 200, Json.write(Map.of("rows", rows)));
+            } else if (path.endsWith("/discover") && "POST".equals(method)) {
+                // V07-WORK-005: Excel → field/reference/relation candidates (Review required)
+                String moduleId = String.valueOf(queryParam(ex, "moduleId", "excel-module"));
+                String entity = String.valueOf(queryParam(ex, "entity", ""));
+                byte[] xlsx = ex.getRequestBody().readAllBytes();
+                List<List<String>> rows = XlsxSupport.parseRows(xlsx);
+                List<String> headers = rows.isEmpty() ? List.of() : rows.get(0);
+                List<List<String>> data = rows.size() > 1 ? rows.subList(1, rows.size()) : List.of();
+                Map<String, Object> draft = candidates.discoverExcel(headers, data, moduleId, entity);
+                respond(ex, 200, Json.write(Map.of("draft", draft)));
             } else {
                 respond(ex, 404, Json.write(Map.of("error", "unknown excel import route")));
             }
+        } catch (Exception e) {
+            respond(ex, 500, Json.write(Map.of("error", String.valueOf(e.getMessage()))));
+        }
+    }
+
+    /**
+     * V07-WORK-005 — Import Review resolution: only CONFIRMED candidates may
+     * enter the formal Business Module Contract manifest. Everything else
+     * (DETECTED / SUGGESTED / IGNORED) is dropped.
+     *
+     *   POST /api/modules/import/review/resolve
+     *   body: { draft: {...}, decisions: {candidateId: "accept"|"ignore"}, edits: {candidateId: {...}} }
+     */
+    private void handleReviewResolve(HttpExchange ex) throws IOException {
+        try {
+            Map<String, Object> body = Json.parseObject(readBody(ex));
+            @SuppressWarnings("unchecked")
+            Map<String, Object> draft = (Map<String, Object>) body.get("draft");
+            if (draft == null) {
+                respond(ex, 400, Json.write(Map.of("error", "draft required")));
+                return;
+            }
+            @SuppressWarnings("unchecked")
+            Map<String, String> decisions = (Map<String, String>) body.get("decisions");
+            @SuppressWarnings("unchecked")
+            Map<String, Map<String, Object>> edits = (Map<String, Map<String, Object>>) body.get("edits");
+            Map<String, Object> manifest = candidates.resolveToManifest(draft, decisions, edits);
+            respond(ex, 200, Json.write(Map.of("manifest", manifest)));
         } catch (Exception e) {
             respond(ex, 500, Json.write(Map.of("error", String.valueOf(e.getMessage()))));
         }
@@ -563,6 +678,77 @@ public final class ConsoleServer {
             }
         }
         return "";
+    }
+
+    // ------------------------------------------------------------------
+    // V07-WORK-004: reference target catalog for the Reference Designer.
+    // Targets come from the SAME contract sources the pipeline consumes:
+    //   console module store (dataDir/modules) + platform fixtures.
+    // ------------------------------------------------------------------
+    @SuppressWarnings("unchecked")
+    private List<Map<String, Object>> moduleTargetCatalog() {
+        List<Map<String, Object>> out = new ArrayList<>();
+        java.util.Set<String> seen = new java.util.LinkedHashSet<>();
+
+        // 1. console module store
+        try {
+            for (Map<String, Object> m : modules.list()) {
+                String id = String.valueOf(m.get("id"));
+                if (!seen.add(id)) continue;
+                Map<String, Object> entry = new LinkedHashMap<>();
+                entry.put("id", id);
+                entry.put("fields", moduleFieldsOf((String) m.get("yaml")));
+                out.add(entry);
+            }
+        } catch (IOException e) {
+            // ignore store read errors — continue with fixtures
+        }
+
+        // 2. platform fixtures (v07 reference, v06 generic, v06 supplier)
+        List<Path> fixtureDirs = List.of(
+                platformRoot.resolve("tests/fixtures/v07-reference/generic/modules"),
+                platformRoot.resolve("tests/fixtures/v06-reference/generic/modules"),
+                platformRoot.resolve("tests/fixtures/v06-reference/supplier/modules"));
+        for (Path dir : fixtureDirs) {
+            if (!Files.isDirectory(dir)) continue;
+            try (Stream<Path> stream = Files.list(dir)) {
+                for (Path f : stream.filter(p -> p.toString().endsWith(".yaml")).sorted().toList()) {
+                    String id = f.getFileName().toString().replace(".yaml", "");
+                    if (!seen.add(id)) continue;
+                    Map<String, Object> entry = new LinkedHashMap<>();
+                    entry.put("id", id);
+                    entry.put("fields", moduleFieldsOf(Files.readString(f, StandardCharsets.UTF_8)));
+                    out.add(entry);
+                }
+            } catch (IOException ignored) {
+                // skip unreadable fixture dir
+            }
+        }
+        return out;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static List<Map<String, Object>> moduleFieldsOf(String yaml) {
+        List<Map<String, Object>> out = new ArrayList<>();
+        try {
+            Map<String, Object> manifest = (Map<String, Object>) AssetYamlReader.parse(yaml);
+            Map<String, Object> biz = (Map<String, Object>) manifest.get("business");
+            if (biz == null) return out;
+            Map<String, Object> entity = (Map<String, Object>) biz.get("entity");
+            if (entity == null) return out;
+            Object fields = entity.get("fields");
+            if (!(fields instanceof List<?> fl)) return out;
+            for (Object o : fl) {
+                if (!(o instanceof Map<?, ?> fm)) continue;
+                Map<String, Object> f = new LinkedHashMap<>();
+                f.put("name", fm.get("name"));
+                f.put("type", fm.get("type"));
+                out.add(f);
+            }
+        } catch (Exception ignored) {
+            // malformed manifest → no fields
+        }
+        return out;
     }
 
     private static boolean isEmptyDir(Path dir) {

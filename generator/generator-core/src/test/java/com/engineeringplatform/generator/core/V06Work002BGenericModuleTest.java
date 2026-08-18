@@ -287,7 +287,12 @@ class V06Work002BGenericModuleTest {
                 out.resolve("src/test/resources/db/seed/seed-zzz-customer-lite.sql"), StandardCharsets.UTF_8);
         assertThat(seed).contains("customer_lite:item:read").contains("customer_lite:item:disable");
         // deterministic IDs (module sorted index 0 -> permission base 1000)
-        assertThat(seed).contains("(1000, 'customer_lite:item:read'").contains("(1003, 'customer_lite:item:disable'");
+        // V0.6+ seed generation uses conditional INSERT ... SELECT WHERE NOT EXISTS
+        // (idempotent against pre-existing capability seeds) — assert the current
+        // deterministic behavior, not the legacy VALUES (...) shape.
+        assertThat(seed).contains("SELECT 1000, 'customer_lite:item:read'")
+                .contains("SELECT 1003, 'customer_lite:item:disable'")
+                .contains("WHERE NOT EXISTS (SELECT 1 FROM sys_permission WHERE code = 'customer_lite:item:read')");
         // dictionary true -> dictionary seed
         assertThat(seed).contains("customer_status").contains("'ENABLED'");
         // menu true -> menu seed

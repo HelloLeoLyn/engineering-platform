@@ -19,60 +19,53 @@ business:
         length: 50
         comment: 'customer code'
         frontend:
-          label: Code
+          label: code
           order: 0
-          searchable: true
           listVisible: true
+          searchable: true
           formVisible: true
           detailVisible: true
       - name: name
         type: string
         required: true
-        unique: false
         length: 100
         frontend:
-          label: Name
+          label: name
           order: 1
-          searchable: true
           listVisible: true
+          searchable: true
           formVisible: true
           detailVisible: true
       - name: address
         type: string
-        required: false
-        unique: false
         length: 200
         comment: 'warehouse address'
         frontend:
-          label: Address
+          label: address
           order: 2
-          searchable: true
           listVisible: true
+          searchable: true
           formVisible: true
           detailVisible: true
       - name: manager
         type: string
-        required: false
-        unique: false
         length: 50
         frontend:
-          label: Manager
+          label: manager
           order: 3
-          searchable: true
           listVisible: true
+          searchable: true
           formVisible: true
           detailVisible: true
       - name: status
         type: string
         required: true
-        unique: false
         length: 20
         semantic: dictionary
         dictionary: warehouse_status
         frontend:
-          label: Status
+          label: status
           order: 4
-          searchable: false
           listVisible: true
           formVisible: true
           detailVisible: true

@@ -100,6 +100,27 @@ files:
     target: frontend/src/components/StatCard.vue
     ownership: GENERATED
     mode: render
+  # ---- V07-WORK-003: relationship-aware reusable UI ----
+  - source: templates/src/components/ReferenceSelect.vue.ftl
+    target: frontend/src/components/ReferenceSelect.vue
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/components/EditableDetailTable.vue.ftl
+    target: frontend/src/components/EditableDetailTable.vue
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/components/MoneyText.vue.ftl
+    target: frontend/src/components/MoneyText.vue
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/components/MoneyInput.vue.ftl
+    target: frontend/src/components/MoneyInput.vue
+    ownership: GENERATED
+    mode: render
+  - source: templates/src/components/StatusSelect.vue.ftl
+    target: frontend/src/components/StatusSelect.vue
+    ownership: GENERATED
+    mode: render
   # ---- router (controlled /system/* registry) ----
   - source: templates/src/router/enterprise.ts.ftl
     target: frontend/src/router/enterprise.ts
@@ -172,6 +193,11 @@ conformance:
     - frontend/src/components/DepartmentTree.vue
     - frontend/src/components/DictionarySelect.vue
     - frontend/src/components/StatCard.vue
+    - frontend/src/components/ReferenceSelect.vue
+    - frontend/src/components/EditableDetailTable.vue
+    - frontend/src/components/MoneyText.vue
+    - frontend/src/components/MoneyInput.vue
+    - frontend/src/components/StatusSelect.vue
     - frontend/src/router/enterprise.ts
     - frontend/src/views/system/UserManagementView.vue
     - frontend/src/views/system/RoleManagementView.vue

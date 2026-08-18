@@ -19,39 +19,54 @@ business:
         length: 50
         comment: 'customer code'
         frontend:
-          label: Code
+          label: code
           order: 0
+          listVisible: true
           searchable: true
+          formVisible: true
+          detailVisible: true
       - name: name
         type: string
         required: true
         length: 100
         frontend:
-          label: Name
+          label: name
           order: 1
+          listVisible: true
           searchable: true
+          formVisible: true
+          detailVisible: true
       - name: phone
         type: string
         length: 30
         comment: 'contact phone'
         frontend:
-          label: Phone
+          label: phone
           order: 2
+          listVisible: true
           searchable: true
+          formVisible: true
+          detailVisible: true
       - name: status
         type: string
         semantic: dictionary
         dictionary: customer_status
         frontend:
-          label: Status
+          label: status
           order: 3
+          listVisible: true
+          formVisible: true
+          detailVisible: true
       - name: level
         type: string
         semantic: dictionary
         dictionary: customer_level
         frontend:
-          label: Level
+          label: level
           order: 4
+          listVisible: true
+          formVisible: true
+          detailVisible: true
   features:
     - list
     - search

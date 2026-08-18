@@ -106,7 +106,9 @@ class ManagementUiWork004Test {
             assertThat(files).as("asset file: " + target)
                     .anyMatch(f -> f.target().equals(target));
         }
-        assertThat(repo.assetFiles("frontend-enterprise-management")).hasSize(29);
+        // V07-WORK-003: +5 relationship-aware components (ReferenceSelect, EditableDetailTable,
+        // MoneyText, MoneyInput, StatusSelect) registered in asset.yaml → 29 + 5 = 34.
+        assertThat(repo.assetFiles("frontend-enterprise-management")).hasSize(34);
     }
 
     // 2. routes: /system/* registered in frontend-auth router via enterprise routes

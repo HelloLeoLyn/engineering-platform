@@ -263,6 +263,15 @@ public final class GenerationService {
                 if (Files.isRegularFile(genericFixture)) {
                     manifests.put(moduleId,
                             (Map<String, Object>) AssetYamlReader.parse(Files.readString(genericFixture)));
+                    continue;
+                }
+                // V07-WORK-004: v07 reference fixtures (supplier/product + master/detail
+                // scenarios) — Builder 2.0 reference targets resolve against these.
+                Path v07Fixture = platformRoot.resolve("tests/fixtures/v07-reference/generic/modules")
+                        .resolve(moduleId + ".yaml");
+                if (Files.isRegularFile(v07Fixture)) {
+                    manifests.put(moduleId,
+                            (Map<String, Object>) AssetYamlReader.parse(Files.readString(v07Fixture)));
                 }
             }
         }

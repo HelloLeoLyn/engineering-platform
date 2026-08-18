@@ -33,6 +33,19 @@ public record ResolutionError(
         details = details == null ? Map.of() : Map.copyOf(details);
     }
 
+    /**
+     * V07-WORK-001: generic ERROR factory for business-contract validation.
+     *
+     * @param code         resolver error code (UPPER_SNAKE_CASE)
+     * @param message      human readable message
+     * @param source       error source (e.g. module-manifest)
+     * @param sourcePath   module id
+     * @param referenceId  relation/field name (may be null)
+     */
+    public static ResolutionError of(String code, String message, String source, String sourcePath, String referenceId) {
+        return new ResolutionError(code, message, Severity.ERROR, source, sourcePath, null, referenceId, Map.of());
+    }
+
     public static ResolutionError unknownReference(String referenceType, String referenceId, String sourcePath) {
         return new ResolutionError(
                 "UNKNOWN_REFERENCE",

@@ -286,10 +286,10 @@ properties:
               properties:
                 name:
                   type: string
-                  pattern: ^[a-z][a-z0-9]*$
+                  pattern: ^[a-z][a-zA-Z0-9]*$
                 type:
                   type: string
-                  enum: [string, number, integer, decimal, boolean, date, datetime, text]
+                  enum: [string, number, integer, decimal, boolean, date, datetime, text, money, enum, status, reference, image, file, richtext]
                 required:
                   type: boolean
                 unique:
@@ -309,13 +309,60 @@ properties:
                   type: boolean
                 comment:
                   type: string
-                # Semantic mapping: dictionary / department / ownership/currentUser / system
+                # V0.6 semantic: none / dictionary / department / ownership/currentUser / system
+                # V0.7 (V07-WORK-001): + reference / enum
                 semantic:
                   type: string
-                  enum: [none, dictionary, department, ownership, currentUser, system]
+                  enum: [none, dictionary, department, ownership, currentUser, system, reference, enum]
                 dictionary:
                   description: semantic=dictionary 时引用的字典类型 key。
                   type: string
+                # V0.7 (V07-WORK-001): semantic=reference 的结构化引用配置。
+                # Contract 描述业务引用；transport/endpoint 由 Generator 决定，禁止写死 HTTP API。
+                reference:
+                  type: object
+                  additionalProperties: false
+                  required: [target]
+                  properties:
+                    target:
+                      description: 目标业务模块 id（必须存在于 module registry）。
+                      type: string
+                      pattern: ^[a-z0-9]+(-[a-z0-9]+)*$
+                    valueField:
+                      description: 值字段（默认 id）。
+                      type: string
+                      pattern: ^[a-z][a-zA-Z0-9]*$
+                    labelField:
+                      description: 显示字段（默认 name）。
+                      type: string
+                      pattern: ^[a-z][a-zA-Z0-9]*$
+                    searchFields:
+                      description: 搜索字段列表。
+                      type: array
+                      uniqueItems: true
+                      items:
+                        type: string
+                        pattern: ^[a-z][a-zA-Z0-9]*$
+                # V0.7 (V07-WORK-001): semantic=enum / type=enum 的结构化候选值。
+                enum:
+                  type: object
+                  additionalProperties: false
+                  required: [values]
+                  properties:
+                    values:
+                      type: array
+                      minItems: 1
+                      uniqueItems: true
+                      items:
+                        type: object
+                        additionalProperties: false
+                        required: [value]
+                        properties:
+                          value:
+                            type: string
+                            minLength: 1
+                          label:
+                            type: string
                 frontend:
                   type: object
                   additionalProperties: false
@@ -324,7 +371,11 @@ properties:
                       type: string
                     listVisible:
                       type: boolean
+                    # V0.7 (V07-WORK-001): 统一为 searchable（V0.6 schema 误用 searchVisible；实现/Console 一直是 searchable）
+                    searchable:
+                      type: boolean
                     searchVisible:
+                      description: V0.6 遗留键（不推荐；等价于 searchable）。
                       type: boolean
                     formVisible:
                       type: boolean
@@ -332,8 +383,51 @@ properties:
                       type: boolean
                     component:
                       type: string
+                    placeholder:
+                      type: string
+                    sortable:
+                      type: boolean
                     order:
                       type: integer
+      # V0.7 (V07-WORK-001): 结构化业务关系（可选；V0.6 无 relations 仍正常解析）。
+      # 禁止 Generator 根据字段名猜关系；关系必须结构化声明。
+      relations:
+        type: array
+        uniqueItems: true
+        items:
+          type: object
+          additionalProperties: false
+          required: [name, type, target]
+          properties:
+            name:
+              description: 关系名（模块内唯一）。
+              type: string
+              pattern: ^[a-z][a-zA-Z0-9]*$
+            type:
+              description: MANY_TO_ONE / ONE_TO_MANY / ONE_TO_ONE；MANY_TO_MANY 预留但 V0.7 明确 unsupported。
+              type: string
+              enum: [MANY_TO_ONE, ONE_TO_MANY, ONE_TO_ONE, MANY_TO_MANY]
+            target:
+              description: 目标业务模块 id（必须存在于 module registry）。
+              type: string
+              pattern: ^[a-z0-9]+(-[a-z0-9]+)*$
+            localField:
+              description: 本模块 FK 字段（MANY_TO_ONE / ONE_TO_ONE 必填）。
+              type: string
+              pattern: ^[a-z][a-zA-Z0-9]*$
+            mappedBy:
+              description: 目标模块 FK 字段（ONE_TO_MANY 必填；即 target 模块中的反向 MANY_TO_ONE localField）。
+              type: string
+              pattern: ^[a-z][a-zA-Z0-9]*$
+            targetField:
+              description: 目标字段（默认 id）。
+              type: string
+              pattern: ^[a-z][a-zA-Z0-9]*$
+            required:
+              type: boolean
+            composition:
+              description: 业务生命周期语义（组合），不是 UI metadata。composition=true 时子记录随主记录生命周期。
+              type: boolean
       features:
         description: 支持的 CRUD 能力。
         type: array

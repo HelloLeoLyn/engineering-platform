@@ -2,6 +2,7 @@ package com.engineeringplatform.generator.core;
 
 import com.engineeringplatform.generator.contracts.BusinessEntityField;
 import com.engineeringplatform.generator.contracts.ResolvedBusinessModule;
+import com.engineeringplatform.generator.contracts.ResolvedRelation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,8 +23,12 @@ public final class GenericFrontendTemplates {
 
     /**
      * Generate all frontend files for one business module.
+     * V07-WORK-003: allModules gives master/child + reference context so the
+     * UI can render ReferenceSelect / EditableDetailTable / money / enum
+     * controls purely from the resolved Contract.
      */
-    public List<GenericModuleGenerator.GeneratedFile> generateFrontend(ResolvedBusinessModule module) {
+    public List<GenericModuleGenerator.GeneratedFile> generateFrontend(ResolvedBusinessModule module,
+                                                                      List<ResolvedBusinessModule> allModules) {
         String entity = module.entity().name();
         String entityVar = decapitalize(entity);
         String modPkg = module.id().replace("-", "");
@@ -37,28 +42,76 @@ public final class GenericFrontendTemplates {
         String label = str(module.frontend(), "label", module.name());
         String title = label + "s";
 
+        // V07-WORK-003: master/child context (structured relations only).
+        ResolvedRelation masterChild = MasterDetailBackendRenderer.compositionOneToMany(module);
+        ResolvedBusinessModule childModule = null;
+        if (masterChild != null) {
+            for (ResolvedBusinessModule m : allModules) {
+                if (m.id().equals(masterChild.target())) childModule = m;
+            }
+        }
+        // reference targets (module ids) for ReferenceSelect api imports
+        // V07-WORK-006 blocker fix: also collect reference targets declared on
+        // the composition child fields (e.g. purchase-order-item.productId ->
+        // product) so generated views can import the child reference api too.
+        List<String> referenceTargets = new ArrayList<>();
+        for (BusinessEntityField f : fields) {
+            if (isSystemField(f)) continue;
+            if ("reference".equals(f.semantic()) && f.reference() != null) {
+                String t = String.valueOf(f.reference().get("target"));
+                if (!referenceTargets.contains(t)) referenceTargets.add(t);
+            }
+        }
+        if (childModule != null) {
+            for (BusinessEntityField cf : childModule.entity().fields()) {
+                if (isSystemField(cf)) continue;
+                // V07-WORK-006: the parent FK (mappedBy) is owned by the master and
+                // never rendered as a reference column — skip it so we do not import
+                // the master's own api twice (Duplicate identifier).
+                if (masterChild != null && cf.name().equals(masterChild.mappedBy())) continue;
+                if ("reference".equals(cf.semantic()) && cf.reference() != null) {
+                    String t = String.valueOf(cf.reference().get("target"));
+                    if (!referenceTargets.contains(t)) referenceTargets.add(t);
+                }
+            }
+        }
+
         List<GenericModuleGenerator.GeneratedFile> files = new ArrayList<>();
-        files.add(new GenericModuleGenerator.GeneratedFile("frontend/src/types/" + module.id() + ".ts", typesSource(module.id(), entity, fields, dataScope)));
-        files.add(new GenericModuleGenerator.GeneratedFile("frontend/src/api/" + module.id() + ".ts", apiSource(module.id(), entity, fields, features, table)));
-        files.add(new GenericModuleGenerator.GeneratedFile("frontend/src/router/business/" + module.id() + ".ts", routerSource(module.id(), entity, route, table, features)));
+        files.add(new GenericModuleGenerator.GeneratedFile("frontend/src/types/" + module.id() + ".ts",
+                typesSource(module.id(), entity, fields, dataScope, childModule)));
+        files.add(new GenericModuleGenerator.GeneratedFile("frontend/src/api/" + module.id() + ".ts",
+                apiSource(module.id(), entity, fields, features, table)));
+        files.add(new GenericModuleGenerator.GeneratedFile("frontend/src/router/business/" + module.id() + ".ts",
+                routerSource(module.id(), entity, route, table, features)));
         files.add(new GenericModuleGenerator.GeneratedFile("frontend/src/views/" + modPkg + "/" + entity + "ListView.vue",
-                listViewSource(module.id(), entity, entityVar, fields, features, dataScope, permissions, dictionary, route, table, title, label)));
+                listViewSource(module.id(), entity, entityVar, fields, features, dataScope, permissions, dictionary, route, table, title, label, childModule, masterChild, referenceTargets, allModules)));
         files.add(new GenericModuleGenerator.GeneratedFile("frontend/src/views/" + modPkg + "/" + entity + "DetailView.vue",
-                detailViewSource(module.id(), entity, entityVar, fields, dataScope, permissions, route, title)));
-        files.add(new GenericModuleGenerator.GeneratedFile("frontend/src/views/" + modPkg + "/" + entity + "EditView.vue",
-                editViewSource(module.id(), entity, entityVar, fields, permissions, route, title)));
-        files.add(new GenericModuleGenerator.GeneratedFile("frontend/tests/" + module.id() + "-api.spec.ts", apiSpecSource(module.id(), entity, fields, table, dataScope)));
-        files.add(new GenericModuleGenerator.GeneratedFile("frontend/tests/" + module.id() + "-route.spec.ts", routeSpecSource(module.id(), entity, route, table)));
-        files.add(new GenericModuleGenerator.GeneratedFile("frontend/tests/" + module.id() + "-list.spec.ts", listSpecSource(module.id(), entity, fields, table, title, dataScope)));
-        files.add(new GenericModuleGenerator.GeneratedFile("frontend/tests/" + module.id() + "-detail.spec.ts", detailSpecSource(module.id(), entity, table, title)));
+                detailViewSource(module.id(), entity, entityVar, fields, dataScope, permissions, route, title, childModule)));
+        if (features.contains("create") || features.contains("edit")) {
+            files.add(new GenericModuleGenerator.GeneratedFile("frontend/src/views/" + modPkg + "/" + entity + "EditView.vue",
+                    editViewSource(module.id(), entity, entityVar, fields, permissions, route, title, childModule, masterChild, referenceTargets, allModules)));
+        }
+        files.add(new GenericModuleGenerator.GeneratedFile("frontend/tests/" + module.id() + "-api.spec.ts",
+                apiSpecSource(module.id(), entity, fields, table, dataScope, features)));
+        files.add(new GenericModuleGenerator.GeneratedFile("frontend/tests/" + module.id() + "-route.spec.ts",
+                routeSpecSource(module.id(), entity, route, table)));
+        files.add(new GenericModuleGenerator.GeneratedFile("frontend/tests/" + module.id() + "-list.spec.ts",
+                listSpecSource(module.id(), entity, fields, table, title, dataScope)));
+        files.add(new GenericModuleGenerator.GeneratedFile("frontend/tests/" + module.id() + "-detail.spec.ts",
+                detailSpecSource(module.id(), entity, table, title)));
         return files;
     }
 
-    private String typesSource(String moduleId, String entity, List<BusinessEntityField> fields, boolean dataScope) {
+    private String typesSource(String moduleId, String entity, List<BusinessEntityField> fields, boolean dataScope,
+                              ResolvedBusinessModule childModule) {
         StringBuilder sb = new StringBuilder();
         sb.append("// ").append(entity).append(" types (generated by engineering-platform Generic Module Generator)\n");
         sb.append("// API Boundary ID String Contract: Snowflake IDs cross as strings (EntityId).\n");
-        sb.append("import type { PageResult, EntityId } from './enterprise';\n\n");
+        sb.append("import type { PageResult, EntityId } from './enterprise';\n");
+        if (childModule != null) {
+            sb.append("import type { ").append(childModule.entity().name()).append(" } from './").append(childModule.id()).append("';\n");
+        }
+        sb.append("\n");
         sb.append("export type { PageResult, EntityId };\n\n");
         sb.append("export interface ").append(entity).append(" {\n");
         sb.append("  id: EntityId;\n");
@@ -66,15 +119,24 @@ public final class GenericFrontendTemplates {
             if (isSystemField(f)) continue;
             sb.append("  ").append(f.name()).append(": ").append(tsType(f)).append(";\n");
         }
-        if (dataScope) sb.append("  departmentId: EntityId | null;\n");
+        if (dataScope && fields.stream().noneMatch(f -> "departmentId".equals(f.name()))) {
+            sb.append("  departmentId: EntityId | null;\n");
+        }
         sb.append("  createdBy: EntityId | null;\n");
         sb.append("  createdAt: string;\n");
         sb.append("  updatedAt: string;\n");
+        // V07-WORK-003: master detail response carries items[]
+        if (childModule != null) {
+            sb.append("  items?: ").append(childModule.entity().name()).append("[];\n");
+        }
         sb.append("}\n\n");
         sb.append("export interface ").append(entity).append("CreateRequest {\n");
         for (BusinessEntityField f : fields) {
             if (isSystemField(f)) continue;
             sb.append("  ").append(f.name()).append(": ").append(tsType(f)).append(";\n");
+        }
+        if (childModule != null) {
+            sb.append("  items: ").append(childModule.entity().name()).append("ItemInput[];\n");
         }
         sb.append("}\n\n");
         sb.append("export interface ").append(entity).append("UpdateRequest {\n");
@@ -82,7 +144,21 @@ public final class GenericFrontendTemplates {
             if (isSystemField(f)) continue;
             sb.append("  ").append(f.name()).append(": ").append(tsType(f)).append(";\n");
         }
+        if (childModule != null) {
+            sb.append("  items: ").append(childModule.entity().name()).append("ItemInput[];\n");
+        }
         sb.append("}\n\n");
+        // V07-WORK-003: child item input type (id optional for new rows)
+        if (childModule != null) {
+            sb.append("export interface ").append(childModule.entity().name()).append("ItemInput {\n");
+            sb.append("  id?: EntityId;\n");
+            for (BusinessEntityField cf : childModule.entity().fields()) {
+                if (isSystemField(cf)) continue;
+                if (cf.name().equals(masterChildMappedBy(childModule))) continue;
+                sb.append("  ").append(cf.name()).append(": ").append(tsType(cf)).append(";\n");
+            }
+            sb.append("}\n\n");
+        }
         sb.append("export interface ").append(entity).append("Query {\n");
         sb.append("  page?: number;\n  size?: number;\n  keyword?: string;\n");
         if (hasSemantic(fields, "dictionary")) sb.append("  status?: string;\n");
@@ -97,6 +173,16 @@ public final class GenericFrontendTemplates {
         return sb.toString();
     }
 
+    /** Child module's mappedBy parent-FK field name (excluded from item input). */
+    private static String masterChildMappedBy(ResolvedBusinessModule childModule) {
+        for (ResolvedRelation r : childModule.relations()) {
+            if ("MANY_TO_ONE".equals(r.type()) && r.localField() != null) {
+                return r.localField();
+            }
+        }
+        return null;
+    }
+
     private String apiSource(String moduleId, String entity, List<BusinessEntityField> fields,
                              List<String> features, String table) {
         String entityVar = decapitalize(entity);
@@ -104,8 +190,10 @@ public final class GenericFrontendTemplates {
         sb.append("// ").append(entity).append(" API service (generated by engineering-platform Generic Module Generator)\n");
         sb.append("// All HTTP through the Platform Request Client — no raw axios/fetch.\n");
         sb.append("import { http } from './request';\n");
-        sb.append("import type { ").append(entity).append(", ").append(entity).append("CreateRequest, ").append(entity)
-                .append("UpdateRequest, ").append(entity).append("Query, ").append(entity).append("PageResponse } from '../types/").append(moduleId).append("';\n");
+        sb.append("import type { ").append(entity).append(", ");
+        if (features.contains("create")) sb.append(entity).append("CreateRequest, ");
+        if (features.contains("edit")) sb.append(entity).append("UpdateRequest, ");
+        sb.append(entity).append("Query, ").append(entity).append("PageResponse } from '../types/").append(moduleId).append("';\n");
         sb.append("import type { EntityId } from '../types/enterprise';\n\n");
         sb.append("export const ").append(entityVar).append("Api = {\n");
         if (features.contains("list")) {
@@ -160,12 +248,18 @@ public final class GenericFrontendTemplates {
     private String listViewSource(String moduleId, String entity, String entityVar,
                                   List<BusinessEntityField> fields, List<String> features,
                                   boolean dataScope, boolean permissions, boolean dictionary,
-                                  String route, String table, String title, String label) {
+                                  String route, String table, String title, String label,
+                                  ResolvedBusinessModule childModule, ResolvedRelation masterChild,
+                                  List<String> referenceTargets, List<ResolvedBusinessModule> allModules) {
         StringBuilder sb = new StringBuilder();
         sb.append("<script setup lang=\"ts\">\n");
         sb.append("// ").append(entity).append(" List (generated by engineering-platform Generic Module Generator)\n");
         sb.append("// EP UI 2.0 generic list: header + optional stats + search panel + data card.\n");
-        sb.append("import { computed, onMounted, reactive, ref } from 'vue';\n");
+        if (statusField(fields) != null) {
+            sb.append("import { computed, onMounted, reactive, ref } from 'vue';\n");
+        } else {
+            sb.append("import { onMounted, reactive, ref } from 'vue';\n");
+        }
         sb.append("import { useRouter } from 'vue-router';\n");
         sb.append("import PageHeader from '../../components/PageHeader.vue';\n");
         sb.append("import PageContainer from '../../components/PageContainer.vue';\n");
@@ -178,14 +272,49 @@ public final class GenericFrontendTemplates {
             sb.append("import StatusTag from '../../components/StatusTag.vue';\n");
         }
         sb.append("import StatCard from '../../components/StatCard.vue';\n");
-        sb.append("import ConfirmAction from '../../components/ConfirmAction.vue';\n");
-        sb.append("import FormDrawer from '../../components/FormDrawer.vue';\n");
-        sb.append("import AppForm from '../../components/AppForm.vue';\n");
+        if (features.contains("disable")) {
+            sb.append("import ConfirmAction from '../../components/ConfirmAction.vue';\n");
+        }
+        if (features.contains("create") || features.contains("edit")) {
+            sb.append("import FormDrawer from '../../components/FormDrawer.vue';\n");
+            sb.append("import AppForm from '../../components/AppForm.vue';\n");
+        }
         if (hasSemantic(fields, "dictionary")) sb.append("import DictionarySelect from '../../components/DictionarySelect.vue';\n");
         if (permissions) sb.append("import PermissionButton from '../../permission/PermissionButton.vue';\n");
+        // V07-WORK-003/V07-WORK-006: relationship-aware controls imported only when used.
+        if (hasReference(fields)) {
+            sb.append("import ReferenceSelect from '../../components/ReferenceSelect.vue';\n");
+        }
+        if (hasEnum(fields)) {
+            sb.append("import StatusSelect from '../../components/StatusSelect.vue';\n");
+        }
+        if (hasType(fields, "money")) {
+            sb.append("import MoneyInput from '../../components/MoneyInput.vue';\n");
+        }
+        if (childModule != null) {
+            sb.append("import EditableDetailTable from '../../components/EditableDetailTable.vue';\n");
+        }
+        for (String target : referenceTargets) {
+            for (ResolvedBusinessModule m : allModules) {
+                if (m.id().equals(target)) {
+                    // V07-WORK-006: never import this module's own api here — it is
+                    // imported by the dedicated line below (Duplicate identifier guard).
+                    if (m.id().equals(moduleId)) break;
+                    sb.append("import { ").append(decapitalize(m.entity().name())).append("Api } from '../../api/").append(m.id()).append("';\n");
+                    break;
+                }
+            }
+        }
         sb.append("import { ").append(entityVar).append("Api } from '../../api/").append(moduleId).append("';\n");
-        sb.append("import type { ").append(entity).append(" } from '../../types/").append(moduleId).append("';\n");
-        sb.append("import { errorMessage, notifySuccess, toastSuccess } from '../../utils/feedback';\n\n");
+        sb.append("import type { ").append(entity);
+        if (childModule != null) {
+            sb.append(", ").append(childModule.entity().name()).append("ItemInput");
+        }
+        sb.append(" } from '../../types/").append(moduleId).append("';\n");
+        sb.append("import { errorMessage");
+        if (features.contains("create") || features.contains("edit")) sb.append(", notifySuccess");
+        if (features.contains("disable")) sb.append(", toastSuccess");
+        sb.append(" } from '../../utils/feedback';\n\n");
         sb.append("const router = useRouter();\n");
         sb.append("const loading = ref(false);\n");
         sb.append("const listError = ref<string | null>(null);\n");
@@ -202,29 +331,31 @@ public final class GenericFrontendTemplates {
             }
         }
         sb.append(" });\n\n");
-        sb.append("const drawerOpen = ref(false);\n");
-        sb.append("const editing = ref<").append(entity).append(" | null>(null);\n");
-        sb.append("const submitting = ref(false);\n");
-        sb.append("const formError = ref<string | null>(null);\n");
-        sb.append("const form = reactive({");
-        boolean first = true;
-        for (BusinessEntityField f : fields) {
-            if (isSystemField(f)) continue;
-            if (!first) sb.append(", ");
-            first = false;
-            sb.append(f.name()).append(": ").append(tsDefault(f));
+        if (features.contains("create") || features.contains("edit")) {
+            sb.append("const drawerOpen = ref(false);\n");
+            sb.append("const editing = ref<").append(entity).append(" | null>(null);\n");
+            sb.append("const submitting = ref(false);\n");
+            sb.append("const formError = ref<string | null>(null);\n");
+            sb.append("const form = reactive({");
+            boolean first = true;
+            for (BusinessEntityField f : fields) {
+                if (isSystemField(f)) continue;
+                if (!first) sb.append(", ");
+                first = false;
+                sb.append(f.name()).append(": ").append(tsDefault(f));
+            }
+            if (childModule != null) {
+                if (!first) sb.append(", ");
+                sb.append("items: [] as ").append(childModule.entity().name()).append("ItemInput[]");
+            }
+            sb.append(" });\n\n");
         }
-        sb.append(" });\n\n");
         // stats derived from current page (deterministic, no backend needed)
-        sb.append("const enabledCount = computed(() => rows.value.filter(r => ");
         String statusField = statusField(fields);
         if (statusField != null) {
-            sb.append("r.").append(statusField).append(" === 'ENABLED'");
-        } else {
-            sb.append("true");
+            sb.append("const enabledCount = computed(() => rows.value.filter(r => r.").append(statusField).append(" === 'ENABLED').length);\n");
+            sb.append("const disabledCount = computed(() => rows.value.length - enabledCount.value);\n\n");
         }
-        sb.append(").length);\n");
-        sb.append("const disabledCount = computed(() => rows.value.length - enabledCount.value);\n\n");
         sb.append("async function load(): Promise<void> {\n");
         sb.append("  loading.value = true;\n  listError.value = null;\n  try {\n");
         sb.append("    const result = await ").append(entityVar).append("Api.page({\n");
@@ -251,47 +382,72 @@ public final class GenericFrontendTemplates {
             }
         }
         sb.append(";\n  page.value = 1;\n  load();\n}\n\n");
-        sb.append("function openCreate(): void {\n");
-        sb.append("  editing.value = null;\n  formError.value = null;\n");
-        sb.append("  Object.assign(form, {");
-        first = true;
-        for (BusinessEntityField f : fields) {
-            if (isSystemField(f)) continue;
-            if (!first) sb.append(", ");
-            first = false;
-            sb.append(f.name()).append(": ").append(tsDefault(f));
+        if (permissions && features.contains("create")) {
+            sb.append("function openCreate(): void {\n");
+            sb.append("  editing.value = null;\n  formError.value = null;\n");
+            sb.append("  Object.assign(form, {");
+            boolean first = true;
+            for (BusinessEntityField f : fields) {
+                if (isSystemField(f)) continue;
+                if (!first) sb.append(", ");
+                first = false;
+                sb.append(f.name()).append(": ").append(tsDefault(f));
+            }
+            if (childModule != null) {
+                if (!first) sb.append(", ");
+                sb.append("items: [] as ").append(childModule.entity().name()).append("ItemInput[]");
+            }
+            sb.append(" });\n  drawerOpen.value = true;\n}\n\n");
         }
-        sb.append(" });\n  drawerOpen.value = true;\n}\n\n");
-        sb.append("function openEdit(p: ").append(entity).append("): void {\n");
-        sb.append("  editing.value = p;\n  formError.value = null;\n");
-        sb.append("  Object.assign(form, {");
-        first = true;
-        for (BusinessEntityField f : fields) {
-            if (isSystemField(f)) continue;
-            if (!first) sb.append(", ");
-            first = false;
-            sb.append(f.name()).append(": p.").append(f.name());
+        if (features.contains("edit")) {
+            sb.append("function openEdit(p: ").append(entity).append("): void {\n");
+            sb.append("  editing.value = p;\n  formError.value = null;\n");
+            sb.append("  Object.assign(form, {");
+            boolean first = true;
+            for (BusinessEntityField f : fields) {
+                if (isSystemField(f)) continue;
+                if (!first) sb.append(", ");
+                first = false;
+                sb.append(f.name()).append(": p.").append(f.name());
+            }
+            if (childModule != null) {
+                if (!first) sb.append(", ");
+                sb.append("items: p.items ?? []");
+            }
+            sb.append(" });\n  drawerOpen.value = true;\n}\n\n");
         }
-        sb.append(" });\n  drawerOpen.value = true;\n}\n\n");
-        sb.append("async function submit(): Promise<void> {\n");
-        sb.append("  submitting.value = true;\n  formError.value = null;\n");
-        sb.append("  const body = {");
-        first = true;
-        for (BusinessEntityField f : fields) {
-            if (isSystemField(f)) continue;
-            if (!first) sb.append(", ");
-            first = false;
-            sb.append(f.name()).append(": form.").append(f.name());
+        if (features.contains("create") || features.contains("edit")) {
+            sb.append("async function submit(): Promise<void> {\n");
+            sb.append("  submitting.value = true;\n  formError.value = null;\n");
+            sb.append("  const body = {");
+            boolean first = true;
+            for (BusinessEntityField f : fields) {
+                if (isSystemField(f)) continue;
+                if (!first) sb.append(", ");
+                first = false;
+                sb.append(f.name()).append(": form.").append(f.name());
+            }
+            if (childModule != null) {
+                if (!first) sb.append(", ");
+                sb.append("items: form.items");
+            }
+            sb.append(" };\n  try {\n");
+            if (features.contains("edit")) {
+                sb.append("    if (editing.value) { await ").append(entityVar).append("Api.update(editing.value.id, body); notifySuccess('").append(label).append(" updated'); }\n");
+            }
+            if (features.contains("create")) {
+                if (features.contains("edit")) sb.append("    else ");
+                sb.append("{ await ").append(entityVar).append("Api.create(body); notifySuccess('").append(label).append(" created'); }\n");
+            }
+            sb.append("    drawerOpen.value = false;\n    await load();\n");
+            sb.append("  } catch (e) { formError.value = errorMessage(e); } finally { submitting.value = false; }\n");
+            sb.append("}\n\n");
         }
-        sb.append(" };\n  try {\n");
-        sb.append("    if (editing.value) { await ").append(entityVar).append("Api.update(editing.value.id, body); notifySuccess('").append(label).append(" updated'); }\n");
-        sb.append("    else { await ").append(entityVar).append("Api.create(body); notifySuccess('").append(label).append(" created'); }\n");
-        sb.append("    drawerOpen.value = false;\n    await load();\n");
-        sb.append("  } catch (e) { formError.value = errorMessage(e); } finally { submitting.value = false; }\n");
-        sb.append("}\n\n");
-        sb.append("async function doDisable(p: ").append(entity).append("): Promise<void> {\n");
-        sb.append("  try { await ").append(entityVar).append("Api.disable(p.id); toastSuccess('").append(label).append(" disabled'); await load(); }\n");
-        sb.append("  catch (e) { toastSuccess(errorMessage(e)); }\n}\n\n");
+        if (features.contains("disable")) {
+            sb.append("async function doDisable(p: ").append(entity).append("): Promise<void> {\n");
+            sb.append("  try { await ").append(entityVar).append("Api.disable(p.id); toastSuccess('").append(label).append(" disabled'); await load(); }\n");
+            sb.append("  catch (e) { toastSuccess(errorMessage(e)); }\n}\n\n");
+        }
         sb.append("onMounted(load);\n");
         sb.append("</script>\n\n<template>\n");
         sb.append("  <PageContainer full-width>\n");
@@ -374,13 +530,59 @@ public final class GenericFrontendTemplates {
                     sb.append("          <DictionarySelect v-model=\"form.").append(f.name()).append("\" code=\"").append(f.dictionary()).append("\" style=\"width: 100%\" data-testid=\"").append(moduleId).append("-form-").append(f.name()).append("\" />\n");
                 } else if ("boolean".equals(f.type())) {
                     sb.append("          <el-switch v-model=\"form.").append(f.name()).append("\" data-testid=\"").append(moduleId).append("-form-").append(f.name()).append("\" />\n");
+                } else if ("reference".equals(f.semantic()) && f.reference() != null) {
+                    String ftarget = String.valueOf(f.reference().get("target"));
+                    String ftargetVar = targetApiVar(ftarget, allModules);
+                    String flabelField = str(f.reference(), "labelField", "name");
+                    sb.append("          <ReferenceSelect :api=\"").append(ftargetVar).append("\" value-field=\"id\" label-field=\"").append(flabelField).append("\" v-model=\"form.").append(f.name()).append("\" placeholder=\"").append(labelOf(f)).append("\" data-testid=\"").append(moduleId).append("-form-").append(f.name()).append("\" />\n");
+                } else if ("date".equals(f.type())) {
+                    sb.append("          <el-date-picker v-model=\"form.").append(f.name()).append("\" type=\"date\" value-format=\"YYYY-MM-DD\" style=\"width: 100%\" placeholder=\"").append(labelOf(f)).append("\" data-testid=\"").append(moduleId).append("-form-").append(f.name()).append("\" />\n");
+                } else if ("enum".equals(f.semantic()) && f.enumValues() != null && !f.enumValues().isEmpty()) {
+                    sb.append("          <StatusSelect :options=\"").append(enumOptionsExpr(f)).append("\" v-model=\"form.").append(f.name()).append("\" placeholder=\"").append(labelOf(f)).append("\" data-testid=\"").append(moduleId).append("-form-").append(f.name()).append("\" />\n");
+                } else if ("money".equals(f.type())) {
+                    sb.append("          <MoneyInput v-model=\"form.").append(f.name()).append("\" :precision=\"").append(scaleOf(f)).append("\" placeholder=\"").append(labelOf(f)).append("\" data-testid=\"").append(moduleId).append("-form-").append(f.name()).append("\" />\n");
                 } else {
                     sb.append("          <el-input v-model=\"form.").append(f.name()).append("\" data-testid=\"").append(moduleId).append("-form-").append(f.name()).append("\" />\n");
                 }
                 sb.append("        </el-form-item>\n");
             }
             sb.append("        <div class=\"form-hint\">Department and creator are set by the server from your session — never from the client.</div>\n");
-            sb.append("      </AppForm>\n    </FormDrawer>\n");
+            sb.append("      </AppForm>\n");
+            if (childModule != null) {
+                sb.append("      <section class=\"form-items\">\n");
+                sb.append("        <h3 class=\"form-items-title\">Items</h3>\n");
+                sb.append("        <EditableDetailTable v-model=\"form.items\" :columns=\"[");
+                List<BusinessEntityField> childFields = childModule.entity().fields();
+                boolean colFirst = true;
+                for (BusinessEntityField cf : childFields) {
+                    if (isSystemField(cf)) continue;
+                    if (cf.name().equals(masterChild.mappedBy())) continue; // parent FK owned by master
+                    if (!colFirst) sb.append(", ");
+                    colFirst = false;
+                    sb.append("{ prop: '").append(cf.name()).append("', label: '").append(labelOf(cf)).append("', kind: '");
+                    if ("reference".equals(cf.semantic()) && cf.reference() != null) {
+                        String ctarget = String.valueOf(cf.reference().get("target"));
+                        String ctargetVar = targetApiVar(ctarget, allModules);
+                        String clabelField = str(cf.reference(), "labelField", "name");
+                        sb.append("reference', api: ").append(ctargetVar).append(", valueField: 'id', labelField: '").append(clabelField).append("'");
+                    } else if ("date".equals(cf.type())) {
+                        sb.append("date'");
+                    } else if ("money".equals(cf.type())) {
+                        sb.append("money'");
+                    } else if ("boolean".equals(cf.type())) {
+                        sb.append("text'");
+                    } else if ("integer".equals(cf.type())) {
+                        sb.append("number'");
+                    } else {
+                        sb.append("text'");
+                    }
+                    if (cf.required()) sb.append(", required: true");
+                    sb.append(" }");
+                }
+                sb.append("]\" data-testid=\"").append(moduleId).append("-form-items\" />\n");
+                sb.append("      </section>\n");
+            }
+            sb.append("    </FormDrawer>\n");
         }
         sb.append("  </PageContainer>\n</template>\n\n<style scoped>\n.list-stats {\n  display: grid;\n  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));\n  gap: var(--ep-space-4);\n  margin-bottom: var(--ep-space-5);\n}\n.form-hint { font-size: var(--ep-font-size-sm); color: var(--ep-color-info); padding: 0 var(--ep-space-2); }\n</style>\n");
         return sb.toString();
@@ -388,11 +590,13 @@ public final class GenericFrontendTemplates {
 
     private String detailViewSource(String moduleId, String entity, String entityVar,
                                     List<BusinessEntityField> fields, boolean dataScope,
-                                    boolean permissions, String route, String title) {
+                                    boolean permissions, String route, String title,
+                                    ResolvedBusinessModule childModule) {
         StringBuilder sb = new StringBuilder();
         sb.append("<script setup lang=\"ts\">\n");
         sb.append("// ").append(entity).append(" Detail (generated by engineering-platform Generic Module Generator)\n");
         sb.append("// EP UI 2.0 detail: overview header + structured sections + audit.\n");
+        sb.append("// V07-WORK-003: money fields render via MoneyText; master detail shows items[].\n");
         sb.append("import { computed, onMounted, ref } from 'vue';\n");
         sb.append("import { useRoute, useRouter } from 'vue-router';\n");
         sb.append("import PageHeader from '../../components/PageHeader.vue';\n");
@@ -402,6 +606,10 @@ public final class GenericFrontendTemplates {
         // without dictionary/status fields.
         if (statusField(fields) != null || hasSemantic(fields, "dictionary")) {
             sb.append("import StatusTag from '../../components/StatusTag.vue';\n");
+        }
+        // V07-WORK-003: MoneyText only when the module has money fields.
+        if (hasType(fields, "money")) {
+            sb.append("import MoneyText from '../../components/MoneyText.vue';\n");
         }
         if (permissions) sb.append("import PermissionButton from '../../permission/PermissionButton.vue';\n");
         sb.append("import { ").append(entityVar).append("Api } from '../../api/").append(moduleId).append("';\n");
@@ -460,7 +668,11 @@ public final class GenericFrontendTemplates {
             if (Boolean.FALSE.equals(f.frontend().get("detailVisible"))) continue;
             anyBasic = true;
             sb.append("        <div class=\"detail-item\"><dt>").append(labelOf(f)).append("</dt><dd data-testid=\"detail-").append(f.name()).append("\">");
-            sb.append("{{ row.").append(f.name()).append(" ?? '—' }}");
+            if ("money".equals(f.type())) {
+                sb.append("<MoneyText :value=\"row.").append(f.name()).append("\" />");
+            } else {
+                sb.append("{{ row.").append(f.name()).append(" ?? '—' }}");
+            }
             sb.append("</dd></div>\n");
         }
         if (!anyBasic) sb.append("        <div class=\"detail-item\"><dt>Record</dt><dd>—</dd></div>\n");
@@ -484,6 +696,23 @@ public final class GenericFrontendTemplates {
             }
             sb.append("      </dl></section>\n");
         }
+        // V07-WORK-003: master detail items table
+        if (childModule != null) {
+            String childEntity = childModule.entity().name();
+            sb.append("      <section class=\"detail-section\"><h3 class=\"detail-section-title\">Items</h3><el-table :data=\"row.items ?? []\" border style=\"width: 100%\" data-testid=\"").append(moduleId).append("-detail-items\">\n");
+            for (BusinessEntityField cf : childModule.entity().fields()) {
+                if (isSystemField(cf)) continue;
+                sb.append("        <el-table-column prop=\"").append(cf.name()).append("\" label=\"").append(labelOf(cf)).append("\" min-width=\"120\">\n");
+                sb.append("          <template #default=\"{ row: item }\">");
+                if ("money".equals(cf.type())) {
+                    sb.append("<MoneyText :value=\"item.").append(cf.name()).append("\" />");
+                } else {
+                    sb.append("{{ item.").append(cf.name()).append(" ?? '—' }}");
+                }
+                sb.append("</template>\n        </el-table-column>\n");
+            }
+            sb.append("      </el-table></section>\n");
+        }
         sb.append("      <section class=\"detail-section\"><h3 class=\"detail-section-title\">Audit</h3><dl class=\"detail-grid\">\n");
         if (dataScope) sb.append("        <div class=\"detail-item\"><dt>Department</dt><dd>{{ row.departmentId ?? '—' }}</dd></div>\n");
         sb.append("        <div class=\"detail-item\"><dt>Created at</dt><dd>{{ new Date(row.createdAt).toLocaleString() }}</dd></div>\n");
@@ -495,11 +724,15 @@ public final class GenericFrontendTemplates {
 
     private String editViewSource(String moduleId, String entity, String entityVar,
                                   List<BusinessEntityField> fields, boolean permissions,
-                                  String route, String title) {
+                                  String route, String title,
+                                  ResolvedBusinessModule childModule, ResolvedRelation masterChild,
+                                  List<String> referenceTargets, List<ResolvedBusinessModule> allModules) {
         StringBuilder sb = new StringBuilder();
         sb.append("<script setup lang=\"ts\">\n");
         sb.append("// ").append(entity).append(" Edit (generated by engineering-platform Generic Module Generator)\n");
         sb.append("// EP UI 2.0 edit: white form card + consistent action area.\n");
+        sb.append("// V07-WORK-003: reference/date/enum/money fields map to relationship-aware\n");
+        sb.append("// controls; master modules render an editable items detail table.\n");
         sb.append("import { onMounted, reactive, ref } from 'vue';\n");
         sb.append("import { useRoute, useRouter } from 'vue-router';\n");
         sb.append("import PageHeader from '../../components/PageHeader.vue';\n");
@@ -509,8 +742,37 @@ public final class GenericFrontendTemplates {
         if (hasSemantic(fields, "dictionary")) {
             sb.append("import DictionarySelect from '../../components/DictionarySelect.vue';\n");
         }
+        // V07-WORK-003: relationship-aware controls imported only when used.
+        if (hasReference(fields)) {
+            sb.append("import ReferenceSelect from '../../components/ReferenceSelect.vue';\n");
+        }
+        if (hasType(fields, "date")) {
+            sb.append("// el-date-picker is globally registered via Element Plus\n");
+        }
+        if (hasEnum(fields)) {
+            sb.append("import StatusSelect from '../../components/StatusSelect.vue';\n");
+        }
+        if (hasType(fields, "money")) {
+            sb.append("import MoneyInput from '../../components/MoneyInput.vue';\n");
+        }
+        if (childModule != null) {
+            sb.append("import EditableDetailTable from '../../components/EditableDetailTable.vue';\n");
+        }
+        // V07-WORK-003: reference target api imports (e.g. supplierApi) for ReferenceSelect.
+        for (String target : referenceTargets) {
+            for (ResolvedBusinessModule m : allModules) {
+                if (m.id().equals(target)) {
+                    sb.append("import { ").append(decapitalize(m.entity().name())).append("Api } from '../../api/").append(m.id()).append("';\n");
+                    break;
+                }
+            }
+        }
         sb.append("import { ").append(entityVar).append("Api } from '../../api/").append(moduleId).append("';\n");
-        sb.append("import type { ").append(entity).append(" } from '../../types/").append(moduleId).append("';\n");
+        sb.append("import type { ").append(entity);
+        if (childModule != null) {
+            sb.append(", ").append(childModule.entity().name()).append("ItemInput");
+        }
+        sb.append(" } from '../../types/").append(moduleId).append("';\n");
         sb.append("import { errorMessage, notifySuccess } from '../../utils/feedback';\n\n");
         sb.append("const route = useRoute();\nconst router = useRouter();\n");
         sb.append("const row = ref<").append(entity).append(" | null>(null);\n");
@@ -524,6 +786,10 @@ public final class GenericFrontendTemplates {
             first = false;
             sb.append(f.name()).append(": ").append(tsDefault(f));
         }
+        if (childModule != null) {
+            if (!first) sb.append(", ");
+            sb.append("items: [] as ").append(childModule.entity().name()).append("ItemInput[]");
+        }
         sb.append(" });\n\n");
         sb.append("async function load(): Promise<void> {\n");
         sb.append("  loading.value = true; error.value = null; notFound.value = false;\n");
@@ -534,6 +800,10 @@ public final class GenericFrontendTemplates {
             if (!first) sb.append(", ");
             first = false;
             sb.append(f.name()).append(": p.").append(f.name());
+        }
+        if (childModule != null) {
+            if (!first) sb.append(", ");
+            sb.append("items: p.items ?? []");
         }
         sb.append(" }); }\n");
         sb.append("  catch (e) { error.value = errorMessage(e); if (e instanceof Error && 'status' in e && (e as { status: number }).status === 404) { notFound.value = true; } }\n");
@@ -547,6 +817,10 @@ public final class GenericFrontendTemplates {
             if (!first) sb.append(", ");
             first = false;
             sb.append(f.name()).append(": form.").append(f.name());
+        }
+        if (childModule != null) {
+            if (!first) sb.append(", ");
+            sb.append("items: form.items");
         }
         sb.append(" }); notifySuccess('").append(title).append(" updated'); router.push({ path: '").append(route).append("/' + row.value.id }); }\n");
         sb.append("  catch (e) { formError.value = errorMessage(e); } finally { submitting.value = false; }\n}\n\n");
@@ -572,6 +846,17 @@ public final class GenericFrontendTemplates {
             sb.append(">\n");
             if ("boolean".equals(f.type())) {
                 sb.append("          <el-switch v-model=\"form.").append(f.name()).append("\" data-testid=\"").append(moduleId).append("-edit-").append(f.name()).append("\" />\n");
+            } else if ("reference".equals(f.semantic()) && f.reference() != null) {
+                String target = String.valueOf(f.reference().get("target"));
+                String targetVar = targetApiVar(target, allModules);
+                String labelField = str(f.reference(), "labelField", "name");
+                sb.append("          <ReferenceSelect :api=\"").append(targetVar).append("\" value-field=\"id\" label-field=\"").append(labelField).append("\" v-model=\"form.").append(f.name()).append("\" placeholder=\"").append(labelOf(f)).append("\" data-testid=\"").append(moduleId).append("-edit-").append(f.name()).append("\" />\n");
+            } else if ("date".equals(f.type())) {
+                sb.append("          <el-date-picker v-model=\"form.").append(f.name()).append("\" type=\"date\" value-format=\"YYYY-MM-DD\" style=\"width: 100%\" placeholder=\"").append(labelOf(f)).append("\" data-testid=\"").append(moduleId).append("-edit-").append(f.name()).append("\" />\n");
+            } else if ("enum".equals(f.semantic()) && f.enumValues() != null && !f.enumValues().isEmpty()) {
+                sb.append("          <StatusSelect :options=\"").append(enumOptionsExpr(f)).append("\" v-model=\"form.").append(f.name()).append("\" placeholder=\"").append(labelOf(f)).append("\" data-testid=\"").append(moduleId).append("-edit-").append(f.name()).append("\" />\n");
+            } else if ("money".equals(f.type())) {
+                sb.append("          <MoneyInput v-model=\"form.").append(f.name()).append("\" :precision=\"").append(scaleOf(f)).append("\" placeholder=\"").append(labelOf(f)).append("\" data-testid=\"").append(moduleId).append("-edit-").append(f.name()).append("\" />\n");
             } else {
                 sb.append("          <el-input v-model=\"form.").append(f.name()).append("\" data-testid=\"").append(moduleId).append("-edit-").append(f.name()).append("\" />\n");
             }
@@ -594,11 +879,94 @@ public final class GenericFrontendTemplates {
         }
         sb.append("        <div class=\"edit-meta\"><span>Ownership is server-managed and cannot be changed here.</span></div>\n");
         sb.append("      </AppForm>\n");
-        sb.append("    </div>\n  </PageContainer>\n</template>\n\n<style scoped>\n.edit-state { padding: var(--ep-space-6); color: var(--ep-color-info); }\n.edit { max-width: 860px; }\n.edit-meta { font-size: var(--ep-font-size-sm); color: var(--ep-color-info); padding: 0 var(--ep-space-2); }\n</style>\n");
+        // V07-WORK-003: master detail editable items table
+        if (childModule != null) {
+            sb.append("      <section class=\"edit-items\">\n");
+            sb.append("        <h3 class=\"edit-items-title\">Items</h3>\n");
+            sb.append("        <EditableDetailTable v-model=\"form.items\" :columns=\"[");
+            List<BusinessEntityField> childFields = childModule.entity().fields();
+            boolean colFirst = true;
+            for (BusinessEntityField cf : childFields) {
+                if (isSystemField(cf)) continue;
+                if (cf.name().equals(masterChild.mappedBy())) continue; // parent FK owned by master
+                if (!colFirst) sb.append(", ");
+                colFirst = false;
+                sb.append("{ prop: '").append(cf.name()).append("', label: '").append(labelOf(cf)).append("', kind: '");
+                if ("reference".equals(cf.semantic()) && cf.reference() != null) {
+                    String ctarget = String.valueOf(cf.reference().get("target"));
+                    String ctargetVar = targetApiVar(ctarget, allModules);
+                    String clabelField = str(cf.reference(), "labelField", "name");
+                    sb.append("reference', api: ").append(ctargetVar).append(", valueField: 'id', labelField: '").append(clabelField).append("'");
+                } else if ("date".equals(cf.type())) {
+                    sb.append("date'");
+                } else if ("money".equals(cf.type())) {
+                    sb.append("money'");
+                } else if ("boolean".equals(cf.type())) {
+                    sb.append("text'");
+                } else if ("integer".equals(cf.type())) {
+                    sb.append("number'");
+                } else {
+                    sb.append("text'");
+                }
+                if (cf.required()) sb.append(", required: true");
+                sb.append(" }");
+            }
+            sb.append("]\" data-testid=\"").append(moduleId).append("-edit-items\" />\n");
+            sb.append("      </section>\n");
+        }
+        sb.append("    </div>\n  </PageContainer>\n</template>\n\n<style scoped>\n.edit-state { padding: var(--ep-space-6); color: var(--ep-color-info); }\n.edit { max-width: 960px; }\n.edit-meta { font-size: var(--ep-font-size-sm); color: var(--ep-color-info); padding: 0 var(--ep-space-2); }\n.edit-items { margin-top: var(--ep-space-5); }\n.edit-items-title { margin: 0 0 var(--ep-space-3); font-size: var(--ep-font-size-section); font-weight: var(--ep-font-weight-semibold); }\n</style>\n");
         return sb.toString();
     }
 
-    private String apiSpecSource(String moduleId, String entity, List<BusinessEntityField> fields, String table, boolean dataScope) {
+    /** True when any non-system field is semantic=reference. */
+    private static boolean hasReference(List<BusinessEntityField> fields) {
+        for (BusinessEntityField f : fields) {
+            if (isSystemField(f)) continue;
+            if ("reference".equals(f.semantic())) return true;
+        }
+        return false;
+    }
+
+    /** True when any non-system field is semantic=enum with values. */
+    private static boolean hasEnum(List<BusinessEntityField> fields) {
+        for (BusinessEntityField f : fields) {
+            if (isSystemField(f)) continue;
+            if ("enum".equals(f.semantic()) && f.enumValues() != null && !f.enumValues().isEmpty()) return true;
+        }
+        return false;
+    }
+
+    /** JS array literal of enum options: [{ value, label }, ...]. */
+    private static String enumOptionsExpr(BusinessEntityField f) {
+        StringBuilder sb = new StringBuilder("[");
+        boolean first = true;
+        for (Map<String, Object> v : f.enumValues()) {
+            if (!first) sb.append(", ");
+            first = false;
+            sb.append("{ value: '").append(String.valueOf(v.get("value"))).append("', label: '").append(str(v, "label", String.valueOf(v.get("value")))).append("' }");
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+
+    /** decimal scale (money precision) with a safe default of 2. */
+    private static int scaleOf(BusinessEntityField f) {
+        Object scale = f.scale();
+        return scale == null ? 2 : Integer.parseInt(String.valueOf(scale));
+    }
+
+    /** Reference target module api variable name (supplier -> supplierApi). */
+    private static String targetApiVar(String targetId, List<ResolvedBusinessModule> allModules) {
+        for (ResolvedBusinessModule m : allModules) {
+            if (m.id().equals(targetId)) {
+                return decapitalize(m.entity().name()) + "Api";
+            }
+        }
+        return decapitalize(targetId.replace("-", "")) + "Api";
+    }
+
+    private String apiSpecSource(String moduleId, String entity, List<BusinessEntityField> fields,
+                                 String table, boolean dataScope, List<String> features) {
         String entityVar = decapitalize(entity);
         StringBuilder sample = new StringBuilder();
         sample.append("{ id: '1'");
@@ -606,7 +974,9 @@ public final class GenericFrontendTemplates {
             if (isSystemField(f)) continue;
             sample.append(", ").append(f.name()).append(": ").append(tsSample(f));
         }
-        if (dataScope) sample.append(", departmentId: '1'");
+        if (dataScope && fields.stream().noneMatch(f -> "departmentId".equals(f.name()))) {
+            sample.append(", departmentId: '1'");
+        }
         sample.append(", createdBy: '1', createdAt: '2026-08-16T00:00:00', updatedAt: '2026-08-16T00:00:00' }");
         StringBuilder sb = new StringBuilder();
         sb.append("// ").append(entity).append(" API service tests (generated by engineering-platform Generic Module Generator)\n");
@@ -625,16 +995,29 @@ public final class GenericFrontendTemplates {
         sb.append("    expect(path).toContain('keyword=x');\n  });\n\n");
         sb.append("  it('detail/create/update/disable route to the right paths', async () => {\n");
         sb.append("    const get = vi.spyOn(http, 'get').mockResolvedValue(row);\n");
-        sb.append("    const post = vi.spyOn(http, 'post').mockResolvedValue(row);\n");
-        sb.append("    const put = vi.spyOn(http, 'put').mockResolvedValue(row);\n");
-        sb.append("    await ").append(entityVar).append("Api.detail('5');\n");
-        sb.append("    expect((get.mock.calls[0] as [string])[0]).toBe('/").append(table).append("/5');\n");
-        sb.append("    await ").append(entityVar).append("Api.create({ id: '0' } as never);\n");
-        sb.append("    expect((post.mock.calls[0] as [string])[0]).toBe('/").append(table).append("');\n");
-        sb.append("    await ").append(entityVar).append("Api.update('5', { id: '0' } as never);\n");
-        sb.append("    expect((put.mock.calls[0] as [string])[0]).toBe('/").append(table).append("/5');\n");
-        sb.append("    await ").append(entityVar).append("Api.disable('5');\n");
-        sb.append("    expect((post.mock.calls[1] as [string])[0]).toBe('/").append(table).append("/5/disable');\n");
+        if (features.contains("create") || features.contains("disable")) {
+            sb.append("    const post = vi.spyOn(http, 'post').mockResolvedValue(row);\n");
+        }
+        if (features.contains("edit")) {
+            sb.append("    const put = vi.spyOn(http, 'put').mockResolvedValue(row);\n");
+        }
+        int postCall = 0;
+        if (features.contains("detail")) {
+            sb.append("    await ").append(entityVar).append("Api.detail('5');\n");
+            sb.append("    expect((get.mock.calls[0] as [string])[0]).toBe('/").append(table).append("/5');\n");
+        }
+        if (features.contains("create")) {
+            sb.append("    await ").append(entityVar).append("Api.create({ id: '0' } as never);\n");
+            sb.append("    expect((post.mock.calls[").append(postCall++).append("] as [string])[0]).toBe('/").append(table).append("');\n");
+        }
+        if (features.contains("edit")) {
+            sb.append("    await ").append(entityVar).append("Api.update('5', { id: '0' } as never);\n");
+            sb.append("    expect((put.mock.calls[0] as [string])[0]).toBe('/").append(table).append("/5');\n");
+        }
+        if (features.contains("disable")) {
+            sb.append("    await ").append(entityVar).append("Api.disable('5');\n");
+            sb.append("    expect((post.mock.calls[").append(postCall++).append("] as [string])[0]).toBe('/").append(table).append("/5/disable');\n");
+        }
         sb.append("  });\n");
         sb.append("});\n");
         return sb.toString();
@@ -670,7 +1053,9 @@ public final class GenericFrontendTemplates {
             if (isSystemField(f)) continue;
             sample.append(", ").append(f.name()).append(": ").append(tsSample(f));
         }
-        if (dataScope) sample.append(", departmentId: '1'");
+        if (dataScope && fields.stream().noneMatch(f -> "departmentId".equals(f.name()))) {
+            sample.append(", departmentId: '1'");
+        }
         sample.append(", createdBy: '1', createdAt: '2026-08-16T00:00:00', updatedAt: '2026-08-16T00:00:00' }");
         StringBuilder sb = new StringBuilder();
         sb.append("// ").append(entity).append(" List view tests (generated by engineering-platform Generic Module Generator)\n");
@@ -766,13 +1151,20 @@ public final class GenericFrontendTemplates {
     }
 
     private static boolean isSystemField(BusinessEntityField f) {
-        return f.semantic() != null && ("system".equals(f.semantic()) || "ownership".equals(f.semantic())
-                || "currentUser".equals(f.semantic()));
+        if (f.semantic() != null && ("system".equals(f.semantic()) || "ownership".equals(f.semantic())
+                || "currentUser".equals(f.semantic()))) {
+            return true;
+        }
+        // MySQL-imported tables carry real system columns; the generator appends
+        // its own id/createdAt/updatedAt — skip contract duplicates.
+        String name = f.name() == null ? "" : f.name();
+        return name.equals("id") || name.equals("createdAt") || name.equals("updatedAt")
+                || name.equals("createdBy") || name.equals("departmentId");
     }
 
     private static String tsType(BusinessEntityField f) {
         return switch (f.type() == null ? "string" : f.type()) {
-            case "integer", "number", "decimal" -> "number";
+            case "integer", "number", "decimal", "money" -> "number";
             case "boolean" -> "boolean";
             default -> "string";
         };
@@ -782,6 +1174,7 @@ public final class GenericFrontendTemplates {
         return switch (f.type() == null ? "string" : f.type()) {
             case "boolean" -> "false";
             case "integer" -> "0";
+            case "money" -> "0";
             default -> "''";
         };
     }
@@ -790,6 +1183,7 @@ public final class GenericFrontendTemplates {
         return switch (f.type() == null ? "string" : f.type()) {
             case "boolean" -> "true";
             case "integer" -> "1";
+            case "money" -> "12.5";
             default -> "'v'";
         };
     }

@@ -38,3 +38,13 @@ temp/
 console/console-data/generated/
 console/console-data/final-accept/
 .generator/
+
+# V07 proof artifacts (WORK-005/006) — never release
+console/console-data/proof-schema.sql
+console/console-data/modules/product.yaml
+console/console-data/modules/purchase-order.yaml
+console/console-data/modules/purchase-order-item.yaml
+console/console-data/modules/supplier.yaml
+console/console-data/modules/warehouse-bin.yaml
+console/console-data/generated/
+console/console-data/final-accept/

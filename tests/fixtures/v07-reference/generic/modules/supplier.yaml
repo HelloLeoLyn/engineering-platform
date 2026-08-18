@@ -1,0 +1,40 @@
+schemaVersion: 1
+module:
+  id: supplier
+  name: Supplier
+  version: 1.0.0
+  type: business
+  description: V0.7 reference target (V0.6 contract, no relations — compatibility proof)
+compatibility:
+  platformVersion: "0.6"
+business:
+  table: supplier
+  entity:
+    name: Supplier
+    fields:
+      - name: code
+        type: string
+        required: true
+        unique: true
+        length: 50
+      - name: name
+        type: string
+        required: true
+        length: 100
+      - name: contactPhone
+        type: string
+        length: 30
+      - name: status
+        type: string
+        semantic: dictionary
+        dictionary: supplier_status
+  features: [list, search, create, edit, detail, disable]
+  enterprise:
+    permissions: true
+    dataScope: true
+    menu: true
+    dictionary: true
+    operationLog: true
+  frontend:
+    route: /supplier
+    label: Supplier

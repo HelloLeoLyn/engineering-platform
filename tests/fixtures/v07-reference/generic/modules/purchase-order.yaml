@@ -1,0 +1,69 @@
+schemaVersion: 1
+module:
+  id: purchase-order
+  name: PurchaseOrder
+  version: 1.0.0
+  type: business
+  description: V0.7 reference scenario master module (composition ONE_TO_MANY -> purchase-order-item)
+compatibility:
+  platformVersion: "0.6"
+business:
+  table: purchase_order
+  entity:
+    name: PurchaseOrder
+    fields:
+      - name: orderNo
+        type: string
+        required: true
+        unique: true
+        length: 64
+        comment: order number
+      - name: supplierId
+        type: integer
+        required: true
+        semantic: reference
+        reference:
+          target: supplier
+          valueField: id
+          labelField: name
+          searchFields: [code, name]
+      - name: orderDate
+        type: date
+        required: true
+      - name: status
+        type: string
+        semantic: enum
+        enum:
+          values:
+            - value: DRAFT
+              label: Draft
+            - value: CONFIRMED
+              label: Confirmed
+            - value: CLOSED
+              label: Closed
+        default: DRAFT
+      - name: totalAmount
+        type: money
+        precision: 14
+        scale: 2
+      - name: departmentId
+        type: integer
+        semantic: department
+      - name: remark
+        type: text
+  relations:
+    - name: items
+      type: ONE_TO_MANY
+      target: purchase-order-item
+      mappedBy: purchaseOrderId
+      composition: true
+  features: [list, search, create, edit, detail, disable]
+  enterprise:
+    permissions: true
+    dataScope: true
+    menu: true
+    dictionary: false
+    operationLog: true
+  frontend:
+    route: /purchase-orders
+    label: Purchase Orders

@@ -159,6 +159,11 @@ public final class XlsxSupport {
 
     /** Minimal xlsx writer for the example template (single sheet, inline strings). */
     public static byte[] writeTemplate(String[] headers) throws IOException {
+        return writeTemplate(headers, null);
+    }
+
+    /** Minimal xlsx writer with optional example rows (V07-WORK-005). */
+    public static byte[] writeTemplate(String[] headers, String[][] exampleRows) throws IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try (ZipOutputStream zip = new ZipOutputStream(bos)) {
             zip.putNextEntry(new ZipEntry("[Content_Types].xml"));
@@ -201,18 +206,35 @@ public final class XlsxSupport {
                         .append(headers[i]).append("</t></is></c>");
             }
             sb.append("</row>");
-            // one example row
-            sb.append("<row r=\"2\">");
-            String[] example = {"code", "code", "string", "Code", "true", "", "true", "50", "unique code"};
-            for (int i = 0; i < example.length; i++) {
-                sb.append("<c r=\"").append((char) ('A' + i)).append("2\" t=\"inlineStr\"><is><t>")
-                        .append(example[i]).append("</t></is></c>");
+            // one example row (or custom rows)
+            if (exampleRows != null) {
+                for (int r = 0; r < exampleRows.length; r++) {
+                    sb.append("<row r=\"").append(r + 2).append("\">");
+                    String[] row = exampleRows[r];
+                    for (int i = 0; i < row.length; i++) {
+                        sb.append("<c r=\"").append((char) ('A' + i)).append(r + 2).append("\" t=\"inlineStr\"><is><t>")
+                                .append(escapeXml(row[i])).append("</t></is></c>");
+                    }
+                    sb.append("</row>");
+                }
+            } else {
+                sb.append("<row r=\"2\">");
+                String[] example = {"code", "code", "string", "Code", "true", "", "true", "50", "unique code"};
+                for (int i = 0; i < example.length; i++) {
+                    sb.append("<c r=\"").append((char) ('A' + i)).append("2\" t=\"inlineStr\"><is><t>")
+                            .append(example[i]).append("</t></is></c>");
+                }
+                sb.append("</row>");
             }
-            sb.append("</row>");
             sb.append("</sheetData></worksheet>");
             zip.write(sb.toString().getBytes(StandardCharsets.UTF_8));
             zip.closeEntry();
         }
         return bos.toByteArray();
+    }
+
+    private static String escapeXml(String s) {
+        if (s == null) return "";
+        return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
     }
 }

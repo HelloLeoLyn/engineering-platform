@@ -17,21 +17,51 @@ business:
         required: true
         unique: true
         length: 50
+        frontend:
+          label: code
+          order: 0
+          listVisible: true
+          formVisible: true
+          detailVisible: true
       - name: name
         type: string
         required: true
         length: 100
+        frontend:
+          label: name
+          order: 1
+          listVisible: true
+          formVisible: true
+          detailVisible: true
       - name: phone
         type: string
         length: 30
+        frontend:
+          label: phone
+          order: 2
+          listVisible: true
+          formVisible: true
+          detailVisible: true
       - name: status
         type: string
         required: true
         length: 20
         defaultValue: ENABLED
+        frontend:
+          label: status
+          order: 3
+          listVisible: true
+          formVisible: true
+          detailVisible: true
       - name: level
         type: string
         length: 20
+        frontend:
+          label: level
+          order: 4
+          listVisible: true
+          formVisible: true
+          detailVisible: true
   features:
     - list
     - search

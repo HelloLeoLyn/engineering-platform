@@ -82,6 +82,14 @@ export const consoleApi = {
   modules: () => request<ModuleRecord[]>('/api/modules'),
   saveModule: (manifest: Record<string, unknown>) =>
     request<ModuleRecord>('/api/modules', { method: 'POST', body: JSON.stringify({ manifest }) }),
+  // V07-WORK-004: Builder 2.0 — contract round-trip + validation
+  moduleContract: (id: string) =>
+    request<{ id: string; manifest: Record<string, unknown> }>(`/api/modules/${id}/contract`),
+  moduleValidate: (manifest: Record<string, unknown>) =>
+    request<{ valid: boolean; errors?: { category: string; message: string }[] }>('/api/modules/validate', {
+      method: 'POST',
+      body: JSON.stringify({ manifest }),
+    }),
   deleteModule: (id: string) =>
     request<{ deleted: string }>(`/api/modules/${id}`, { method: 'DELETE' }),
   generateModule: (id: string, location?: string) =>
@@ -98,6 +106,12 @@ export const consoleApi = {
       method: 'POST',
       body: JSON.stringify({ ...conn, table }),
     }),
+  // V07-WORK-005: multi-table metadata discovery → module drafts + candidates
+  mysqlDiscover: (conn: MySqlConn, tables: string[], mapping?: Record<string, { moduleId: string; entity: string }>) =>
+    request<{ drafts: ImportDraft[] }>('/api/modules/import/mysql/discover', {
+      method: 'POST',
+      body: JSON.stringify({ ...conn, tables, mapping }),
+    }),
   excelImport: (file: File) => {
     const body = new Blob([file], { type: 'application/octet-stream' });
     return request<{ rows: string[][] }>('/api/modules/import/excel/import', {
@@ -105,6 +119,20 @@ export const consoleApi = {
       body,
     });
   },
+  // V07-WORK-005: Excel → draft + candidates (moduleId/entity as query params)
+  excelDiscover: (file: File, moduleId: string, entity: string) => {
+    const body = new Blob([file], { type: 'application/octet-stream' });
+    return request<{ draft: ImportDraft }>(
+      `/api/modules/import/excel/discover?moduleId=${encodeURIComponent(moduleId)}&entity=${encodeURIComponent(entity)}`,
+      { method: 'POST', body },
+    );
+  },
+  // V07-WORK-005: only CONFIRMED candidates → formal Business Module Contract
+  reviewResolve: (draft: ImportDraft, decisions: Record<string, string>, edits: Record<string, Record<string, unknown>>) =>
+    request<{ manifest: Record<string, unknown> }>('/api/modules/import/review/resolve', {
+      method: 'POST',
+      body: JSON.stringify({ draft, decisions, edits }),
+    }),
   // V06-WORK-006: Build / Run developer loop (all via Runtime Recipe)
   preflight: (location: string) =>
     request<PreflightResponse>('/api/runtime/preflight', { method: 'POST', body: JSON.stringify({ location }) }),
@@ -200,6 +228,32 @@ export interface MySqlConn {
   database: string;
   username: string;
   password: string;
+}
+
+// ---- V07-WORK-005: Import Candidate model (DETECTED/SUGGESTED/CONFIRMED/IGNORED) ----
+
+export type CandidateType = 'FIELD' | 'REFERENCE' | 'RELATION' | 'SEMANTIC';
+export type CandidateStatus = 'DETECTED' | 'SUGGESTED' | 'CONFIRMED' | 'IGNORED';
+
+export interface ImportCandidate {
+  id: string;
+  type: CandidateType;
+  status: CandidateStatus;
+  source: string;
+  moduleId: string;
+  table: string;
+  note?: string;
+  unresolved?: boolean;
+  payload: Record<string, unknown>;
+}
+
+export interface ImportDraft {
+  table: string;
+  comment?: string;
+  moduleId: string;
+  entity: string;
+  fields: FieldDef[];
+  candidates: ImportCandidate[];
 }
 
 export interface FieldDef {

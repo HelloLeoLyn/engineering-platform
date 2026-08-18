@@ -34,6 +34,21 @@ AI 研发控制（Requirement/WorkItem/Agent Runtime/Tool Control/Approval/任�
 
 报告：[V06-ARCHITECTURE-PLAN](V06-ARCHITECTURE-PLAN.md) ｜ [V06-WORK-005](V06-WORK-005-IMPLEMENTATION-REPORT.md) ｜ [V06-WORK-006](V06-WORK-006-IMPLEMENTATION-REPORT.md) ｜ [V06-FINAL-ACCEPTANCE](V06-FINAL-ACCEPTANCE-REPORT.md)（V0.6 RELEASE DECISION = GO）
 
+## V0.7 能做什么（Business Modeling + Relations + Master/Detail）
+
+从 Business Modeling Contract 描述**关系型业务域**，生成完整的前后端 Master/Detail 应用（V0.7 Certified Stack：`enterprise` + `enterprise-java25` + `enterprise-admin`）。
+
+- **Business Modeling Contract V2 + Field Semantics V2**：业务模块显式声明字段语义（reference / enum / money / date / dictionary / text）与关系（MANY_TO_ONE / ONE_TO_MANY / ONE_TO_ONE / composition）
+- **Reference Contract**：字段级 `reference` 配置（target / labelField），生成 ReferenceSelect 下拉 + 后端引用存在性校验（`*_REFERENCE_NOT_FOUND`）
+- **Relationship-aware Backend Generation**：FK 约束 / 引用校验 / Master-Detail 事务（create 一次保存 parent+children）/ deterministic reconciliation（update：existing updated / missing deleted / new inserted）
+- **Relationship-aware Frontend Generation**：`ReferenceSelect`（canonical PageResult 契约）+ `EditableDetailTable`（Add Row / Remove Row / 行内 reference/money/number/text 编辑）+ Master Create/Edit/Detail 页面
+- **Business Module Builder 2.0**：Console 可视化构建带关系/语义的业务模块（模块即 Contract）
+- **MySQL FK / Relation Candidate Discovery**：真实 MySQL schema → FK/关系候选 → 导入
+- **Excel Relation/Semantic Candidate**：Excel 导入关系/语义候选
+- **Candidate Review / Human Confirmation**：导入候选人工确认后才生成
+- **Purchase Order Golden Path**（Reference Scenario，非专用代码）：Supplier/Product/PurchaseOrder/PurchaseOrderItem → 浏览器 Create（1 parent + 2 children 一次保存）→ Edit（改/删/增 reconciliation）→ Detail 全链路
+- 验收：[V07-ARCHITECTURE-PLAN](V07-ARCHITECTURE-PLAN.md) ｜ [V07-WORK-001~006 报告](V07-WORK-006-IMPLEMENTATION-REPORT.md) ｜ [V07-FINAL-ACCEPTANCE](V07-FINAL-ACCEPTANCE-REPORT.md)（V0.7 RELEASE DECISION = GO）
+
 ## Getting Started（V0.3）
 
 新用户从这里开始：[Getting Started Guide](docs/guides/getting-started.md) —— 只需一份 `project.yaml` + `./ep` 命令，即可生成真实可编译的 Spring Boot 项目：
@@ -151,11 +166,13 @@ python3 generator/scripts/validate-agent-execution-contracts.py   # Agent 9/9
 要点：无真实 Agent Adapter；Browser capability 未实现；Shell Guard 是 Policy Guard 非 OS sandbox；
 Approval 无 UI；JDK25 本地 Build Gate 未执行；部分 Operation 类型为 Contract-only（SKIPPED）。
 
-## V0.7 Backlog（记录，不实施）
+## V0.8+ Backlog（记录，不实施）
 
-- Enterprise Admin UI refinement
-- richer Excel import
-- dictionary / business semantic improvements
+- MANY_TO_MANY 关系（V0.7 明确保留未实现）
+- richer relation semantics（cascade 策略、on-delete 行为、关系级权限）
+- UI refinement（Enterprise Admin UI 2.x 持续打磨）
+- richer enum / dictionary semantics（enum 强校验回填、国际化 label、依赖字典）
+- richer import mapping（MySQL/Excel 导入时 enum/semantic 启发式推断、列映射编辑）
 - persistent build/runtime history
 - stronger datasource preflight
 - additional frontend templates
